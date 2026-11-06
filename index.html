@@ -1197,7 +1197,7 @@ let lb = { kind: "", db: null, uid: null, mine: null, ready: false, off: false }
 /* Two leaderboard backends:
    - inside claude.ai: the artifact's shared database (claude.use("db"));
    - anywhere else (GitHub Pages): Convex, through its HTTP API. build.js fills in the URL. */
-const CONVEX_URL = "";
+const CONVEX_URL = "https://handsome-squirrel-794.eu-west-1.convex.cloud";
 const PID_KEY = "globedrop-pid";
 async function cx(kind, path, args){
   const r = await fetch(CONVEX_URL.replace(/\/$/, "") + "/api/" + kind, {
