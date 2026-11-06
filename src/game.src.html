@@ -1,0 +1,1705 @@
+<title>Globe by Abisto</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one-screen game. Prompt bar on top, full-bleed map, action tray at the bottom. */
+:root{
+  --ocean:#8fc6ea; --ocean-line:#7ab8e0; --chip:#e9f1f5;
+  --land:#f6f0dc; --land-edge:#b3a378; --land-hover:#ece0b8;
+  --ink:#16323b; --ink-soft:#4f6b74;
+  --panel:#ffffff; --panel-edge:#d6e2e5;
+  --pin:#d6402b; --target:#1f8a5b; --gold:#c98a12;
+  --btn:#16323b; --btn-ink:#f6fbfc;
+  --glass:rgba(255,255,255,.58); --glass-edge:rgba(255,255,255,.75); --glass-shadow:0 10px 30px rgba(20,60,90,.18), inset 0 1px 0 rgba(255,255,255,.6);
+  --display:"Bricolage Grotesque", "IBM Plex Sans Arabic", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", "IBM Plex Sans Arabic", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ocean:#0c3a5e; --ocean-line:#134871; --chip:#0a1a22;
+  --land:#3a4d40; --land-edge:#6a8a72; --land-hover:#4a6150;
+  --ink:#e8f2f3; --ink-soft:#9db5ba;
+  --panel:#12232a; --panel-edge:#24414b;
+  --pin:#ff6a50; --target:#4fd08e; --gold:#f0b83a;
+  --btn:#e8f2f3; --btn-ink:#0f2730; color-scheme:dark;
+  --glass:rgba(12,28,38,.55); --glass-edge:rgba(255,255,255,.14); --glass-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+}}
+:root[data-theme="dark"]{
+  --ocean:#0c3a5e; --ocean-line:#134871; --chip:#0a1a22;
+  --land:#3a4d40; --land-edge:#6a8a72; --land-hover:#4a6150;
+  --ink:#e8f2f3; --ink-soft:#9db5ba;
+  --panel:#12232a; --panel-edge:#24414b;
+  --pin:#ff6a50; --target:#4fd08e; --gold:#f0b83a;
+  --btn:#e8f2f3; --btn-ink:#0f2730; color-scheme:dark;
+  --glass:rgba(12,28,38,.55); --glass-edge:rgba(255,255,255,.14); --glass-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--ocean);color:var(--ink);font-family:var(--display);overflow:hidden;-webkit-tap-highlight-color:transparent}
+.app{height:100%;position:relative}
+
+/* Top bar */
+.glass{background:var(--glass);border:1px solid var(--glass-edge);box-shadow:var(--glass-shadow);
+  -webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
+.topwrap{position:absolute;z-index:4;top:10px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.top{pointer-events:auto;width:100%;max-width:640px;display:flex;flex-direction:column;gap:10px;padding:12px 16px;border-radius:26px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.headrow{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px}
+.headrow .modes{justify-self:end}
+.scorebox{white-space:nowrap}
+.controls .theme{width:24px;height:24px}
+.controls .theme svg{width:13px;height:13px}
+.brand{justify-self:start;min-width:0;font-weight:800;font-size:1.1rem;letter-spacing:-.02em;display:flex;align-items:center;gap:6px}
+.brand svg{width:20px;height:20px;flex:none}
+/* loading splash: the logo, big and centred, pulsing softly until the game is ready, then fading out */
+.splash{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(120% 90% at 50% 40%,color-mix(in srgb,var(--ocean) 70%,#fff) 0%,var(--ocean) 70%);transition:opacity .45s ease,visibility .45s}
+.splash .spin{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px;text-align:center}
+.splash img{width:min(58vw,280px);height:auto;filter:drop-shadow(0 14px 28px rgba(10,30,40,.25));animation:splashpulse 1.6s ease-in-out infinite}
+.splash{overflow-y:auto}
+.splash .spin{margin:auto}
+.splash .spbody{display:flex;flex-direction:column;align-items:center;gap:14px;width:min(320px,86vw);opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease}
+.splash.ready .spbody{opacity:1;transform:none}
+.splash .sptag{margin:0;max-width:300px;font:600 1.02rem/1.4 var(--display);color:var(--ink)}
+.splash .sphi{margin:0;font:800 1.25rem var(--display);color:var(--ink);letter-spacing:-.01em}
+.splash .langpills{background:color-mix(in srgb,var(--panel) 45%,transparent)}
+.splash form{display:flex;flex-direction:column;gap:12px;width:100%}
+.splash .namefield{text-align:start}
+.splash .namefield input{background:var(--panel)}
+.splash .namefield .hint{font-size:.8rem;color:var(--ink-soft)}
+.splash .err{color:var(--pin);font-size:.85rem;min-height:0}
+.splash .err:empty{display:none}
+.splash .spexplore{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;font-size:1rem;background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.splash .spexplore svg{width:18px;height:18px}
+.study{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:14px;border:1px dashed var(--panel-edge);color:var(--ink-soft);font-size:.92rem}
+.study button{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;font-size:.9rem}
+.study svg{width:16px;height:16px}
+.splash .spgo{width:100%;padding:15px 28px;font-size:1.15rem;box-shadow:0 10px 24px rgba(10,30,40,.25)}
+.splash.out{opacity:0;visibility:hidden}
+.splash.out img{animation:none;transform:scale(1.06);transition:transform .45s ease}
+@keyframes splashpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@media (prefers-reduced-motion:reduce){.splash img{animation:none}}
+.welcome .hero{display:block;width:min(168px,48%);height:auto;margin:-4px auto 2px;filter:drop-shadow(0 8px 16px rgba(10,30,40,.18));animation:heroin .6s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes heroin{from{opacity:0;transform:scale(.85) translateY(6px)}to{opacity:1;transform:none}}
+.welcome h3{text-align:center}
+.modes{display:flex;gap:4px;background:color-mix(in srgb,var(--chip) 55%,transparent);padding:3px;border-radius:999px;min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.modes::-webkit-scrollbar{display:none}
+.modes button{flex:none}
+.modes button{border:0;background:transparent;color:var(--ink-soft);font:600 .85rem var(--display);padding:6px 11px;border-radius:999px;cursor:pointer}
+.theme{width:36px;height:36px;border-radius:50%;border:1px solid var(--glass-edge);background:color-mix(in srgb,var(--chip) 55%,transparent);color:var(--ink);cursor:pointer;display:grid;place-items:center;padding:0}
+.theme svg{width:18px;height:18px}
+.theme:focus-visible{outline:3px solid var(--pin);outline-offset:2px}
+.modes button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+/* top bar: tabs, then a status row that never moves, then the question in a fixed-height row */
+.statusrow{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:28px}
+.stats{display:flex;align-items:center;gap:12px;font:500 .8rem var(--mono);color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.stats b{color:var(--ink);font-weight:600}
+.controls{display:flex;align-items:center;gap:6px}
+.levels.off,.exploring .stats > *{visibility:hidden}
+.prompt{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;min-width:0;border-top:1px solid var(--glass-edge);padding-top:9px}
+.qline{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;max-width:100%;height:clamp(44px,11vw,58px)}
+.qline .place{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qline .place.long{font-size:clamp(1.15rem,4.4vw,1.6rem)}
+.qline .hint:empty{display:none}
+.qline .hint{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
+.prompt .label{font:600 .7rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.prompt .place{font-weight:800;font-size:clamp(1.5rem,5vw,2.2rem);letter-spacing:-.03em;line-height:1.05;text-wrap:balance}
+.prompt .hint{color:var(--ink-soft);font-size:.95rem}
+.meta{display:flex;gap:14px;font:500 .8rem var(--mono);color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.meta b{color:var(--ink);font-weight:600}
+.card.stack{flex-direction:column;align-items:stretch;gap:12px}
+.cardrow{display:flex;align-items:center;gap:14px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.choice{border:1px solid var(--glass-edge);background:color-mix(in srgb,var(--panel) 70%,transparent);color:var(--ink);font:700 1rem var(--display);padding:13px 10px;border-radius:16px;cursor:pointer;text-align:center;line-height:1.2}
+.choice:hover:not(:disabled){background:var(--panel)}
+.choice:focus-visible{outline:3px solid var(--pin);outline-offset:2px}
+.choice:disabled{cursor:default}
+.choice.right{background:var(--target);color:var(--btn-ink);border-color:transparent}
+.choice.wrong{background:var(--pin);color:#fff;border-color:transparent}
+.choice.fade{opacity:.45}
+.flagimg{display:block;height:clamp(40px,10.5vw,56px);width:auto;aspect-ratio:4/3;border-radius:5px;box-shadow:0 0 0 1px var(--panel-edge),0 4px 12px rgba(10,30,40,.18);max-width:100%}
+/* solid, so white or pale flag areas never read as water */
+.country.correct.flagged,.easy .country.flagged{fill-opacity:1;stroke:var(--target);stroke-width:2}
+@keyframes flagin{from{opacity:0}to{opacity:1}}
+#flagfill image{animation:flagin .5s ease-out}
+.miniflag{display:inline-block;height:13px;width:auto;aspect-ratio:4/3;border-radius:2px;box-shadow:0 0 0 1px var(--panel-edge);vertical-align:-1px;margin-inline-end:7px}
+.langwrap{position:relative;display:inline-flex}
+.langbtn{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;border:1px solid var(--glass-edge);background:color-mix(in srgb,var(--chip) 55%,transparent);color:var(--ink);font:600 .72rem var(--mono);cursor:pointer}
+.langbtn svg{width:14px;height:14px}
+.langbtn:focus-visible,.langmenu button:focus-visible,.langpills button:focus-visible{outline:3px solid var(--pin);outline-offset:2px}
+.langmenu{position:absolute;top:calc(100% + 6px);inset-inline-end:0;z-index:6;display:flex;flex-direction:column;min-width:130px;padding:6px;border-radius:16px}
+.langmenu[hidden]{display:none}
+.langmenu button{border:0;background:transparent;color:var(--ink);font:600 .95rem var(--display);text-align:start;padding:9px 12px;border-radius:10px;cursor:pointer}
+.langmenu button:hover{background:color-mix(in srgb,var(--chip) 70%,transparent)}
+.langmenu button[aria-checked="true"]{background:var(--panel)}
+/* compact language switch; always English · Français · العربية in the same places, whatever the page direction */
+.langpills{display:inline-flex;align-self:center;gap:2px;background:var(--chip);padding:3px;border-radius:999px}
+.langpills button{border:0;background:transparent;color:var(--ink-soft);font:600 .78rem var(--display);padding:5px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.langpills button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+/* Arabic: right to left, and no letter-spacing or capitals (they break joined letters) */
+[dir="rtl"]{--mono:"IBM Plex Sans Arabic", "Noto Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif}
+[dir="rtl"] *{letter-spacing:0!important}
+[dir="rtl"] .prompt .label,[dir="rtl"] .namefield label,[dir="rtl"] .tag{text-transform:none}
+[dir="rtl"] .prompt .label{font-size:.85rem}
+[dir="rtl"] .list .p,[dir="rtl"] .board li .rk{text-align:left}
+[dir="rtl"] .zoomctl{align-self:flex-end}
+.modes .m-explore{display:inline-grid;place-items:center;padding:6px 9px}
+.modes .m-explore svg{width:16px;height:16px;display:block}
+.exploring #levels{visibility:hidden}
+.excard{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center}
+.excard .exflag{grid-row:span 2;height:56px;width:auto;aspect-ratio:4/3;border-radius:6px;box-shadow:0 0 0 1px var(--panel-edge),0 4px 12px rgba(10,30,40,.18)}
+.excard .exname{font:800 1.35rem var(--display);letter-spacing:-.02em;line-height:1.1;min-width:0}
+.excard .exrows{display:flex;flex-direction:column;gap:2px;min-width:0}
+.excard dl{grid-column:1/-1;margin:4px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.95rem}
+.excard dt{font:600 .7rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);align-self:center}
+.excard dd{margin:0;font-weight:700;min-width:0}
+.excard dd.cities{font-weight:500;color:var(--ink-soft)}
+.excard .btns{grid-column:1/-1;justify-content:flex-end}
+.excard .exnote{grid-column:1/-1;font-size:.85rem;color:var(--ink-soft);line-height:1.35;padding-top:2px}
+[dir="rtl"] .excard dt{text-transform:none}
+/* first-visit tour: a soft spotlight on the real controls, one short tip at a time */
+.tour{position:fixed;inset:0;z-index:30}
+.tour[hidden]{display:none}
+.tour-ring{position:fixed;border-radius:20px;box-shadow:0 0 0 2px rgba(255,255,255,.9),0 0 0 9999px rgba(8,28,38,.42);pointer-events:none;
+  transition:left .35s cubic-bezier(.2,.8,.2,1),top .35s cubic-bezier(.2,.8,.2,1),width .35s cubic-bezier(.2,.8,.2,1),height .35s cubic-bezier(.2,.8,.2,1)}
+.tour-tip{position:fixed;width:min(300px,calc(100vw - 24px));padding:16px 16px 14px;border-radius:20px;display:flex;flex-direction:column;gap:6px;background:var(--panel);
+  border:1px solid var(--panel-edge);box-shadow:0 14px 40px rgba(10,30,40,.28);transition:left .35s cubic-bezier(.2,.8,.2,1),top .35s cubic-bezier(.2,.8,.2,1);animation:tipin .3s ease-out}
+.tour-tip h4{margin:0;font:800 1.08rem var(--display);letter-spacing:-.01em}
+.tour-tip p{margin:0;color:var(--ink-soft);font-size:.92rem;line-height:1.4}
+.tour-tip .tour-foot{display:flex;align-items:center;gap:10px;margin-top:8px}
+.tour-tip .tour-dots{display:flex;gap:5px;margin-inline-end:auto}
+.tour-tip .tour-dots i{width:6px;height:6px;border-radius:50%;background:var(--panel-edge)}
+.tour-tip .tour-dots i.on{background:var(--ink);width:16px;border-radius:3px}
+.tour-tip .btn{padding:9px 18px;font-size:.95rem}
+.tour-tip .tour-skip{border:0;background:none;color:var(--ink-soft);font:600 .88rem var(--display);cursor:pointer;padding:6px}
+.tour-tip .tour-skip:focus-visible{outline:3px solid var(--pin);outline-offset:2px;border-radius:8px}
+@keyframes tipin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.a2hs{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;padding:14px;border-radius:16px;background:var(--chip);text-align:start}
+.a2hs .ic{grid-row:span 2;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--ocean);box-shadow:0 2px 6px rgba(10,30,40,.15)}
+.a2hs .ic svg{width:24px;height:24px}
+.a2hs b.tt{font:800 .98rem var(--display)}
+.a2hs .st{color:var(--ink-soft);font-size:.9rem;line-height:1.4}
+.a2hs .st svg{width:15px;height:15px;vertical-align:-2px;margin:0 2px}
+.a2hs .st small{display:block;margin-top:4px;font-size:.8rem}
+.a2hs .acts{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.a2hs .acts .btn,.a2hs .acts .btn2{padding:8px 16px;font-size:.9rem}
+.helpa2hs{display:flex;flex-direction:column;gap:6px}
+.helpa2hs p svg{width:15px;height:15px;vertical-align:-2px;margin:0 2px}
+.lives{display:flex;gap:3px;align-items:center}
+.lives svg{width:17px;height:17px;transition:transform .25s ease}
+.lives .on{fill:var(--pin)}
+.lives .off{fill:var(--panel-edge);transform:scale(.85)}
+.lives .lost{animation:lose .5s ease}
+.lives .gain{animation:gain .9s cubic-bezier(.2,1.6,.4,1)}
+@keyframes gain{0%{transform:scale(.3)}50%{transform:scale(1.7)}100%{transform:scale(1)}}
+/* streak pop-up: drops in under the top bar, then fades away */
+.toast{position:absolute;z-index:6;left:50%;top:calc(var(--toastTop,150px));transform:translate(-50%,-8px);opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:10px;padding:10px 18px 10px 12px;border-radius:999px;font:700 1rem var(--display);color:var(--ink);white-space:nowrap;
+  transition:opacity .25s ease,transform .35s cubic-bezier(.2,1.4,.4,1)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast .th{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--pin) 16%,transparent)}
+.toast .th svg{width:20px;height:20px;fill:var(--pin);animation:gain .9s cubic-bezier(.2,1.6,.4,1)}
+.toast small{display:block;font:500 .78rem var(--display);color:var(--ink-soft)}
+/* end-of-game medal */
+.medal{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;margin:-4px 0 2px}
+.medal .m{font-size:76px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+  filter:drop-shadow(0 8px 14px rgba(150,100,0,.35));animation:medaldrop 1s cubic-bezier(.2,1.5,.4,1) both, medalswing 2.6s ease-in-out 1s infinite alternate;transform-origin:50% 0}
+.medal .ml{font:800 1rem var(--display);color:var(--gold);letter-spacing:.01em;animation:fadeup .5s ease .6s both}
+@keyframes medaldrop{0%{transform:translateY(-120px) rotate(-25deg) scale(.6);opacity:0}60%{opacity:1}100%{transform:none}}
+@keyframes medalswing{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+@keyframes fadeup{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.confetti{position:absolute;inset:0;pointer-events:none;z-index:7}
+@media (prefers-reduced-motion:reduce){.medal .m,.medal .ml{animation:none}}
+@keyframes lose{0%{transform:scale(1.35)}100%{transform:scale(.85)}}
+
+/* Map */
+.mapwrap{position:absolute;inset:0}
+svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
+.graticule{fill:none;stroke:var(--ocean-line);stroke-width:.6;vector-effect:non-scaling-stroke}
+.country{fill:var(--land);stroke:var(--land-edge);stroke-width:.5;vector-effect:non-scaling-stroke}
+.countries-mode .country{cursor:pointer}
+.countries-mode .country:hover{fill:var(--land-hover)}
+.country.picked{fill:var(--pin);fill-opacity:.55}
+.easy .country{fill-opacity:.4}
+.easy .country.focus{fill-opacity:1;stroke:var(--ink-soft);stroke-width:1.2}
+.safezone{fill:var(--target);fill-opacity:.12;stroke:var(--target);stroke-width:1.2;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.labelrow{display:flex;align-items:center;gap:8px}
+.levels{display:flex;gap:2px;background:color-mix(in srgb,var(--chip) 55%,transparent);padding:2px;border-radius:999px}
+.levels button{border:0;background:transparent;color:var(--ink-soft);font:600 .72rem var(--display);padding:3px 10px;border-radius:999px;cursor:pointer}
+.levels button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.levels button:focus-visible{outline:3px solid var(--pin);outline-offset:2px}
+.country.correct{fill:var(--target);fill-opacity:.75}
+.guessline{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 4;fill:none;vector-effect:non-scaling-stroke}
+.zoomctl{align-self:flex-end;pointer-events:auto;display:flex;flex-direction:column;gap:8px}
+.zoomctl button{width:40px;height:40px;border-radius:50%;color:var(--ink);font:600 1.2rem var(--mono);cursor:pointer}
+
+/* Bottom tray */
+.tray{position:absolute;left:0;right:0;bottom:0;z-index:3;
+  padding-block:12px calc(14px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none}
+/* the result of a multiple-choice round sits in its own card above the untouched answers */
+.resultbar{flex-direction:row;align-items:center;gap:14px;padding:12px 14px 12px 18px;animation:resultin .32s cubic-bezier(.2,1.2,.4,1) both}
+.resultbar[hidden]{display:none}
+@keyframes resultin{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.card{pointer-events:auto;width:100%;max-width:520px;border-radius:26px;
+  padding:14px 16px 14px 20px;display:flex;align-items:center;gap:14px}
+.card .txt{flex:1;min-width:0}
+.card .big{font:600 1.5rem var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.card .small{color:var(--ink-soft);font-size:.9rem}
+.btn{border:0;background:var(--btn);color:var(--btn-ink);font:700 1rem var(--display);padding:12px 22px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.btn:disabled{opacity:.35;cursor:default}
+.btn:focus-visible,.modes button:focus-visible,.zoomctl button:focus-visible{outline:3px solid var(--pin);outline-offset:2px}
+.bar{height:6px;border-radius:3px;background:var(--chip);margin-top:6px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--gold);border-radius:3px;transition:width .6s ease}
+
+/* Results */
+.results{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--ocean) 70%,transparent);backdrop-filter:blur(3px);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
+.sheet{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--panel-edge);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 50px rgba(10,30,40,.25)}
+.sheet h2{margin:0;font-size:1rem;font-weight:600;color:var(--ink-soft)}
+.total{font:600 3rem var(--mono);letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.total small{font-size:1rem;color:var(--ink-soft);letter-spacing:0}
+.verdict{font-weight:700;font-size:1.15rem}
+.list{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none;max-height:min(38vh,320px);overflow:auto}
+.list li{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:7px 0;border-bottom:1px solid var(--panel-edge);font-size:.95rem}
+.list li:last-child{border-bottom:0}
+.list .d{font:500 .85rem var(--mono);color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.list .p{font:600 .9rem var(--mono);font-variant-numeric:tabular-nums;min-width:4ch;text-align:right}
+.best{font:500 .8rem var(--mono);color:var(--ink-soft)}
+/* welcome + leaderboard */
+.welcome h3{margin:0;font-size:1.6rem;letter-spacing:-.03em;line-height:1.1}
+.welcome p{margin:0;color:var(--ink-soft);line-height:1.45}
+.namefield{display:flex;flex-direction:column;gap:6px}
+.namefield label{font:600 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.namefield input{font:700 1.1rem var(--display);color:var(--ink);background:var(--chip);border:1px solid var(--panel-edge);border-radius:14px;padding:12px 14px;width:100%}
+.namefield input:focus{outline:3px solid color-mix(in srgb,var(--pin) 55%,transparent);outline-offset:1px}
+.namefield .err{color:var(--pin);font-size:.85rem;min-height:1.1em}
+.board{display:flex;flex-direction:column;gap:6px;background:var(--chip);border-radius:16px;padding:12px 14px}
+.board .bh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:700}
+.board .bh small{font:500 .78rem var(--mono);color:var(--ink-soft);font-weight:500}
+.board ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.board li{display:grid;grid-template-columns:2.6ch 1fr auto;gap:10px;align-items:center;padding:6px 8px;border-radius:10px;font-variant-numeric:tabular-nums}
+.board li .rk{font:600 .85rem var(--mono);color:var(--ink-soft);text-align:right}
+.board li .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board li .sc{font:600 .95rem var(--mono)}
+.board li.me{background:color-mix(in srgb,var(--gold) 22%,transparent);font-weight:700}
+.board li.gap{display:block;text-align:center;color:var(--ink-soft);padding:0;line-height:1}
+.board .note{color:var(--ink-soft);font-size:.88rem}
+.who{font-size:.85rem;color:var(--ink-soft);text-align:center}
+.who button{border:0;background:none;padding:0;color:var(--ink);font:700 .85rem var(--display);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.list .p.ok{color:var(--target)} .list .p.no{color:var(--pin)}
+.card .verdictline{font:800 1.3rem var(--display);letter-spacing:-.02em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .verdictline.ok{color:var(--target)} .card .verdictline.no{color:var(--pin)}
+.stat{font:500 .85rem var(--mono);color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.btn2{border:1px solid var(--glass-edge);background:color-mix(in srgb,var(--chip) 60%,transparent);color:var(--ink);font:600 .95rem var(--display);padding:11px 16px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.btn2:focus-visible{outline:3px solid var(--pin);outline-offset:2px}
+.btns{display:flex;gap:8px;align-items:center}
+.tag{display:inline-block;font:600 .7rem var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;vertical-align:middle;margin-left:6px}
+.tag.miss{background:color-mix(in srgb,var(--pin) 18%,transparent);color:var(--pin)}
+.tag.hit{background:color-mix(in srgb,var(--target) 18%,transparent);color:var(--target)}
+.meta{align-items:center}
+.of{color:var(--ink-soft)}
+.how{width:24px;height:24px;border-radius:50%;border:1px solid var(--glass-edge);background:color-mix(in srgb,var(--chip) 55%,transparent);color:var(--ink);font:600 .8rem var(--display);cursor:pointer;padding:0;display:grid;place-items:center}
+.how:focus-visible,.linkbtn:focus-visible{outline:3px solid var(--pin);outline-offset:2px}
+.card .big small{font-size:.85rem;color:var(--ink-soft);letter-spacing:0;font-weight:500}
+.linkbtn{border:0;background:none;padding:0;color:var(--ink-soft);font:600 .85rem var(--display);text-decoration:underline;text-underline-offset:3px;cursor:pointer;align-self:center}
+.sheet{max-height:100%;overflow:auto}
+/* results: score first, one main action, everything else quiet or folded away */
+.rsheet{gap:16px;padding:24px 20px 18px;text-align:center}
+.rsheet .rchip{align-self:center;display:inline-flex;gap:6px;align-items:center;padding:5px 12px;border-radius:999px;background:var(--chip);color:var(--ink-soft);font:600 .8rem var(--display)}
+.rsheet .rhero{display:flex;flex-direction:column;align-items:center;gap:4px}
+.rsheet .medal{margin:0}
+.rsheet .medal .m{font-size:64px}
+.rsheet .rnum{font:800 4rem/1 var(--display);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.rsheet .rlabel{font:600 1rem var(--display);color:var(--ink-soft)}
+.rsheet .rsub{font-size:.88rem;color:var(--ink-soft)}
+.rsheet .rsub b{color:var(--ink);font-weight:700}
+.rsheet .ractions{display:flex;flex-direction:column;gap:8px}
+.rsheet .ractions .btn{padding:14px 22px;font-size:1.05rem}
+.rsheet .ractions .btn2{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px}
+.rsheet .ractions .btn2 svg{width:17px;height:17px}
+.rsheet .board{text-align:start;padding:12px}
+.rsheet .board .bh{font-size:.95rem}
+.rsheet .board .note{font-size:.85rem}
+.rsheet details{text-align:start;border-top:1px solid var(--panel-edge);padding-top:10px}
+.rsheet summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;font:600 .92rem var(--display);color:var(--ink-soft);padding:4px 2px}
+.rsheet summary::-webkit-details-marker{display:none}
+.rsheet summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s ease;margin-inline-end:4px}
+.rsheet details[open] summary::after{transform:rotate(-135deg)}
+.rsheet details .list{margin-top:6px}
+.rsheet .rfoot{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 14px;font-size:.82rem;color:var(--ink-soft);padding-top:2px}
+.rsheet .rfoot button{border:0;background:none;padding:0;color:var(--ink-soft);font:600 .82rem var(--display);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* home-screen tip: one quiet row that opens on tap */
+.rsheet .a2hs{display:block;padding:0;background:none;border-top:1px solid var(--panel-edge);border-radius:0;padding-top:10px}
+.rsheet .a2hs summary{justify-content:flex-start}
+.rsheet .a2hs summary .ic{width:26px;height:26px;border-radius:8px;flex:none}
+.rsheet .a2hs summary .ic svg{width:16px;height:16px}
+.rsheet .a2hs summary .tt{flex:1;font:600 .92rem var(--display);color:var(--ink-soft)}
+.rsheet .a2hs .st{margin:8px 2px 0;text-align:start}
+.rsheet .a2hs .acts{margin-top:8px}
+.sheet p{margin:0;line-height:1.45;color:var(--ink-soft)}
+.sheet p b{color:var(--ink)}
+.sheet h3{margin:0;font-size:1.35rem;letter-spacing:-.02em}
+.scale{display:grid;grid-template-columns:auto 1fr auto;gap:8px 12px;align-items:center;font:500 .85rem var(--mono);font-variant-numeric:tabular-nums}
+.scale .meter{height:8px;border-radius:4px;background:var(--chip);overflow:hidden}
+.scale .meter span{display:block;height:100%;background:var(--gold)}
+.scale .pts{text-align:right;font-weight:600;min-width:4ch}
+
+@media (max-width:480px){
+  .brand span{display:none}
+  .card .big{font-size:1.25rem}
+  .meta{gap:10px}
+  .modes button{padding:6px 7px;font-size:.78rem}
+  .modes .m-explore{padding:6px 7px}
+  .headrow{gap:6px}
+}
+/* most phones (up to ~430px wide): tighten the tab row so all five tabs fit beside the logo */
+@media (max-width:380px){
+  /* narrow phones: "✓ 4" instead of "Score 4", and a tighter level switch, so the status row always fits */
+  .scorebox [data-i18n="score"]{display:none}
+  .scorebox b::before{content:"✓ ";color:var(--target);font-weight:700}
+  .levels button{padding:3px 7px}
+  .controls{gap:4px}
+}
+@media (max-width:430px){
+  .stats{gap:8px}
+  .controls{gap:5px}
+  .lives svg{width:15px;height:15px}
+  .top{padding-left:10px;padding-right:10px}
+  .topwrap{padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+  .modes{gap:1px;padding:2px}
+  .modes button{padding:6px 6px;font-size:.75rem;letter-spacing:-.01em}
+  .modes .m-explore{padding:6px 5px}
+  .headrow{gap:4px}
+}
+/* ---------- tactile feedback: every button squeezes a little when pressed and springs back ---------- */
+button,.card,.tray{touch-action:manipulation}
+button{-webkit-tap-highlight-color:transparent;transition:transform .14s cubic-bezier(.3,.7,.4,1.5),background-color .2s ease,color .2s ease,box-shadow .2s ease,opacity .2s ease}
+button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
+.btn:active:not(:disabled),.btn2:active:not(:disabled),.choice:active:not(:disabled){transform:scale(.96)}
+.modes button:active:not(:disabled),.levels button:active:not(:disabled),.langpills button:active:not(:disabled){transform:scale(.9)}
+/* answers react: the right one pops, a wrong pick shakes, the verdict slides in */
+.choice.right{animation:answerpop .5s cubic-bezier(.2,1.6,.4,1)}
+.choice.wrong{animation:answershake .42s ease}
+.verdictline{animation:fadeup .3s ease both}
+.lock-pop{animation:answerpop .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes answerpop{0%{transform:scale(.9)}55%{transform:scale(1.07)}100%{transform:scale(1)}}
+@keyframes answershake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes fadeup{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@keyframes drop{from{transform:translateY(-14px);opacity:0}to{transform:none;opacity:1}}
+.pinmark{animation:drop .22s ease-out}
+</style>
+
+<div class="splash" id="splash" role="dialog" aria-label="Globe by Abisto"><div class="spin"><img src="__LOGO_BIG__" alt="Globe by Abisto"><div class="spbody" id="spbody"></div></div></div>
+<div class="app" id="app">
+
+  <div class="mapwrap" id="mapwrap">
+    <svg id="map" role="img" data-i18n-aria="mapLabel" aria-label="World map"></svg>
+    <div class="tray"><div class="card glass resultbar" id="resultbar" role="status" hidden></div><div class="card glass" id="card"></div></div>
+    <div class="results" id="results" hidden></div>
+    <div class="results" id="help" hidden></div>
+    <div class="results" id="welcome" hidden></div>
+    <div class="toast glass" id="toast" role="status" aria-live="polite"></div>
+  </div>
+  <div class="topwrap"><header class="top glass" id="top">
+    <div class="headrow">
+      <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="var(--pin)"/><circle cx="12" cy="9" r="2.6" fill="var(--panel)"/></svg><span data-i18n="appName">Globe by Abisto</span></div>
+      <div class="modes" role="group" data-i18n-aria="gameMode" aria-label="Game mode">
+        <button id="m-explore" class="m-explore" aria-pressed="false" data-i18n-aria="m_explore" aria-label="Explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg></button>
+        <button id="m-flags" aria-pressed="true" data-i18n="m_flags">Flags</button>
+        <button id="m-countries" aria-pressed="false" data-i18n="m_countries">Countries</button>
+        <button id="m-capitals" aria-pressed="false" data-i18n="m_capitals">Capitals</button>
+        <button id="m-cities" aria-pressed="false" data-i18n="m_cities">Cities</button>
+      </div>
+    </div>
+    <div class="statusrow">
+      <div class="stats"><div class="lives" id="lives"></div><span class="scorebox"><span data-i18n="score">Score</span> <b id="score">0</b></span></div>
+      <div class="controls"><span class="levels" id="levels" role="group" data-i18n-aria="level" aria-label="Level">
+          <button id="l-easy" aria-pressed="true" data-i18n="easy">Easy</button>
+          <button id="l-pro" aria-pressed="false" data-i18n="pro">Pro</button>
+        </span><button class="how" id="how" data-i18n-aria="howToPlay" aria-label="How to play">?</button><span class="langwrap"><button class="langbtn" id="langbtn" data-i18n-aria="language" aria-label="Language" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>EN</span></button><span class="langmenu glass" id="langmenu" role="menu" hidden></span></span><button class="theme" id="theme" aria-label="Switch to dark mode"></button></div>
+    </div>
+    <div class="prompt">
+      <span class="label" id="p-label">Capital of</span>
+      <div class="qline"><span class="place" id="p-place">…</span><span class="hint" id="p-hint"></span></div>
+    </div>
+  </header>
+  <div class="zoomctl">
+      <button class="glass" id="zin" data-i18n-aria="zoomIn" aria-label="Zoom in">+</button>
+      <button class="glass" id="zout" data-i18n-aria="zoomOut" aria-label="Zoom out">−</button>
+      <button class="glass" id="zreset" data-i18n-aria="resetView" aria-label="Reset view" style="font-size:1.15rem">⟲</button>
+    </div></div>
+  <div class="tour" id="tour" hidden><div class="tour-ring" id="tour-ring"></div><div class="tour-tip" id="tour-tip" role="dialog" aria-modal="true" aria-labelledby="tour-h"></div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+const TOPO = __TOPO__;
+
+/* name, country, lat, lon */
+const CITIES = [
+ ["Paris","France",48.8566,2.3522],["London","United Kingdom",51.5074,-0.1278],["Rome","Italy",41.9028,12.4964],
+ ["Madrid","Spain",40.4168,-3.7038],["Berlin","Germany",52.52,13.405],["Lisbon","Portugal",38.7223,-9.1393],
+ ["Athens","Greece",37.9838,23.7275],["Istanbul","Türkiye",41.0082,28.9784],["Moscow","Russia",55.7558,37.6173],
+ ["Stockholm","Sweden",59.3293,18.0686],["Reykjavík","Iceland",64.1466,-21.9426],["Warsaw","Poland",52.2297,21.0122],
+ ["Kyiv","Ukraine",50.4501,30.5234],["Cairo","Egypt",30.0444,31.2357],["Lagos","Nigeria",6.5244,3.3792],
+ ["Nairobi","Kenya",-1.2921,36.8219],["Cape Town","South Africa",-33.9249,18.4241],["Casablanca","Morocco",33.5731,-7.5898],
+ ["Dakar","Senegal",14.7167,-17.4677],["Addis Ababa","Ethiopia",9.03,38.74],["Kinshasa","DR Congo",-4.4419,15.2663],
+ ["Antananarivo","Madagascar",-18.8792,47.5079],["Dubai","United Arab Emirates",25.2048,55.2708],["Tehran","Iran",35.6892,51.389],
+ ["Riyadh","Saudi Arabia",24.7136,46.6753],["Karachi","Pakistan",24.8607,67.0011],["Mumbai","India",19.076,72.8777],
+ ["Delhi","India",28.7041,77.1025],["Kathmandu","Nepal",27.7172,85.324],["Dhaka","Bangladesh",23.8103,90.4125],
+ ["Bangkok","Thailand",13.7563,100.5018],["Singapore","Singapore",1.3521,103.8198],["Jakarta","Indonesia",-6.2088,106.8456],
+ ["Manila","Philippines",14.5995,120.9842],["Hanoi","Vietnam",21.0278,105.8342],["Beijing","China",39.9042,116.4074],
+ ["Shanghai","China",31.2304,121.4737],["Hong Kong","China",22.3193,114.1694],["Seoul","South Korea",37.5665,126.978],
+ ["Tokyo","Japan",35.6762,139.6503],["Ulaanbaatar","Mongolia",47.8864,106.9057],["Almaty","Kazakhstan",43.222,76.8512],
+ ["Sydney","Australia",-33.8688,151.2093],["Perth","Australia",-31.9505,115.8605],["Auckland","New Zealand",-36.8485,174.7633],
+ ["Honolulu","United States",21.3069,-157.8583],["Anchorage","United States",61.2181,-149.9003],["Vancouver","Canada",49.2827,-123.1207],
+ ["Los Angeles","United States",34.0522,-118.2437],["Chicago","United States",41.8781,-87.6298],["New York","United States",40.7128,-74.006],
+ ["Miami","United States",25.7617,-80.1918],["Toronto","Canada",43.6532,-79.3832],["Montreal","Canada",45.5017,-73.5673],
+ ["Mexico City","Mexico",19.4326,-99.1332],["Havana","Cuba",23.1136,-82.3666],["Panama City","Panama",8.9824,-79.5199],
+ ["Bogotá","Colombia",4.711,-74.0721],["Lima","Peru",-12.0464,-77.0428],["Quito","Ecuador",-0.1807,-78.4678],
+ ["Santiago","Chile",-33.4489,-70.6693],["Buenos Aires","Argentina",-34.6037,-58.3816],["Rio de Janeiro","Brazil",-22.9068,-43.1729],
+ ["São Paulo","Brazil",-23.5505,-46.6333],["Manaus","Brazil",-3.119,-60.0217],["La Paz","Bolivia",-16.4897,-68.1193],
+ ["Nuuk","Greenland",64.1814,-51.6941],["Marrakesh","Morocco",31.6295,-7.9811],["Baghdad","Iraq",33.3152,44.3661],
+ ["Tbilisi","Georgia",41.7151,44.8271],["Vienna","Austria",48.2082,16.3738],["Dublin","Ireland",53.3498,-6.2603]
+];
+
+/* capital, country (as named on the map), lat, lon. Countries with a disputed capital or status are left out. */
+const CAPITALS = [
+ ["Kabul","Afghanistan",34.5553,69.2075],["Tirana","Albania",41.3275,19.8187],["Algiers","Algeria",36.7538,3.0588],["Luanda","Angola",-8.839,13.2894],
+ ["Buenos Aires","Argentina",-34.6037,-58.3816],["Yerevan","Armenia",40.1792,44.4991],["Canberra","Australia",-35.2809,149.13],["Vienna","Austria",48.2082,16.3738],
+ ["Baku","Azerbaijan",40.4093,49.8671],["Nassau","Bahamas",25.0443,-77.3504],["Dhaka","Bangladesh",23.8103,90.4125],["Minsk","Belarus",53.9006,27.559],
+ ["Brussels","Belgium",50.8503,4.3517],["Belmopan","Belize",17.251,-88.759],["Porto-Novo","Benin",6.4969,2.6289],["Thimphu","Bhutan",27.4728,89.639],
+ ["Sucre","Bolivia",-19.0196,-65.2619],["Sarajevo","Bosnia and Herz.",43.8563,18.4131],["Gaborone","Botswana",-24.6282,25.9231],["Brasília","Brazil",-15.7975,-47.8919],
+ ["Bandar Seri Begawan","Brunei",4.9031,114.9398],["Sofia","Bulgaria",42.6977,23.3219],["Ouagadougou","Burkina Faso",12.3714,-1.5197],["Gitega","Burundi",-3.4271,29.9246],
+ ["Phnom Penh","Cambodia",11.5564,104.9282],["Yaoundé","Cameroon",3.848,11.5021],["Ottawa","Canada",45.4215,-75.6972],["Bangui","Central African Rep.",4.3947,18.5582],
+ ["N'Djamena","Chad",12.1348,15.0557],["Santiago","Chile",-33.4489,-70.6693],["Beijing","China",39.9042,116.4074],["Bogotá","Colombia",4.711,-74.0721],
+ ["Brazzaville","Congo",-4.2634,15.2429],["San José","Costa Rica",9.9281,-84.0907],["Zagreb","Croatia",45.815,15.9819],["Havana","Cuba",23.1136,-82.3666],
+ ["Nicosia","Cyprus",35.1856,33.3823],["Prague","Czechia",50.0755,14.4378],["Yamoussoukro","Côte d'Ivoire",6.8276,-5.2893],["Kinshasa","Dem. Rep. Congo",-4.4419,15.2663],
+ ["Copenhagen","Denmark",55.6761,12.5683],["Djibouti","Djibouti",11.5721,43.1456],["Santo Domingo","Dominican Rep.",18.4861,-69.9312],["Quito","Ecuador",-0.1807,-78.4678],
+ ["Cairo","Egypt",30.0444,31.2357],["San Salvador","El Salvador",13.6929,-89.2182],["Malabo","Eq. Guinea",3.7504,8.7371],["Asmara","Eritrea",15.3229,38.9251],
+ ["Tallinn","Estonia",59.437,24.7536],["Addis Ababa","Ethiopia",9.03,38.74],["Suva","Fiji",-18.1248,178.4501],["Helsinki","Finland",60.1699,24.9384],
+ ["Paris","France",48.8566,2.3522],["Libreville","Gabon",0.4162,9.4673],["Banjul","Gambia",13.4549,-16.579],["Tbilisi","Georgia",41.7151,44.8271],
+ ["Berlin","Germany",52.52,13.405],["Accra","Ghana",5.6037,-0.187],["Athens","Greece",37.9838,23.7275],["Guatemala City","Guatemala",14.6349,-90.5069],
+ ["Conakry","Guinea",9.6412,-13.5784],["Bissau","Guinea-Bissau",11.8817,-15.617],["Georgetown","Guyana",6.8013,-58.1551],["Port-au-Prince","Haiti",18.5944,-72.3074],
+ ["Tegucigalpa","Honduras",14.0723,-87.1921],["Budapest","Hungary",47.4979,19.0402],["Reykjavík","Iceland",64.1466,-21.9426],["New Delhi","India",28.6139,77.209],
+ ["Jakarta","Indonesia",-6.2088,106.8456],["Tehran","Iran",35.6892,51.389],["Baghdad","Iraq",33.3152,44.3661],["Dublin","Ireland",53.3498,-6.2603],
+ ["Rome","Italy",41.9028,12.4964],["Kingston","Jamaica",17.9714,-76.7931],["Tokyo","Japan",35.6762,139.6503],["Amman","Jordan",31.9454,35.9284],
+ ["Astana","Kazakhstan",51.1694,71.4491],["Nairobi","Kenya",-1.2921,36.8219],["Kuwait City","Kuwait",29.3759,47.9774],["Bishkek","Kyrgyzstan",42.8746,74.5698],
+ ["Vientiane","Laos",17.9757,102.6331],["Riga","Latvia",56.9496,24.1052],["Beirut","Lebanon",33.8938,35.5018],["Maseru","Lesotho",-29.3151,27.4869],
+ ["Monrovia","Liberia",6.3156,-10.8074],["Tripoli","Libya",32.8872,13.1913],["Vilnius","Lithuania",54.6872,25.2797],["Luxembourg","Luxembourg",49.6116,6.1319],
+ ["Skopje","Macedonia",41.9981,21.4254],["Antananarivo","Madagascar",-18.8792,47.5079],["Lilongwe","Malawi",-13.9626,33.7741],["Kuala Lumpur","Malaysia",3.139,101.6869],
+ ["Bamako","Mali",12.6392,-8.0029],["Nouakchott","Mauritania",18.0735,-15.9582],["Mexico City","Mexico",19.4326,-99.1332],["Chișinău","Moldova",47.0105,28.8638],
+ ["Ulaanbaatar","Mongolia",47.8864,106.9057],["Podgorica","Montenegro",42.4304,19.2594],["Rabat","Morocco",34.0209,-6.8416],["Maputo","Mozambique",-25.9692,32.5732],
+ ["Naypyidaw","Myanmar",19.7633,96.0785],["Windhoek","Namibia",-22.5609,17.0658],["Kathmandu","Nepal",27.7172,85.324],["Amsterdam","Netherlands",52.3676,4.9041],
+ ["Wellington","New Zealand",-41.2865,174.7762],["Managua","Nicaragua",12.1149,-86.2362],["Niamey","Niger",13.5116,2.1254],["Abuja","Nigeria",9.0765,7.3986],
+ ["Pyongyang","North Korea",39.0392,125.7625],["Oslo","Norway",59.9139,10.7522],["Muscat","Oman",23.588,58.3829],["Islamabad","Pakistan",33.6844,73.0479],
+ ["Panama City","Panama",8.9824,-79.5199],["Port Moresby","Papua New Guinea",-9.4438,147.1803],["Asunción","Paraguay",-25.2637,-57.5759],["Lima","Peru",-12.0464,-77.0428],
+ ["Manila","Philippines",14.5995,120.9842],["Warsaw","Poland",52.2297,21.0122],["Lisbon","Portugal",38.7223,-9.1393],["Doha","Qatar",25.2854,51.531],
+ ["Bucharest","Romania",44.4268,26.1025],["Moscow","Russia",55.7558,37.6173],["Kigali","Rwanda",-1.9441,30.0619],["Juba","S. Sudan",4.8594,31.5713],
+ ["Riyadh","Saudi Arabia",24.7136,46.6753],["Dakar","Senegal",14.7167,-17.4677],["Belgrade","Serbia",44.7866,20.4489],["Freetown","Sierra Leone",8.4657,-13.2317],
+ ["Bratislava","Slovakia",48.1486,17.1077],["Ljubljana","Slovenia",46.0569,14.5058],["Honiara","Solomon Is.",-9.4456,159.9729],["Mogadishu","Somalia",2.0469,45.3182],
+ ["Pretoria","South Africa",-25.7479,28.2293],["Seoul","South Korea",37.5665,126.978],["Madrid","Spain",40.4168,-3.7038],["Sri Jayawardenepura Kotte","Sri Lanka",6.8868,79.9187],
+ ["Khartoum","Sudan",15.5007,32.5599],["Paramaribo","Suriname",5.852,-55.2038],["Stockholm","Sweden",59.3293,18.0686],["Bern","Switzerland",46.948,7.4474],
+ ["Damascus","Syria",33.5138,36.2765],["Dushanbe","Tajikistan",38.5598,68.787],["Dodoma","Tanzania",-6.163,35.7516],["Bangkok","Thailand",13.7563,100.5018],
+ ["Dili","Timor-Leste",-8.5569,125.5603],["Lomé","Togo",6.1319,1.2228],["Port of Spain","Trinidad and Tobago",10.6603,-61.5086],["Tunis","Tunisia",36.8065,10.1815],
+ ["Ankara","Turkey",39.9334,32.8597],["Ashgabat","Turkmenistan",37.9601,58.3261],["Kampala","Uganda",0.3476,32.5825],["Kyiv","Ukraine",50.4501,30.5234],
+ ["Abu Dhabi","United Arab Emirates",24.4539,54.3773],["London","United Kingdom",51.5074,-0.1278],["Washington, D.C.","United States of America",38.9072,-77.0369],
+ ["Montevideo","Uruguay",-34.9011,-56.1645],["Tashkent","Uzbekistan",41.2995,69.2401],["Port Vila","Vanuatu",-17.7333,168.3273],["Caracas","Venezuela",10.4806,-66.9036],
+ ["Hanoi","Vietnam",21.0278,105.8342],["Sanaa","Yemen",15.3694,44.191],["Lusaka","Zambia",-15.3875,28.3228],["Harare","Zimbabwe",-17.8252,31.0335],["Mbabane","eSwatini",-26.3054,31.1367]
+];
+
+/* Capitals · Pro: 3 well-known non-capital cities per country. Cities that could also be argued to be
+   a capital (seat of government, second official capital, a disputed region's capital) are left out on purpose. */
+const OTHER_CITIES = {
+ "Afghanistan":["Kandahar","Herat","Mazar-i-Sharif"],"Albania":["Durrës","Vlorë","Shkodër"],"Algeria":["Oran","Constantine","Annaba"],
+ "Angola":["Huambo","Lobito","Benguela"],"Argentina":["Córdoba","Rosario","Mendoza"],"Armenia":["Gyumri","Vanadzor","Vagharshapat"],
+ "Australia":["Sydney","Melbourne","Perth"],"Austria":["Graz","Salzburg","Innsbruck"],"Azerbaijan":["Ganja","Sumgait","Lankaran"],
+ "Bahamas":["Freeport","Marsh Harbour","West End"],"Bangladesh":["Chittagong","Khulna","Sylhet"],"Belarus":["Gomel","Brest","Grodno"],
+ "Belgium":["Antwerp","Ghent","Bruges"],"Belize":["Belize City","San Ignacio","Orange Walk"],"Benin":["Cotonou","Parakou","Abomey"],
+ "Bhutan":["Phuntsholing","Paro","Punakha"],"Bolivia":["Santa Cruz","Cochabamba","Oruro"],"Bosnia and Herz.":["Banja Luka","Mostar","Tuzla"],
+ "Botswana":["Francistown","Maun","Serowe"],"Brazil":["Rio de Janeiro","São Paulo","Salvador"],"Brunei":["Kuala Belait","Seria","Tutong"],
+ "Bulgaria":["Plovdiv","Varna","Burgas"],"Burkina Faso":["Bobo-Dioulasso","Koudougou","Banfora"],"Burundi":["Bujumbura","Ngozi","Muyinga"],
+ "Cambodia":["Siem Reap","Battambang","Sihanoukville"],"Cameroon":["Douala","Garoua","Bamenda"],"Canada":["Toronto","Montreal","Vancouver"],
+ "Central African Rep.":["Bimbo","Berbérati","Bambari"],"Chad":["Moundou","Abéché","Sarh"],"Chile":["Concepción","Antofagasta","Viña del Mar"],
+ "China":["Shanghai","Guangzhou","Shenzhen"],"Colombia":["Medellín","Cali","Cartagena"],"Congo":["Pointe-Noire","Dolisie","Nkayi"],
+ "Costa Rica":["Limón","Alajuela","Liberia"],"Croatia":["Split","Rijeka","Dubrovnik"],"Cuba":["Santiago de Cuba","Camagüey","Holguín"],
+ "Cyprus":["Limassol","Larnaca","Paphos"],"Czechia":["Brno","Ostrava","Plzeň"],"Côte d'Ivoire":["Abidjan","Bouaké","San-Pédro"],
+ "Dem. Rep. Congo":["Lubumbashi","Kisangani","Goma"],"Denmark":["Aarhus","Odense","Aalborg"],"Djibouti":["Ali Sabieh","Tadjourah","Obock"],
+ "Dominican Rep.":["Santiago de los Caballeros","Puerto Plata","La Romana"],"Ecuador":["Guayaquil","Cuenca","Manta"],"Egypt":["Alexandria","Giza","Luxor"],
+ "El Salvador":["Santa Ana","San Miguel","Soyapango"],"Eq. Guinea":["Bata","Ebebiyín","Mongomo"],"Eritrea":["Keren","Massawa","Assab"],
+ "Estonia":["Tartu","Narva","Pärnu"],"Ethiopia":["Dire Dawa","Gondar","Bahir Dar"],"Fiji":["Nadi","Lautoka","Labasa"],
+ "Finland":["Espoo","Tampere","Turku"],"France":["Lyon","Marseille","Nice"],"Gabon":["Port-Gentil","Franceville","Oyem"],
+ "Gambia":["Serekunda","Brikama","Bakau"],"Georgia":["Batumi","Kutaisi","Rustavi"],"Germany":["Munich","Hamburg","Frankfurt"],
+ "Ghana":["Kumasi","Tamale","Takoradi"],"Greece":["Thessaloniki","Patras","Heraklion"],"Guatemala":["Quetzaltenango","Antigua Guatemala","Escuintla"],
+ "Guinea":["Nzérékoré","Kankan","Kindia"],"Guinea-Bissau":["Bafatá","Gabú","Cacheu"],"Guyana":["Linden","New Amsterdam","Bartica"],
+ "Haiti":["Cap-Haïtien","Gonaïves","Les Cayes"],"Honduras":["San Pedro Sula","La Ceiba","Choluteca"],"Hungary":["Debrecen","Szeged","Pécs"],
+ "Iceland":["Akureyri","Kópavogur","Hafnarfjörður"],"India":["Mumbai","Kolkata","Bengaluru"],"Indonesia":["Surabaya","Bandung","Medan"],
+ "Iran":["Mashhad","Isfahan","Shiraz"],"Iraq":["Basra","Mosul","Erbil"],"Ireland":["Cork","Galway","Limerick"],
+ "Italy":["Milan","Naples","Florence"],"Jamaica":["Montego Bay","Spanish Town","Ocho Rios"],"Japan":["Osaka","Kyoto","Yokohama"],
+ "Jordan":["Zarqa","Irbid","Aqaba"],"Kazakhstan":["Almaty","Shymkent","Karaganda"],"Kenya":["Mombasa","Kisumu","Nakuru"],
+ "Kuwait":["Al Ahmadi","Hawalli","Al Jahra"],"Kyrgyzstan":["Osh","Karakol","Jalal-Abad"],"Laos":["Luang Prabang","Pakse","Savannakhet"],
+ "Latvia":["Daugavpils","Liepāja","Jelgava"],"Lebanon":["Sidon","Tyre","Byblos"],"Lesotho":["Teyateyaneng","Mafeteng","Leribe"],
+ "Liberia":["Gbarnga","Buchanan","Harper"],"Libya":["Benghazi","Misrata","Sabha"],"Lithuania":["Kaunas","Klaipėda","Šiauliai"],
+ "Luxembourg":["Esch-sur-Alzette","Differdange","Dudelange"],"Macedonia":["Bitola","Ohrid","Kumanovo"],"Madagascar":["Toamasina","Antsirabe","Mahajanga"],
+ "Malawi":["Blantyre","Mzuzu","Zomba"],"Malaysia":["George Town","Johor Bahru","Kota Kinabalu"],"Mali":["Timbuktu","Sikasso","Mopti"],
+ "Mauritania":["Nouadhibou","Kiffa","Rosso"],"Mexico":["Guadalajara","Monterrey","Cancún"],"Moldova":["Bălți","Cahul","Ungheni"],
+ "Mongolia":["Erdenet","Darkhan","Choibalsan"],"Montenegro":["Nikšić","Budva","Bar"],"Morocco":["Casablanca","Marrakesh","Fes"],
+ "Mozambique":["Beira","Nampula","Quelimane"],"Myanmar":["Yangon","Mandalay","Bago"],"Namibia":["Walvis Bay","Swakopmund","Rundu"],
+ "Nepal":["Pokhara","Biratnagar","Lalitpur"],"Netherlands":["Rotterdam","The Hague","Utrecht"],"New Zealand":["Auckland","Christchurch","Queenstown"],
+ "Nicaragua":["León","Granada","Masaya"],"Niger":["Zinder","Maradi","Agadez"],"Nigeria":["Lagos","Kano","Ibadan"],
+ "North Korea":["Hamhung","Chongjin","Kaesong"],"Norway":["Bergen","Trondheim","Stavanger"],"Oman":["Salalah","Sohar","Nizwa"],
+ "Pakistan":["Karachi","Lahore","Peshawar"],"Panama":["Colón","David","Santiago de Veraguas"],"Papua New Guinea":["Lae","Mount Hagen","Madang"],
+ "Paraguay":["Ciudad del Este","Encarnación","Concepción"],"Peru":["Arequipa","Cusco","Trujillo"],"Philippines":["Cebu City","Davao City","Quezon City"],
+ "Poland":["Kraków","Gdańsk","Wrocław"],"Portugal":["Porto","Coimbra","Faro"],"Qatar":["Al Rayyan","Al Wakrah","Al Khor"],
+ "Romania":["Cluj-Napoca","Timișoara","Iași"],"Russia":["Saint Petersburg","Novosibirsk","Kazan"],"Rwanda":["Huye","Rubavu","Musanze"],
+ "S. Sudan":["Wau","Malakal","Yei"],"Saudi Arabia":["Jeddah","Mecca","Dammam"],"Senegal":["Saint-Louis","Touba","Thiès"],
+ "Serbia":["Novi Sad","Niš","Kragujevac"],"Sierra Leone":["Bo","Kenema","Makeni"],"Slovakia":["Košice","Žilina","Nitra"],
+ "Slovenia":["Maribor","Celje","Koper"],"Solomon Is.":["Gizo","Auki","Noro"],"Somalia":["Kismayo","Baidoa","Bosaso"],
+ "South Africa":["Johannesburg","Durban","Polokwane"],"South Korea":["Busan","Incheon","Daegu"],"Spain":["Barcelona","Seville","Valencia"],
+ "Sri Lanka":["Kandy","Galle","Jaffna"],"Sudan":["Kassala","Nyala","El Obeid"],"Suriname":["Nieuw Nickerie","Lelydorp","Moengo"],
+ "Sweden":["Gothenburg","Malmö","Uppsala"],"Switzerland":["Zurich","Geneva","Basel"],"Syria":["Aleppo","Homs","Latakia"],
+ "Tajikistan":["Khujand","Kulob","Bokhtar"],"Tanzania":["Dar es Salaam","Arusha","Mwanza"],"Thailand":["Chiang Mai","Phuket","Pattaya"],
+ "Timor-Leste":["Baucau","Maliana","Suai"],"Togo":["Sokodé","Kara","Kpalimé"],"Trinidad and Tobago":["San Fernando","Chaguanas","Arima"],
+ "Tunisia":["Sfax","Sousse","Kairouan"],"Turkey":["Istanbul","Izmir","Antalya"],"Turkmenistan":["Türkmenabat","Daşoguz","Mary"],
+ "Uganda":["Entebbe","Gulu","Jinja"],"Ukraine":["Kharkiv","Odesa","Lviv"],"United Arab Emirates":["Dubai","Sharjah","Al Ain"],
+ "United Kingdom":["Manchester","Birmingham","Liverpool"],"United States of America":["New York City","Los Angeles","Chicago"],
+ "Uruguay":["Salto","Punta del Este","Paysandú"],"Uzbekistan":["Samarkand","Bukhara","Namangan"],"Vanuatu":["Luganville","Isangel","Lakatoro"],
+ "Venezuela":["Maracaibo","Valencia","Barquisimeto"],"Vietnam":["Ho Chi Minh City","Da Nang","Haiphong"],"Yemen":["Taiz","Hodeidah","Mukalla"],
+ "Zambia":["Kitwe","Ndola","Livingstone"],"Zimbabwe":["Bulawayo","Mutare","Gweru"],"eSwatini":["Manzini","Nhlangano","Siteki"]
+};
+
+const FLAGS = __FLAGS__; // country name on the map → flag image (SVG, 4:3)
+const flagImg = (name, cls) => FLAGS[name] ? `<img class="${cls}" src="${FLAGS[name]}" alt="">` : "";
+
+const LIVES = 3;       // misses allowed before the game ends
+const PRO_MISS_KM = 1000; // Cities · Pro: a pin further than this costs a life
+/* Cities · Easy: the map zooms to the country, and the safe distance scales with the country's size */
+const easyMissKm = sizeKm => Math.round(Math.min(400, Math.max(75, sizeKm * 0.25)) / 5) * 5;
+const TOPO_NAME = {"United States":"United States of America","Türkiye":"Turkey","DR Congo":"Dem. Rep. Congo"};
+const isPhone = () => window.innerWidth < 600;
+const $ = id => document.getElementById(id);
+
+/* ---------- map ---------- */
+const svg = d3.select("#map");
+const gZoom = svg.append("g");
+const gBase = gZoom.append("g");
+const gMarks = gZoom.append("g");
+/* After a Flags answer, the right country is painted with its flag, fitted to its main landmass */
+const flagPattern = svg.append("defs").append("pattern").attr("id", "flagfill").attr("patternUnits", "userSpaceOnUse");
+const flagPatternImg = flagPattern.append("image").attr("preserveAspectRatio", "none");
+/* Morocco is drawn as one shape: its geometry is merged with the W. Sahara polygon so no inner border shows. */
+const MERGE_INTO = {"Morocco": ["Morocco", "W. Sahara"]};
+const mergedAway = new Set(Object.values(MERGE_INTO).flat());
+const countries = topojson.feature(TOPO, TOPO.objects.countries).features
+  .filter(f => f.properties.name !== "Antarctica" && !mergedAway.has(f.properties.name))
+  .concat(Object.entries(MERGE_INTO).map(([name, parts]) => ({
+    type: "Feature", id: name, properties: {name},
+    geometry: topojson.merge(TOPO, TOPO.objects.countries.geometries.filter(g => parts.includes(g.properties.name)))
+  })));
+const projection = d3.geoNaturalEarth1();
+const path = d3.geoPath(projection);
+let k = 1;
+
+const zoom = d3.zoom().scaleExtent([1, 40]).clickDistance(6)
+  .on("zoom", e => { k = e.transform.k; gZoom.attr("transform", e.transform); sizeMarks(); });
+svg.call(zoom).on("dblclick.zoom", null);
+
+function layout(){
+  const r = $("mapwrap").getBoundingClientRect();
+  const topH = $("top").getBoundingClientRect().bottom - r.top;
+  const topPad = topH + 12, botPad = Math.max(isPhone() ? 110 : 100, trayH());
+  svg.attr("viewBox", `0 0 ${r.width} ${r.height}`);
+  projection.fitExtent([[10, topPad], [r.width - 10, r.height - botPad]], {type:"Sphere"});
+  zoom.translateExtent([[-r.width*0.25, -r.height*0.25],[r.width*1.25, r.height*1.25]]);
+  gBase.selectAll("*").remove();
+  gBase.append("path").attr("class","graticule").attr("d", path(d3.geoGraticule10()));
+  gBase.selectAll(".country").data(countries).join("path")
+    .attr("class","country").attr("d", path)
+    .on("click", (e, d) => { if (tapsCountry()) { e.stopPropagation(); if (mode === "explore") exploreCountry(d); else guessCountry(d); } });
+  paintCountries();
+  redrawMarks();
+  // the projection changed, so the old zoom no longer points at the same place
+  if (mode === "explore" && current) focusBounds(safeBounds(mainShape(current)), 20, 0.6, 0);
+  else if (current && area && (!revealed || mode === "capitals")) focusBounds(safeBounds(area.shape), 30, 0.8, 0);
+  else svg.call(zoom.transform, d3.zoomIdentity);
+}
+/* Bounds on the flat map. A few countries cross the 180° line (Russia's Chukotka, Fiji, the Aleutians), and the
+   piece past it is drawn at the opposite edge, which would make the shape look as wide as the world.
+   When that happens, measure only the points on the same side of the 180° line as the shape's centre. */
+function safeBounds(obj){
+  const b = path.bounds(obj), sphere = path.bounds({type:"Sphere"});
+  if (b[1][0] - b[0][0] < 0.5 * (sphere[1][0] - sphere[0][0])) return b;
+  const pts = [];
+  const walk = c => typeof c[0] === "number" ? pts.push(c) : c.forEach(walk);
+  const geoms = obj.type === "FeatureCollection" ? obj.features.map(f => f.geometry || f) : [obj.geometry || obj];
+  geoms.forEach(g => g && g.coordinates && walk(g.coordinates));
+  const east = d3.geoCentroid(obj)[0] >= 0;
+  const xy = pts.filter(p => east ? p[0] > -90 : p[0] < 90).map(p => projection(p)).filter(Boolean);
+  if (!xy.length) return b;
+  return [[d3.min(xy, q => q[0]), d3.min(xy, q => q[1])], [d3.max(xy, q => q[0]), d3.max(xy, q => q[1])]];
+}
+function setFlagPattern(f){
+  const g = f.geometry;
+  const main = g.type === "MultiPolygon"
+    ? g.coordinates.map(c => ({type:"Polygon", coordinates:c})).reduce((a, b) => d3.geoArea(a) > d3.geoArea(b) ? a : b)
+    : g;
+  const [[x0, y0], [x1, y1]] = safeBounds(main);
+  const w = Math.max(x1 - x0, 1), h = Math.max(y1 - y0, 1);
+  flagPattern.attr("x", x0).attr("y", y0).attr("width", w).attr("height", h);
+  if (flagPatternImg.attr("href") !== FLAGS[f.properties.name]) flagPatternImg.attr("href", FLAGS[f.properties.name]);
+  // Cover the whole shape. The flag may stretch up to 2x to match the shape, so every stripe stays visible
+  // (Russia is very wide, Chile very tall); only beyond that is it cropped, centred.
+  const flagAR = 4 / 3, minAR = flagAR / 2, maxAR = flagAR * 2, ar = w / h;
+  let iw = w, ih = h;
+  if (ar > maxAR) ih = w / maxAR;
+  else if (ar < minAR) iw = h * minAR;
+  flagPatternImg.attr("x", (w - iw) / 2).attr("y", (h - ih) / 2).attr("width", iw).attr("height", ih);
+}
+function paintCountries(){
+  const showFlag = (mode === "flags" || mode === "countries" || mode === "explore") && revealed && current && !!FLAGS[current.properties?.name];
+  if (showFlag) setFlagPattern(current);
+  gBase.selectAll(".country")
+    .classed("flagged", f => showFlag && f === current)
+    .style("fill", f => showFlag && f === current ? "url(#flagfill)" : null)
+    .classed("focus", f => !!area && f === area.country)
+    .classed("picked", f => f === pickedF)
+    .classed("correct", f => (mode === "countries" || mode === "flags" || mode === "explore") && revealed && f === current);
+}
+d3.select("#zin").on("click", () => svg.transition().duration(250).call(zoom.scaleBy, 1.8));
+d3.select("#zout").on("click", () => svg.transition().duration(250).call(zoom.scaleBy, 1/1.8));
+d3.select("#zreset").on("click", () => {
+  if (area && (!revealed || mode === "capitals")) focusBounds(safeBounds(area.shape), 30, 0.8);
+  else svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+});
+
+svg.on("click", e => {
+  if (mode !== "cities" || revealed) return;
+  const [x, y] = d3.zoomTransform(svg.node()).invert(d3.pointer(e, svg.node()));
+  const ll = projection.invert([x, y]);
+  if (!ll || isNaN(ll[0])) return;
+  guess = ll; redrawMarks(); renderCard();
+});
+
+/* ---------- marks ---------- */
+function pinPath(color){
+  return `<path d="M0 0 C-2 -5 -7 -9 -7 -14 a7 7 0 0 1 14 0 C7 -9 2 -5 0 0z" fill="${color}" stroke="var(--panel)" stroke-width="1.5"/><circle cy="-14" r="2.6" fill="var(--panel)"/>`;
+}
+function redrawMarks(){
+  gMarks.selectAll("*").remove();
+  if (revealed && answerLL && mode === "cities"){
+    gMarks.append("path").attr("class","safezone")
+      .attr("d", path(d3.geoCircle().center(answerLL).radius(missKm / 6371 * 180 / Math.PI)()));
+  }
+  if (revealed && guess && answerLL){
+    gMarks.append("path").attr("class","guessline")
+      .attr("d", path({type:"LineString", coordinates:[guess, answerLL]}));
+  }
+  if (revealed && answerLL){
+    const [x,y] = projection(answerLL);
+    gMarks.append("g").attr("class","mark pinmark").attr("data-x",x).attr("data-y",y).html(pinPath("var(--target)"));
+  }
+  if (guess && mode === "cities"){
+    const [x,y] = projection(guess);
+    gMarks.append("g").attr("class","mark pinmark").attr("data-x",x).attr("data-y",y).html(pinPath("var(--pin)"));
+  }
+  sizeMarks();
+}
+function sizeMarks(){
+  gMarks.selectAll(".mark").attr("transform", function(){
+    return `translate(${this.dataset.x},${this.dataset.y}) scale(${1.25/k})`;
+  });
+}
+
+document.addEventListener("touchstart", () => {}, { passive: true }); // lets iPhone show the pressed state
+/* the loading splash is up until the player taps Play; things that must be seen wait for it (see afterSplash) */
+let splashOpen = true; const afterSplashQueue = [];
+function afterSplash(fn){ splashOpen ? afterSplashQueue.push(fn) : fn(); }
+
+/* ---------- fresh visit ----------
+   Opening the page with #fresh at the end of its link forgets everything this device remembers
+   (name, language, theme, device bests) and shows the welcome screen, as for a first-time visitor.
+   Leaderboard scores already saved are kept. */
+const FRESH = location.hash === "#fresh";
+if (FRESH) { try { Object.keys(localStorage).filter(k => k.startsWith("globedrop-")).forEach(k => localStorage.removeItem(k)); } catch(e){} }
+
+/* ---------- languages ---------- */
+const PLACES_I18N = __PLACES_I18N__;     // English place name → [French, Arabic]; empty French = same as English
+const COUNTRIES_I18N = __COUNTRIES_I18N__; // country name on the map → [French, Arabic]
+const LANGS = { en: "English", fr: "Français", ar: "العربية" };
+let LANG = "en";
+try { LANG = localStorage.getItem("globedrop-lang") || ""; } catch(e){}
+if (!LANGS[LANG]) { const nl = (navigator.language || "en").slice(0, 2).toLowerCase(); LANG = LANGS[nl] ? nl : "en"; }
+
+const T = {
+  en: {
+    m_capitals:"Capitals", m_countries:"Countries", m_flags:"Flags", m_cities:"Cities", m_explore:"Explore", lbl_explore:"Explore the map", tapAny:"Tap any country", exploreHint:"Tap a country to see its flag, capital and big cities. Pinch or use + to zoom.", capital:"Capital", bigCities:"Big cities", worldView:"World view", tour1h:"Pick a game", tour1p:"Flags, Countries, Capitals or Cities. Switch any time.", tour2h:"Warm up first", tour2p:"Tap the compass to explore the map: every country's flag and capital, no score.", tour3h:"3 lives, +1 per right answer", tour3p:"Try Pro when Easy feels easy. Tap ? for the rules any time.", tourNext:"Next", tourGo:"Let's play", tourSkip:"Skip", tourAgain:"Show the tour again", a2hsTitle:"Play from your home screen", a2hsWhy:"One tap to play, full screen, like an app.", a2hsIOS:"Tap <b>Share</b> <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3v12M7.5 7.5 12 3l4.5 4.5M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg> then <b>Add to Home Screen</b>.", a2hsIOSNote:"Inside another app? Open this page in Safari first.", a2hsAndroid:"Tap the browser menu <b>⋮</b> then <b>Add to Home screen</b> or <b>Install app</b>.", a2hsAndroidNote:"Inside another app? Open this page in Chrome first.", a2hsHelp:"Add to your home screen", install:"Install", notNow:"Not now", gotIt2:"Got it", streakUp:n => `${n} in a row!`, lifeBack:"+1 life back", medal:"Medal earned!", easy:"Easy", pro:"Pro", score:"Score",
+    gameMode:"Game mode", level:"Level", language:"Language", howToPlay:"How to play", mapLabel:"World map. Tap where you think the place is.",
+    zoomIn:"Zoom in", zoomOut:"Zoom out", resetView:"Reset view", toDark:"Switch to dark mode", toLight:"Switch to light mode",
+    lbl_capital:"Capital of", lbl_flag:"Whose flag?", lbl_city:"Find the city", lbl_country:"Find the country",
+    livesLeft:n => `${n} ${n === 1 ? "life" : "lives"} left`,
+    tapPin:"Tap the map to drop your pin", tapMove:"Tap again to move your pin",
+    safeKm:km => `Within ${km} km is safe. Further loses a life.`, lockIn:"Lock it in",
+    tapCountryFlag:"Tap the country this flag belongs to", tapCountry:"Tap the country on the map", wrongCountry:"A wrong country loses a life.",
+    rightOnIt:"Right on it", pinFrom:(km, p) => `Your pin was ${km} km from ${p}`,
+    rightCountry:"Right country", tappedFrom:(x, km, p) => `You tapped ${x}, ${km} km from ${p}`,
+    stop:"Stop", next:"Next", seeResults:"See results", right:"✓ Right", miss:"✕ Miss", minusLife:"−1 life", outOfLives:"Out of lives",
+    hintFlags:"Pick the country. Neighbours can look alike.", hintCapPro:"All 4 are cities in this country. Only one is the capital.", hintCap:"Pick the capital. A wrong answer loses a life.",
+    flagHit:c => `That's the flag of ${c}.`, flagMiss:(c, p) => `That's the flag of ${c}, not ${p}.`,
+    capHit:(cap, c) => `${cap} is the capital of ${c}.`, capMiss:(cap, c, p) => `The capital of ${c} is ${cap}${p ? `, not ${p}` : ""}.`,
+    youStopped:"You stopped", rightAnswers:n => n === 1 ? "right answer" : "right answers", playedMissed:(p, m) => `${p} played · ${m} missed`,
+    verdicts:["The world is big. Go again.", "Getting there.", "Well travelled.", "Seriously sharp.", "Human atlas."],
+    you:n => `you: ${n}`, spotOn:"spot on", kmOff:km => `${km} km off`,
+    bestNew:n => `New personal best on this device: ${n}`, bestDevice:n => `Your best on this device: ${n}`,
+    playAgain:"Play again", playingAs:n => `Playing as <b>${n}</b>`, changeName:"Change name", addName:"Add a player name",
+    appName:"Globe by Abisto", spTag:"Learn the world: flags, countries, capitals and cities.", spGo:"Play", spExplore:"Explore the map first", studyHint:"Want to study first?", studyBtn:"Explore the map", studyBtn2:"Study on the map first", yourAnswers:n => `Your answers (${n})`, spHi:n => `Welcome back, ${n}!`, spNameHint:"Optional. Shown on the leaderboard.", spNotYou:"Not you? Change name", welcomeTitle:"Welcome to Globe by Abisto", welcomeText:"Pick a player name. Your best score in each mode goes on the leaderboard, so you can see where you stand.",
+    renameTitle:"Change your name", renameText:"This is the name other players see on the leaderboard.",
+    playerName:"Player name", placeholder:"e.g. MapMaster", startPlaying:"Start playing", saveName:"Save name", playNoName:"Play without a name", cancel:"Cancel",
+    nameErr:"Use 2 to 16 letters or numbers.", player:"Player",
+    leaderboard:"Leaderboard", loading:"Loading…", lbSignin:"The leaderboard works when you're signed in to Claude.",
+    lbDown:"The leaderboard can't be reached right now. Your score is kept on this device.", lbDown2:"The leaderboard can't be reached right now.",
+    youTag:" (you)", joinName:"Add a name to join the leaderboard.", joinOne:"Get at least 1 right to join the leaderboard.", noScores:"No scores yet. Be the first.",
+    rank:(nb, r, n) => `${nb ? "New best! " : ""}You're <b>#${r}</b> of ${n} ${n === 1 ? "player" : "players"}.`,
+    gotIt:"Got it",
+    help:`<p>Your score is the number of <b>right answers</b>. Each right answer is <b>+1</b>. Each miss costs one of your <b>3 lives</b>. The game ends when you run out of lives or press <b>Stop</b>.</p>
+    <p><b>Explore (compass):</b> no score, no lives. Tap any country to see its flag, capital and big cities. Good homework before you play.</p>
+    <p><b>Flags · Easy:</b> pick the country from 4 names. The wrong ones are neighbours, so similar flags show up.</p>
+    <p><b>Flags · Pro:</b> no names. Tap the country on the map.</p>
+    <p><b>Countries:</b> tap the named country on the map. Only the exact country counts.</p>
+    <p><b>Capitals · Easy:</b> a country lights up. Pick its capital from 4 capitals of nearby countries.</p>
+    <p><b>Capitals · Pro:</b> all 4 answers are cities in that same country, like Sydney or Canberra for Australia. Only one is the capital.</p>
+    <p><b>Cities · Easy:</b> the map zooms to the right country. Drop your pin close enough to the city. The safe distance depends on the country's size (75 to 400 km) and is shown each round.</p>
+    <p><b>Cities · Pro:</b> the whole world map. Your pin must land within <b>1,000 km</b> of the city.</p>
+    <p><b>Bonuses:</b> 10 right in a row wins back a lost life (again at 20, 30…). Finish with 3 or more right answers to earn a 🏅.</p>`
+  },
+  fr: {
+    m_capitals:"Capitales", m_countries:"Pays", m_flags:"Drapeaux", m_cities:"Villes", m_explore:"Explorer", lbl_explore:"Explore la carte", tapAny:"Touche un pays", exploreHint:"Touche un pays pour voir son drapeau, sa capitale et ses grandes villes. Pince ou utilise + pour zoomer.", capital:"Capitale", bigCities:"Grandes villes", worldView:"Vue du monde", tour1h:"Choisis un jeu", tour1p:"Drapeaux, Pays, Capitales ou Villes. Change quand tu veux.", tour2h:"Échauffe-toi d'abord", tour2p:"Touche la boussole pour explorer la carte : drapeau et capitale de chaque pays, sans score.", tour3h:"3 vies, +1 par bonne réponse", tour3p:"Passe en Pro quand Facile devient facile. Touche ? pour les règles.", tourNext:"Suivant", tourGo:"C'est parti", tourSkip:"Passer", tourAgain:"Revoir la visite", a2hsTitle:"Joue depuis ton écran d'accueil", a2hsWhy:"Un seul geste pour jouer, en plein écran, comme une appli.", a2hsIOS:"Touche <b>Partager</b> <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3v12M7.5 7.5 12 3l4.5 4.5M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg> puis <b>Sur l'écran d'accueil</b>.", a2hsIOSNote:"Dans une autre appli ? Ouvre d'abord cette page dans Safari.", a2hsAndroid:"Touche le menu du navigateur <b>⋮</b> puis <b>Ajouter à l'écran d'accueil</b> ou <b>Installer l'application</b>.", a2hsAndroidNote:"Dans une autre appli ? Ouvre d'abord cette page dans Chrome.", a2hsHelp:"Ajouter à l'écran d'accueil", install:"Installer", notNow:"Plus tard", gotIt2:"Compris", streakUp:n => `${n} d'affilée !`, lifeBack:"+1 vie récupérée", medal:"Médaille gagnée !", easy:"Facile", pro:"Pro", score:"Score",
+    gameMode:"Mode de jeu", level:"Niveau", language:"Langue", howToPlay:"Comment jouer", mapLabel:"Carte du monde. Touche l'endroit où tu penses que se trouve le lieu.",
+    zoomIn:"Zoomer", zoomOut:"Dézoomer", resetView:"Recentrer", toDark:"Passer en mode sombre", toLight:"Passer en mode clair",
+    lbl_capital:"Quelle capitale ?", lbl_flag:"À qui ce drapeau ?", lbl_city:"Trouve la ville", lbl_country:"Trouve le pays",
+    livesLeft:n => `${n} ${n > 1 ? "vies restantes" : "vie restante"}`,
+    tapPin:"Touche la carte pour placer ton repère", tapMove:"Touche à nouveau pour déplacer ton repère",
+    safeKm:km => `À moins de ${km} km, c'est bon. Plus loin, tu perds une vie.`, lockIn:"Valider",
+    tapCountryFlag:"Touche le pays de ce drapeau", tapCountry:"Touche le pays sur la carte", wrongCountry:"Un mauvais pays te coûte une vie.",
+    rightOnIt:"En plein dessus", pinFrom:(km, p) => `Ton repère était à ${km} km du bon endroit`,
+    rightCountry:"C'est le bon pays", tappedFrom:(x, km, p) => `Tu as touché : ${x}, à ${km} km de la bonne réponse`,
+    stop:"Arrêter", next:"Suivant", seeResults:"Voir les résultats", right:"✓ Juste", miss:"✕ Raté", minusLife:"−1 vie", outOfLives:"Plus de vies",
+    hintFlags:"Choisis le pays. Les voisins se ressemblent parfois.", hintCapPro:"Les 4 sont des villes de ce pays. Une seule est la capitale.", hintCap:"Choisis la capitale. Une erreur te coûte une vie.",
+    flagHit:c => `Bonne réponse : ${c}.`, flagMiss:(c, p) => `La réponse était ${c}, pas ${p}.`,
+    capHit:(cap, c) => `Oui ! ${cap} est bien la capitale.`, capMiss:(cap, c, p) => `La bonne réponse était ${cap}${p ? `, pas ${p}` : ""}.`,
+    youStopped:"Tu as arrêté", rightAnswers:n => n > 1 ? "bonnes réponses" : "bonne réponse", playedMissed:(p, m) => `${p} ${p > 1 ? "jouées" : "jouée"} · ${m} ${m > 1 ? "ratées" : "ratée"}`,
+    verdicts:["Le monde est grand. Rejoue !", "Ça vient.", "Grand voyageur.", "Vraiment fort.", "Un atlas humain."],
+    you:n => `toi : ${n}`, spotOn:"pile dessus", kmOff:km => `à ${km} km`,
+    bestNew:n => `Nouveau record sur cet appareil : ${n}`, bestDevice:n => `Ton record sur cet appareil : ${n}`,
+    playAgain:"Rejouer", playingAs:n => `Tu joues en tant que <b>${n}</b>`, changeName:"Changer de nom", addName:"Ajouter un nom de joueur",
+    appName:"Globe by Abisto", spTag:"Découvre le monde : drapeaux, pays, capitales et villes.", spGo:"Jouer", spExplore:"Explorer la carte d'abord", studyHint:"Envie de réviser d'abord ?", studyBtn:"Explorer la carte", studyBtn2:"Réviser sur la carte d'abord", yourAnswers:n => `Tes réponses (${n})`, spHi:n => `Bon retour, ${n} !`, spNameHint:"Facultatif. Affiché au classement.", spNotYou:"Ce n'est pas toi ? Changer de nom", welcomeTitle:"Bienvenue sur Globe by Abisto", welcomeText:"Choisis un nom de joueur. Ton meilleur score dans chaque mode apparaît au classement, pour voir où tu te situes.",
+    renameTitle:"Changer ton nom", renameText:"C'est le nom que les autres joueurs voient au classement.",
+    playerName:"Nom de joueur", placeholder:"ex. : AsDesCartes", startPlaying:"Commencer", saveName:"Enregistrer", playNoName:"Jouer sans nom", cancel:"Annuler",
+    nameErr:"Utilise 2 à 16 lettres ou chiffres.", player:"Joueur",
+    leaderboard:"Classement", loading:"Chargement…", lbSignin:"Le classement fonctionne quand tu es connecté à Claude.",
+    lbDown:"Le classement est inaccessible pour l'instant. Ton score est gardé sur cet appareil.", lbDown2:"Le classement est inaccessible pour l'instant.",
+    youTag:" (toi)", joinName:"Ajoute un nom pour entrer au classement.", joinOne:"Trouve au moins 1 bonne réponse pour entrer au classement.", noScores:"Aucun score pour l'instant. Sois le premier !",
+    rank:(nb, r, n) => `${nb ? "Nouveau record ! " : ""}Tu es <b>n° ${r}</b> sur ${n} ${n > 1 ? "joueurs" : "joueur"}.`,
+    gotIt:"Compris",
+    help:`<p>Ton score est le nombre de <b>bonnes réponses</b>. Chaque bonne réponse vaut <b>+1</b>. Chaque erreur te coûte une de tes <b>3 vies</b>. La partie s'arrête quand tu n'as plus de vies ou quand tu touches <b>Arrêter</b>.</p>
+    <p><b>Explorer (boussole) :</b> pas de score, pas de vies. Touche un pays pour voir son drapeau, sa capitale et ses grandes villes. Parfait pour réviser avant de jouer.</p>
+    <p><b>Drapeaux · Facile :</b> choisis le pays parmi 4 noms. Les mauvaises réponses sont des voisins, donc les drapeaux se ressemblent.</p>
+    <p><b>Drapeaux · Pro :</b> pas de noms. Touche le pays sur la carte.</p>
+    <p><b>Pays :</b> touche le pays demandé sur la carte. Seul le bon pays compte.</p>
+    <p><b>Capitales · Facile :</b> un pays s'allume. Choisis sa capitale parmi 4 capitales de pays voisins.</p>
+    <p><b>Capitales · Pro :</b> les 4 réponses sont des villes du même pays, comme Sydney ou Canberra pour l'Australie. Une seule est la capitale.</p>
+    <p><b>Villes · Facile :</b> la carte zoome sur le bon pays. Place ton repère assez près de la ville. La distance permise dépend de la taille du pays (75 à 400 km) et s'affiche à chaque tour.</p>
+    <p><b>Villes · Pro :</b> toute la carte du monde. Ton repère doit tomber à moins de <b>1 000 km</b> de la ville.</p>
+    <p><b>Bonus :</b> 10 bonnes réponses d'affilée te rendent une vie perdue (et encore à 20, 30…). Termine avec au moins 3 bonnes réponses pour gagner une 🏅.</p>`
+  },
+  ar: {
+    m_capitals:"العواصم", m_countries:"الدول", m_flags:"الأعلام", m_cities:"المدن", m_explore:"استكشاف", lbl_explore:"استكشف الخريطة", tapAny:"المس أي دولة", exploreHint:"المس أي دولة لترى علمها وعاصمتها وأكبر مدنها. استخدم إصبعين أو زر + للتكبير.", capital:"العاصمة", bigCities:"مدن كبرى", worldView:"عرض العالم", tour1h:"اختر لعبة", tour1p:"الأعلام أو الدول أو العواصم أو المدن. بدّل متى شئت.", tour2h:"تمرّن أولًا", tour2p:"المس البوصلة لاستكشاف الخريطة: علم كل دولة وعاصمتها، بدون نقاط.", tour3h:"3 أرواح، و+1 لكل إجابة صحيحة", tour3p:"جرّب مستوى محترف عندما يصبح السهل سهلًا. المس ? لقراءة القواعد في أي وقت.", tourNext:"التالي", tourGo:"لنبدأ", tourSkip:"تخطَّ", tourAgain:"إعادة الجولة", a2hsTitle:"العب من شاشتك الرئيسية", a2hsWhy:"لمسة واحدة للعب بملء الشاشة، كأنه تطبيق.", a2hsIOS:"المس <b>مشاركة</b> <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3v12M7.5 7.5 12 3l4.5 4.5M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg> ثم <b>إضافة إلى الشاشة الرئيسية</b>.", a2hsIOSNote:"داخل تطبيق آخر؟ افتح هذه الصفحة في سفاري أولًا.", a2hsAndroid:"المس قائمة المتصفح <b>⋮</b> ثم <b>إضافة إلى الشاشة الرئيسية</b> أو <b>تثبيت التطبيق</b>.", a2hsAndroidNote:"داخل تطبيق آخر؟ افتح هذه الصفحة في كروم أولًا.", a2hsHelp:"إضافة إلى الشاشة الرئيسية", install:"تثبيت", notNow:"ليس الآن", gotIt2:"فهمت", streakUp:n => `${n} إجابات صحيحة متتالية!`, lifeBack:"استعدت روحًا +1", medal:"حصلت على ميدالية!", easy:"سهل", pro:"محترف", score:"النقاط",
+    gameMode:"نمط اللعب", level:"المستوى", language:"اللغة", howToPlay:"طريقة اللعب", mapLabel:"خريطة العالم. المس المكان الذي تظن أنه الموقع.",
+    zoomIn:"تكبير", zoomOut:"تصغير", resetView:"إعادة الضبط", toDark:"التبديل إلى الوضع الداكن", toLight:"التبديل إلى الوضع الفاتح",
+    lbl_capital:"ما عاصمة", lbl_flag:"علم أي دولة؟", lbl_city:"ابحث عن المدينة", lbl_country:"ابحث عن الدولة",
+    livesLeft:n => `الأرواح المتبقية: ${n}`,
+    tapPin:"المس الخريطة لوضع الدبوس", tapMove:"المس مرة أخرى لتحريك الدبوس",
+    safeKm:km => `ضمن ${km} كم أنت في أمان. أبعد من ذلك تخسر روحًا.`, lockIn:"تأكيد",
+    tapCountryFlag:"المس الدولة صاحبة هذا العلم", tapCountry:"المس الدولة على الخريطة", wrongCountry:"الدولة الخاطئة تكلّفك روحًا.",
+    rightOnIt:"في المكان تمامًا", pinFrom:(km, p) => `كان الدبوس على بعد ${km} كم من ${p}`,
+    rightCountry:"الدولة الصحيحة", tappedFrom:(x, km, p) => `لمست ${x}، على بعد ${km} كم من ${p}`,
+    stop:"توقف", next:"التالي", seeResults:"عرض النتائج", right:"✓ صحيح", miss:"✕ خطأ", minusLife:"−1 روح", outOfLives:"نفدت الأرواح",
+    hintFlags:"اختر الدولة. قد تتشابه أعلام الجيران.", hintCapPro:"الخيارات الأربعة مدن في هذه الدولة، وواحدة فقط هي العاصمة.", hintCap:"اختر العاصمة. الإجابة الخاطئة تكلّفك روحًا.",
+    flagHit:c => `صحيح، هذا علم ${c}.`, flagMiss:(c, p) => `هذا علم ${c}، وليس ${p}.`,
+    capHit:(cap, c) => `${cap} هي عاصمة ${c}.`, capMiss:(cap, c, p) => `عاصمة ${c} هي ${cap}${p ? `، وليست ${p}` : ""}.`,
+    youStopped:"توقفت", rightAnswers:n => n === 1 ? "إجابة صحيحة" : "إجابات صحيحة", playedMissed:(p, m) => `لعبت ${p} · أخطأت في ${m}`,
+    verdicts:["العالم كبير. حاول مجددًا.", "أنت في الطريق الصحيح.", "مسافر خبير.", "ذكي حقًا.", "أطلس بشري!"],
+    you:n => `اخترت: ${n}`, spotOn:"تمامًا", kmOff:km => `بفارق ${km} كم`,
+    bestNew:n => `رقم قياسي جديد على هذا الجهاز: ${n}`, bestDevice:n => `أفضل نتيجة لك على هذا الجهاز: ${n}`,
+    playAgain:"العب مجددًا", playingAs:n => `تلعب باسم <b>${n}</b>`, changeName:"تغيير الاسم", addName:"أضف اسم لاعب",
+    appName:"العالم مع Abisto", spTag:"اكتشف العالم: الأعلام والدول والعواصم والمدن.", spGo:"العب", spExplore:"استكشف الخريطة أولًا", studyHint:"تريد المراجعة أولًا؟", studyBtn:"استكشف الخريطة", studyBtn2:"راجع على الخريطة أولًا", yourAnswers:n => `إجاباتك (${n})`, spHi:n => `أهلًا بعودتك يا ${n}!`, spNameHint:"اختياري. يظهر في لوحة الترتيب.", spNotYou:"لست أنت؟ غيّر الاسم", welcomeTitle:"مرحبًا بك في العالم مع Abisto", welcomeText:"اختر اسم لاعب. تظهر أفضل نتيجة لك في كل نمط في لوحة الترتيب، لترى مركزك بين اللاعبين.",
+    renameTitle:"غيّر اسمك", renameText:"هذا هو الاسم الذي يراه اللاعبون الآخرون في لوحة الترتيب.",
+    playerName:"اسم اللاعب", placeholder:"مثال: بطل الخرائط", startPlaying:"ابدأ اللعب", saveName:"حفظ الاسم", playNoName:"العب بدون اسم", cancel:"إلغاء",
+    nameErr:"استخدم من 2 إلى 16 حرفًا أو رقمًا.", player:"لاعب",
+    leaderboard:"لوحة الترتيب", loading:"جارٍ التحميل…", lbSignin:"تعمل لوحة الترتيب عند تسجيل الدخول إلى Claude.",
+    lbDown:"تعذّر الوصول إلى لوحة الترتيب الآن. نتيجتك محفوظة على هذا الجهاز.", lbDown2:"تعذّر الوصول إلى لوحة الترتيب الآن.",
+    youTag:" (أنت)", joinName:"أضف اسمًا لتنضم إلى لوحة الترتيب.", joinOne:"أجب إجابة صحيحة واحدة على الأقل لتدخل لوحة الترتيب.", noScores:"لا توجد نتائج بعد. كن الأول!",
+    rank:(nb, r, n) => `${nb ? "رقم قياسي جديد! " : ""}أنت في المركز <b>${r}</b> من ${n}.`,
+    gotIt:"فهمت",
+    help:`<p>نتيجتك هي عدد <b>الإجابات الصحيحة</b>. كل إجابة صحيحة تساوي <b>+1</b>، وكل خطأ يكلّفك روحًا من <b>أرواحك الثلاث</b>. تنتهي اللعبة عندما تنفد أرواحك أو عندما تضغط <b>توقف</b>.</p>
+    <p><b>الاستكشاف (البوصلة):</b> بدون نقاط ولا أرواح. المس أي دولة لترى علمها وعاصمتها وأكبر مدنها. مراجعة مفيدة قبل اللعب.</p>
+    <p><b>الأعلام · سهل:</b> اختر الدولة من بين 4 أسماء. الخيارات الخاطئة دول مجاورة، لذا قد تتشابه الأعلام.</p>
+    <p><b>الأعلام · محترف:</b> بدون أسماء. المس الدولة على الخريطة.</p>
+    <p><b>الدول:</b> المس الدولة المطلوبة على الخريطة. الدولة الصحيحة فقط تُحتسب.</p>
+    <p><b>العواصم · سهل:</b> تُضاء دولة على الخريطة. اختر عاصمتها من بين 4 عواصم لدول مجاورة.</p>
+    <p><b>العواصم · محترف:</b> الخيارات الأربعة كلها مدن في الدولة نفسها، مثل سيدني أو كانبيرا لأستراليا. واحدة فقط هي العاصمة.</p>
+    <p><b>المدن · سهل:</b> تقترب الخريطة من الدولة الصحيحة. ضع الدبوس قريبًا بما يكفي من المدينة. المسافة المسموحة تعتمد على حجم الدولة (من 75 إلى 400 كم) وتظهر في كل جولة.</p>
+    <p><b>المدن · محترف:</b> خريطة العالم كلها. يجب أن يقع الدبوس ضمن <b>1000 كم</b> من المدينة.</p>
+    <p><b>مكافآت:</b> 10 إجابات صحيحة متتالية تعيد لك روحًا مفقودة (ومرة أخرى عند 20 و30…). أنهِ اللعبة بـ3 إجابات صحيحة أو أكثر لتربح 🏅.</p>`
+  }
+};
+const t = (k, ...a) => { const v = (T[LANG] && T[LANG][k] !== undefined) ? T[LANG][k] : T.en[k]; return typeof v === "function" ? v(...a) : v; };
+const fmt = n => new Intl.NumberFormat(LANG === "fr" ? "fr-FR" : "en-US").format(n);
+const placeName = n => LANG === "en" ? n : ((PLACES_I18N[n] || [])[LANG === "fr" ? 0 : 1] || n);
+
+/* ---------- game state ---------- */
+let mode = "flags", choices = [], chosen = null, level = "easy", levelOf = {capitals:"easy", flags:"easy", cities:"easy"}, missKm = PRO_MISS_KM, area = null, pickedF = null, queue = [], round = 0, results = [], lives = LIVES, lostAt = -1, guess = null, revealed = false, answerLL = null, current = null;
+
+const COUNTRY_POOL = countries.filter(f => {
+  const a = d3.geoArea(f); return a > 0.0009 && f.properties.name && !/^(W\. Sahara|N\. Cyprus|Somaliland|Fr\. S\. Antarctic Lands|Falkland Is\.)$/.test(f.properties.name);
+});
+const prettyName = n => ({"United States of America":"United States","Dem. Rep. Congo":"DR Congo","Central African Rep.":"Central African Republic","Bosnia and Herz.":"Bosnia and Herzegovina","Dominican Rep.":"Dominican Republic","S. Sudan":"South Sudan","Eq. Guinea":"Equatorial Guinea","Solomon Is.":"Solomon Islands","eSwatini":"Eswatini","Falkland Is.":"Falkland Islands","Fr. S. Antarctic Lands":"French Southern Lands"})[n] || n;
+/* a country's name in the current language, from its name on the map (or a city's English country name) */
+const countryName = n => { const k = TOPO_NAME[n] || n; return LANG === "en" ? prettyName(k) : ((COUNTRIES_I18N[k] || [])[LANG === "fr" ? 0 : 1] || prettyName(k)); };
+
+function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const kmBetween = (a,b) => d3.geoDistance(a,b) * 6371;
+const pointsFor = km => Math.round(1000 * Math.exp(-km / 1800)) ;
+
+function newGame(){
+  queue = shuffle(pool());
+  round = 0; results = []; lives = LIVES; lostAt = -1; streak = 0; gainAt = -1;
+  $("results").hidden = true;
+  startRound();
+}
+const CAPITALS_POOL = CAPITALS.filter(c => countries.some(f => f.properties.name === c[1]));
+const CAPITALS_PRO_POOL = CAPITALS_POOL.filter(c => OTHER_CITIES[c[1]]?.length === 3);
+/* Easy can use every flag, even tiny countries. Pro needs a country big enough to tap. */
+const FLAG_POOL = countries.filter(f => FLAGS[f.properties.name] && !/^(Falkland Is\.|Fr\. S\. Antarctic Lands)$/.test(f.properties.name));
+const FLAG_PRO_POOL = COUNTRY_POOL.filter(f => FLAGS[f.properties.name]);
+const pool = () => mode === "cities" ? CITIES : mode === "capitals" ? (level === "pro" ? CAPITALS_PRO_POOL : CAPITALS_POOL) : mode === "flags" ? (level === "pro" ? FLAG_PRO_POOL : FLAG_POOL) : COUNTRY_POOL;
+/* Flags · Easy: the 3 wrong answers are neighbours, which often have look-alike flags. Choices are map names; shown translated. */
+function flagChoices(f){
+  const c = d3.geoCentroid(f);
+  const near = FLAG_POOL.filter(x => x !== f).sort((a, b) => d3.geoDistance(d3.geoCentroid(a), c) - d3.geoDistance(d3.geoCentroid(b), c)).slice(0, 3);
+  return shuffle([f, ...near]).map(x => x.properties.name);
+}
+const isChoiceRound = () => mode === "capitals" || (mode === "flags" && level === "easy");
+const tapsCountry = () => mode === "explore" || mode === "countries" || (mode === "flags" && level === "pro");
+const rightAnswer = () => mode === "capitals" ? current[0] : current.properties.name;
+const choiceLabel = k => mode === "capitals" ? placeName(k) : countryName(k);
+/* the 3 wrong answers are the capitals closest to the right one, so you can't guess by region */
+function capitalChoices(c){
+  if (level === "pro") return shuffle([c[0], ...OTHER_CITIES[c[1]]]);
+  const ll = [c[3], c[2]];
+  const near = CAPITALS_POOL.filter(x => x !== c).sort((a, b) => kmBetween([a[3],a[2]], ll) - kmBetween([b[3],b[2]], ll)).slice(0, 3);
+  return shuffle([c, ...near]).map(x => x[0]);
+}
+
+/* The part of the city's country that contains it (e.g. mainland USA, not Alaska), or a small area around the city. */
+function cityArea(city){
+  const ll = [city[3], city[2]];
+  const name = TOPO_NAME[city[1]] || city[1];
+  const f = countries.find(c => c.properties.name === name);
+  if (f){
+    const g = f.geometry;
+    const parts = g.type === "MultiPolygon" ? g.coordinates.map(c => ({type:"Feature", properties:f.properties, geometry:{type:"Polygon", coordinates:c}})) : [f];
+    const part = parts.find(pt => d3.geoContains(pt, ll)) ||
+      parts.reduce((a, b) => d3.geoDistance(d3.geoCentroid(a), ll) < d3.geoDistance(d3.geoCentroid(b), ll) ? a : b);
+    const main = parts.reduce((a, b) => d3.geoArea(a) > d3.geoArea(b) ? a : b);
+    if (part !== main && d3.geoArea(part) < 0.15 * d3.geoArea(main) && d3.geoDistance(ll, d3.geoCentroid(main)) * 6371 < 1500){
+      return {country: f, shape: {type:"FeatureCollection", features:[part, main]}, missKm: easyMissKm(Math.sqrt(d3.geoArea(main)) * 6371)};
+    }
+    const sizeKm = Math.sqrt(d3.geoArea(part)) * 6371;
+    return {country: f, shape: part, missKm: easyMissKm(sizeKm)};
+  }
+  return {country: null, shape: d3.geoCircle().center(ll).radius(2.5)(), missKm: 75};
+}
+function startRound(){
+  if (round >= queue.length){ // seen them all: reshuffle and keep going, never repeating the last place
+    let more = shuffle(pool()); if (more[0] === queue[queue.length-1]) more.push(more.shift());
+    queue = queue.concat(more);
+  }
+  current = queue[round]; guess = null; revealed = false; answerLL = null;
+  const easy = mode === "cities" && level === "easy";
+  const lit = easy || mode === "capitals";
+  area = lit ? cityArea(current) : null; pickedF = null; chosen = null;
+  missKm = easy ? area.missKm : PRO_MISS_KM;
+  if (mode === "capitals") choices = capitalChoices(current);
+  if (mode === "flags" && level === "easy") choices = flagChoices(current);
+  paintCountries();
+  $("app").classList.toggle("countries-mode", tapsCountry());
+  $("app").classList.toggle("easy", lit);
+  $("levels").classList.toggle("off", mode === "countries");
+  renderPrompt(); renderTop(); redrawMarks(); renderCard();
+  // frame after the card is drawn, so the country sits in the space that is actually free
+  if (lit) focusBounds(safeBounds(area.shape), 30, 0.8);
+  else svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
+}
+function fitPlace(){ const el = $("p-place"); el.classList.toggle("long", !el.querySelector("img") && el.textContent.length > 15); }
+function renderPrompt(){
+  if (mode === "explore"){
+    $("p-label").textContent = t("lbl_explore");
+    $("p-place").textContent = current ? countryName(current.properties.name) : t("tapAny");
+    $("p-hint").textContent = "";
+    fitPlace();
+    return;
+  }
+  if (!current) return;
+  if (mode === "capitals"){
+    $("p-label").textContent = t("lbl_capital");
+    $("p-place").textContent = countryName(current[1]);
+    $("p-hint").textContent = "";
+  } else if (mode === "flags"){
+    $("p-label").textContent = t("lbl_flag");
+    $("p-place").innerHTML = flagImg(current.properties.name, "flagimg");
+    $("p-hint").textContent = "";
+  } else if (mode === "cities"){
+    $("p-label").textContent = t("lbl_city");
+    $("p-place").textContent = placeName(current[0]);
+    $("p-hint").textContent = countryName(current[1]);
+  } else {
+    $("p-label").textContent = t("lbl_country");
+    $("p-place").textContent = countryName(current.properties.name);
+    $("p-hint").textContent = "";
+  }
+  fitPlace();
+}
+/* Lives and streaks: a miss costs a life and resets the streak; every 10 right in a row gives back a lost life. */
+const STREAK_FOR_LIFE = 10;
+let streak = 0, gainAt = -1, toastTimer = 0;
+function afterAnswer(miss){
+  if (miss){ lives--; lostAt = lives; streak = 0; return; }
+  streak++;
+  if (streak % STREAK_FOR_LIFE === 0 && lives < LIVES){
+    gainAt = lives; lives++;
+    showToast(t("streakUp", streak), t("lifeBack"));
+  }
+}
+function showToast(title, sub){
+  const el = $("toast");
+  el.style.setProperty("--toastTop", ($("top").getBoundingClientRect().bottom - $("mapwrap").getBoundingClientRect().top + 12) + "px");
+  el.innerHTML = `<span class="th"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg></span><span>${esc(title)}<small>${esc(sub)}</small></span>`;
+  el.classList.remove("show"); void el.offsetWidth; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+function renderTop(){
+  $("score").textContent = results.filter(r => !r.miss).length;
+  const heart = (cls) => `<svg viewBox="0 0 24 24" class="${cls}" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>`;
+  $("lives").innerHTML = Array.from({length:LIVES},(_,i)=> heart(i === gainAt ? "on gain" : i < lives ? "on" : i === lostAt ? "off lost" : "off")).join("");
+  $("lives").setAttribute("aria-label", t("livesLeft", lives));
+  lostAt = -1; gainAt = -1;
+}
+function choiceButtons(){
+  return `<div class="choices">${choices.map((n, i) => {
+    const cls = !revealed ? "" : n === rightAnswer() ? "right" : n === chosen ? "wrong" : "fade";
+    return `<button class="choice ${cls}" data-i="${i}" ${revealed ? "disabled" : ""}>${esc(choiceLabel(n))}</button>`;
+  }).join("")}</div>`;
+}
+/* iPhone Safari can drop the "click" that follows a tap, notably right after a tap on the map.
+   onTap reacts to the finger lifting off the button itself (ignoring swipes), and still accepts a normal click
+   from a mouse or keyboard. A tap handled this way cancels the browser's own click, so nothing fires twice. */
+function onTap(el, fn){
+  if (!el) return;
+  let sx = 0, sy = 0, live = false;
+  el.addEventListener("touchstart", e => { const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; live = true; }, { passive: true });
+  el.addEventListener("touchcancel", () => { live = false; });
+  el.addEventListener("touchend", e => {
+    if (!live) return; live = false;
+    const t = e.changedTouches[0];
+    if (Math.hypot(t.clientX - sx, t.clientY - sy) > 12 || el.disabled) return;
+    e.preventDefault(); fn(e);
+  }, { passive: false });
+  el.addEventListener("click", e => { if (!el.disabled) fn(e); });
+}
+function nextButtons(last){
+  return `<div class="btns">${last ? "" : `<button class="btn2" id="stop">${t("stop")}</button>`}<button class="btn" id="next">${last ? t("seeResults") : t("next")}</button></div>`;
+}
+function wireNext(last, focus){
+  if (!last) onTap($("stop"), () => showResults(false));
+  onTap($("next"), () => { if (last) showResults(true); else { round++; startRound(); } });
+  if (focus) $("next").focus({preventScroll:true});
+}
+/* height of the bottom cards (answers + result) measured from the bottom of the map, plus breathing room */
+function trayH(){
+  const m = $("mapwrap").getBoundingClientRect(), rb = $("resultbar");
+  const top = Math.min($("card").getBoundingClientRect().top, rb.hidden ? Infinity : rb.getBoundingClientRect().top);
+  return m.bottom - top + 18;
+}
+function renderCard(focus = true){
+  const c = $("card");
+  // put the result card away AND empty it, so its old Next/Stop buttons can't be picked up instead of the visible ones
+  if (!(isChoiceRound() && revealed && mode !== "explore")) { $("resultbar").hidden = true; $("resultbar").innerHTML = ""; }
+  if (mode === "explore") return renderExploreCard(c);
+  c.classList.toggle("stack", isChoiceRound());
+  if (isChoiceRound()) return renderChoiceCard(c, focus);
+  if (!revealed){
+    if (mode === "cities"){
+      c.innerHTML = `<div class="txt"><div class="small">${guess ? t("tapMove") : t("tapPin")}</div><div class="small">${t("safeKm", fmt(missKm))}</div></div>
+        <button class="btn" id="lock" ${guess?"":"disabled"}>${t("lockIn")}</button>`;
+      onTap($("lock"), reveal);
+    } else {
+      c.innerHTML = `<div class="txt"><div class="small">${mode === "flags" ? t("tapCountryFlag") : t("tapCountry")}</div><div class="small">${t("wrongCountry")}</div></div>`;
+    }
+    return;
+  }
+  const r = results[results.length-1];
+  const last = lives === 0;
+  const km = fmt(Math.round(r.km));
+  const msg = mode === "cities"
+    ? (r.km < 1 ? t("rightOnIt") : t("pinFrom", km, placeName(r.key)))
+    : (r.km < 1 ? t("rightCountry") : t("tappedFrom", countryName(r.picked), km, countryName(r.key)));
+  c.innerHTML = `<div class="txt">${resultLine(r, last)}<div class="small">${esc(msg)}</div></div>` + nextButtons(last);
+  wireNext(last, focus);
+}
+
+function resultLine(r, last){
+  if (!r.miss) return `<div class="verdictline ok">${t("right")} <span class="tag hit">+1</span></div>`;
+  return `<div class="verdictline no">${t("miss")} <span class="tag miss">${last ? t("outOfLives") : t("minusLife")}</span></div>`;
+}
+function renderChoiceCard(c, focus){
+  if (!revealed){
+    const hint = mode === "flags" ? t("hintFlags") : level === "pro" ? t("hintCapPro") : t("hintCap");
+    c.innerHTML = choiceButtons() + `<div class="small">${hint}</div>`;
+    c.querySelectorAll(".choice").forEach(b => onTap(b, () => pickCapital(choices[+b.dataset.i])));
+    return;
+  }
+  const r = results[results.length-1];
+  const last = lives === 0;
+  const msg = mode === "flags"
+    ? (r.miss ? t("flagMiss", countryName(r.key), countryName(r.picked)) : t("flagHit", countryName(r.key)))
+    : (r.miss ? t("capMiss", placeName(r.key), countryName(current[1]), level === "pro" ? placeName(r.picked) : "") : t("capHit", placeName(r.key), countryName(current[1])));
+  const hint = mode === "flags" ? t("hintFlags") : level === "pro" ? t("hintCapPro") : t("hintCap");
+  c.innerHTML = choiceButtons() + `<div class="small">${hint}</div>`;
+  const rb = $("resultbar");
+  rb.innerHTML = `<div class="txt">${resultLine(r, last)}<div class="small">${esc(msg)}</div></div>${nextButtons(last)}`;
+  rb.hidden = false;
+  wireNext(last, focus);
+}
+/* Results keep stable keys (English place names, map country names) and are worded at display time,
+   so switching language mid-game re-labels everything without changing what was answered. */
+function pickCapital(name){
+  if (revealed) return;
+  chosen = name;
+  const ok = name === rightAnswer();
+  if (mode === "flags"){
+    pickedF = ok ? null : FLAG_POOL.find(f => f.properties.name === name);
+    results.push({kind:"country", key: current.properties.name, flag: current.properties.name, picked: name, km: 0, miss: !ok});
+  } else {
+    answerLL = [current[3], current[2]];
+    results.push({kind:"place", key: current[0], picked: name, pickedKind:"place", km: 0, miss: !ok});
+  }
+  afterAnswer(!ok);
+  revealed = true; paintCountries(); redrawMarks(); renderTop(); renderCard();
+  if (mode === "flags") focusFeatures(current, pickedF);
+  else focusBounds(safeBounds(area.shape), 30, 0.8);
+}
+function reveal(){
+  if (!guess) return;
+  answerLL = [current[3], current[2]];
+  const km = kmBetween(guess, answerLL);
+  const miss = km > missKm;
+  results.push({kind:"place", key: current[0], km, miss, dist: true});
+  afterAnswer(miss);
+  revealed = true; redrawMarks(); renderTop(); renderCard();
+  if (level === "easy") focusBounds(safeBounds(d3.geoCircle().center(answerLL).radius(Math.max(missKm, km) * 1.15 / 6371 * 180 / Math.PI)()), 30, 0.85);
+  else focusPair(guess, answerLL);
+}
+function guessCountry(d){
+  if (revealed) return;
+  const correct = d === current;
+  const km = correct ? 0 : kmBetween(d3.geoCentroid(d), d3.geoCentroid(current));
+  results.push({kind:"country", key: current.properties.name, flag: mode === "flags" ? current.properties.name : null, picked: d.properties.name, km, miss: !correct});
+  afterAnswer(!correct);
+  pickedF = correct ? null : d;
+  revealed = true; paintCountries(); renderTop(); renderCard();
+  if (!correct) focusFeatures(d, current);
+  else focusFeatures(current);
+}
+
+function focusBounds(b, maxK = 6, fill = 0.7, ms = 600){
+  const r = $("mapwrap").getBoundingClientRect();
+  const [[x0,y0],[x1,y1]] = b;
+  const w = Math.max(x1-x0, 4), h = Math.max(y1-y0, 4);
+  const topH = $("top").getBoundingClientRect().bottom - r.top;
+  const availH = r.height - topH - Math.max(isPhone()?120:110, trayH());
+  const s = Math.max(1, Math.min(maxK, fill / Math.max(w / r.width, h / availH)));
+  const cx = (x0+x1)/2, cy = (y0+y1)/2;
+  const tr = d3.zoomIdentity.translate(r.width/2 - s*cx, topH + availH/2 - s*cy).scale(s);
+  if (ms) svg.transition().duration(ms).call(zoom.transform, tr); else svg.interrupt().call(zoom.transform, tr);
+}
+function focusPair(a, b){
+  const p = projection(a), q = projection(b);
+  focusBounds([[Math.min(p[0],q[0]),Math.min(p[1],q[1])],[Math.max(p[0],q[0]),Math.max(p[1],q[1])]]);
+}
+/* the biggest piece of a country, so overseas bits (French Guiana, Alaska) don't zoom the map out */
+function mainShape(f){
+  const g = f.geometry;
+  if (g.type !== "MultiPolygon") return f;
+  return {type:"Feature", geometry: g.coordinates.map(c => ({type:"Polygon", coordinates:c})).reduce((x, y) => d3.geoArea(x) > d3.geoArea(y) ? x : y)};
+}
+function focusFeatures(a, b){
+  focusBounds(safeBounds({type:"FeatureCollection", features:[a, b].filter(Boolean).map(mainShape)}));
+}
+
+function verdict(n){
+  const v = t("verdicts");
+  return v[n >= 30 ? 4 : n >= 20 ? 3 : n >= 10 ? 2 : n >= 4 ? 1 : 0];
+}
+/* ---------- player name + leaderboard ----------
+   Each player has one shared document, scores/<their id>, holding their name and their best score per board.
+   Everyone signed in can read all of them; each player can only write their own (rules set at publish). */
+const NAME_KEY = "globedrop-name";
+let playerName = "";
+try { playerName = localStorage.getItem(NAME_KEY) || ""; } catch(e){}
+let lb = { db: null, uid: null, mine: null, ready: false, off: false };
+const boardKey = () => mode + (mode !== "countries" ? "_" + level : "");
+const boardTitle = () => mode === "countries" ? t("m_countries") : t("m_" + mode) + " · " + t(level);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+const cleanName = s => String(s || "").replace(/[^\p{L}\p{N} _.\-]/gu, "").replace(/\s+/g, " ").trim().slice(0, 16);
+
+(async () => {
+  try {
+    if (!window.claude?.use) { lb.off = true; return; }
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    const uid = user ? await user.id() : null;
+    if (!db || !uid) { lb.off = true; return; }
+    lb.db = db; lb.uid = uid;
+    const snap = await db.doc("scores/" + uid).get();
+    lb.mine = snap.exists ? snap.data() : null;
+    lb.ready = true;
+    // a name saved on another device wins over an empty one here
+    if (!playerName && !FRESH && lb.mine?.name){ playerName = lb.mine.name; try { localStorage.setItem(NAME_KEY, playerName); } catch(e){} closeWelcome(); if (splashOpen && !($("spname")?.value)) { splashAsk = false; renderSplash(); } }
+  } catch(e){ lb.off = true; }
+})();
+
+async function saveMine(patch){
+  if (!lb.ready) return false;
+  const next = Object.assign({}, lb.mine || {}, patch, { name: playerName || "Player", updated: Date.now() });
+  try { await lb.db.doc("scores/" + lb.uid).set(next); lb.mine = next; return true; }
+  catch(e){ if (e?.code === "invalid_argument") lb.off = true; return false; }
+}
+
+const langPills = () => `<div class="langpills" dir="ltr" role="group" aria-label="${t("language")}">${Object.entries(LANGS).map(([k, v]) =>
+  `<button type="button" data-lang="${k}" aria-pressed="${k === LANG}" lang="${k}">${v}</button>`).join("")}</div>`;
+function wireLangPills(root){ root.querySelectorAll("[data-lang]").forEach(b => b.onclick = () => setLang(b.dataset.lang)); }
+
+let welcomeFirst = false;
+function askName(first){
+  welcomeFirst = first;
+  const w = $("welcome");
+  const typed = $("pname") ? $("pname").value : playerName;
+  w.innerHTML = `<div class="sheet welcome" role="dialog" aria-labelledby="w-t">
+    ${first ? langPills() : ""}
+    <h3 id="w-t">${first ? t("welcomeTitle") : t("renameTitle")}</h3>
+    <p>${first ? t("welcomeText") : t("renameText")}</p>
+    <form class="namefield" id="nameform" autocomplete="off">
+      <label for="pname">${t("playerName")}</label>
+      <input id="pname" type="text" maxlength="16" placeholder="${esc(t("placeholder"))}" value="${esc(typed)}" autocapitalize="words" spellcheck="false" enterkeyhint="go">
+      <div class="err" id="nameerr"></div>
+      <button class="btn" type="submit">${first ? t("startPlaying") : t("saveName")}</button>
+    </form>
+    <button class="linkbtn" id="skipname">${first ? t("playNoName") : t("cancel")}</button>
+  </div>`;
+  w.hidden = false;
+  wireLangPills(w);
+  $("nameform").onsubmit = async e => {
+    e.preventDefault();
+    const n = cleanName($("pname").value);
+    if (n.length < 2){ $("nameerr").textContent = t("nameErr"); return; }
+    playerName = n;
+    try { localStorage.setItem(NAME_KEY, n); } catch(e){}
+    closeWelcome();
+    if (lb.ready && lb.mine) await saveMine({});
+    if (!$("results").hidden) { renderResults(); refreshBoard(); }
+  };
+  $("skipname").onclick = closeWelcome;
+  if (!splashOpen) setTimeout(() => $("pname")?.focus({preventScroll:true}), 50);
+}
+function closeWelcome(){ const was = !$("welcome").hidden; $("welcome").hidden = true; if (was && welcomeFirst) maybeTour(); }
+
+/* Read the current board once, save a new best, and draw the standings. */
+let boardSeq = 0, boardCache = null;
+async function refreshBoard(total){
+  const el = $("board"); if (!el) return;
+  const seq = ++boardSeq, field = "b_" + boardKey();
+  if (lb.off || (!lb.ready && !window.claude?.use)){
+    el.innerHTML = `<div class="note">${t("lbSignin")}</div>`; return;
+  }
+  el.innerHTML = `<div class="bh">${t("leaderboard")} <small>${esc(boardTitle())}</small></div><div class="note">${t("loading")}</div>`;
+  const t0 = Date.now();
+  while (!lb.ready && !lb.off && Date.now() - t0 < 10000) await new Promise(r => setTimeout(r, 200));
+  if (seq !== boardSeq) return;
+  if (!lb.ready){ el.innerHTML = `<div class="note">${t("lbDown")}</div>`; return; }
+  let newBest = false;
+  if (typeof total === "number" && total > 0 && playerName && total > (+lb.mine?.[field] || 0)){
+    newBest = await saveMine({ [field]: total, ["t_" + boardKey()]: Date.now() });
+  }
+  let docs = [];
+  try { docs = (await lb.db.collection("scores").orderBy(field, "desc").limit(500).get()).docs; }
+  catch(e){ if (seq === boardSeq) el.innerHTML = `<div class="note">${t("lbDown2")}</div>`; return; }
+  if (seq !== boardSeq) return;
+  const rows = docs.map(d => ({ id: d.id, ...d.data() })).filter(r => +r[field] > 0)
+    .sort((a, b) => (+b[field] - +a[field]) || ((+a["t_" + boardKey()] || 0) - (+b["t_" + boardKey()] || 0)));
+  boardCache = { rows, field, newBest: newBest || boardCache?.newBest && boardCache.field === field };
+  drawBoard();
+}
+function drawBoard(){
+  const el = $("board"); if (!el || !boardCache) return;
+  const { rows, field, newBest } = boardCache;
+  const meIdx = rows.findIndex(r => r.id === lb.uid);
+  const line = (r, i) => `<li class="${r.id === lb.uid ? "me" : ""}"><span class="rk">${i + 1}</span><span class="nm"><bdi>${esc(r.name || t("player"))}</bdi>${r.id === lb.uid ? t("youTag") : ""}</span><span class="sc">${+r[field]}</span></li>`;
+  const TOP = 3;
+  let list = rows.slice(0, TOP).map(line).join("");
+  if (meIdx >= TOP) list += (meIdx > TOP ? `<li class="gap">⋯</li>` : "") + line(rows[meIdx], meIdx);
+  const where = !playerName ? t("joinName") : meIdx >= 0 ? t("rank", newBest, meIdx + 1, rows.length) : t("joinOne");
+  document.querySelector(".sheet .best")?.setAttribute("hidden", "");
+  el.innerHTML = `<div class="bh">${t("leaderboard")}</div>
+    <div class="note">${where}</div>
+    ${rows.length ? `<ol>${list}</ol>` : `<div class="note">${t("noScores")}</div>`}`;
+}
+
+const MEDAL_AT = 3; // right answers needed for the end-of-game medal
+/* A short confetti burst from the medal, drawn on a canvas over the results; skipped when the viewer prefers less motion. */
+function celebrate(){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const host = $("results"), m = host.querySelector(".medal .m"); if (!m) return;
+  host.querySelector(".confetti")?.remove();
+  const cv = document.createElement("canvas"); cv.className = "confetti"; host.appendChild(cv);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2), W = host.clientWidth, H = host.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + "px"; cv.style.height = H + "px";
+  const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
+  const cs = getComputedStyle(document.documentElement);
+  const colors = ["--gold", "--pin", "--target", "--ocean", "--ink"].map(v => cs.getPropertyValue(v).trim() || "#c98a12");
+  const mr = m.getBoundingClientRect(), hr = host.getBoundingClientRect();
+  const ox = mr.left - hr.left + mr.width / 2, oy = mr.top - hr.top + mr.height / 2 + 30;
+  const bits = Array.from({length: 110}, () => {
+    const a = -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.1, v = 5 + Math.random() * 7;
+    return { x: ox, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * Math.PI, vr: (Math.random() - .5) * .3,
+             w: 5 + Math.random() * 5, h: 8 + Math.random() * 6, c: colors[(Math.random() * colors.length) | 0] };
+  });
+  const t0 = performance.now();
+  (function frame(now){
+    const el = now - t0; ctx.clearRect(0, 0, W, H);
+    for (const b of bits){
+      b.vy += .22; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.r += b.vr;
+      ctx.save(); ctx.globalAlpha = Math.max(0, 1 - el / 2400); ctx.translate(b.x, b.y); ctx.rotate(b.r);
+      ctx.fillStyle = b.c; ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h * Math.abs(Math.cos(b.r * 2))); ctx.restore();
+    }
+    if (el < 2400 && cv.isConnected) requestAnimationFrame(frame); else cv.remove();
+  })(t0 + 400 > performance.now() ? t0 : performance.now());
+}
+/* ---------- add to home screen ----------
+   Browsers don't let a page add itself, so on phones we show the exact steps once, after the first finished game.
+   Where the browser offers its own install prompt (Android Chrome on a hosted copy), the card gets an Install button. */
+const A2HS_KEY = "globedrop-a2hs";
+const UA = navigator.userAgent || "";
+const isIOS = /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/.test(UA);
+const isStandalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; });
+function a2hsSteps(){
+  if (isIOS) return `${t("a2hsIOS")}<small>${t("a2hsIOSNote")}</small>`;
+  if (isAndroid) return `${t("a2hsAndroid")}<small>${t("a2hsAndroidNote")}</small>`;
+  return "";
+}
+function shouldOfferA2hs(){
+  if (isStandalone || !(isIOS || isAndroid || installEvt)) return false;
+  try { return !localStorage.getItem(A2HS_KEY); } catch(e){ return false; }
+}
+const APP_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="var(--pin)"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></svg>`;
+function a2hsCard(){
+  return `<details class="a2hs" id="a2hs">
+    <summary><span class="ic">${APP_ICON}</span><span class="tt">${t("a2hsTitle")}</span></summary>
+    <div class="st">${installEvt ? t("a2hsWhy") : a2hsSteps()}</div>
+    <div class="acts">${installEvt ? `<button class="btn2" id="a2hs-no">${t("notNow")}</button><button class="btn" id="a2hs-yes">${t("install")}</button>` : `<button class="btn2" id="a2hs-no">${t("gotIt2")}</button>`}</div>
+  </details>`;
+}
+function wireA2hs(){
+  const done = () => { try { localStorage.setItem(A2HS_KEY, "1"); } catch(e){} $("a2hs")?.remove(); a2hsShown = false; };
+  $("a2hs-no") && ($("a2hs-no").onclick = done);
+  $("a2hs-yes") && ($("a2hs-yes").onclick = async () => { try { installEvt.prompt(); await installEvt.userChoice; } catch(e){} installEvt = null; done(); });
+}
+let a2hsShown = false;
+
+const STUDY_BELOW = 5; // suggest Explore on the results screen below this many right answers
+let lastOutcome = null; // {outOfLives, total, best, newBest}
+function showResults(outOfLives){
+  const total = results.filter(r => !r.miss).length;
+  const key = "globedrop-right-best-" + mode + (mode !== "countries" ? "-" + level : "");
+  let best = 0;
+  try { best = +localStorage.getItem(key) || 0; if (total > best) localStorage.setItem(key, total); } catch(e){}
+  lastOutcome = { outOfLives, total, best, newBest: total > best };
+  a2hsShown = shouldOfferA2hs();
+  boardCache = null;
+  clearTimeout(toastTimer); $("toast").classList.remove("show");
+  renderResults();
+  refreshBoard(total);
+  if (total >= MEDAL_AT) celebrate();
+  $("again").focus({preventScroll:true});
+}
+function resultName(r){ return r.kind === "place" ? placeName(r.key) : countryName(r.key); }
+function resultDetail(r){
+  if (r.dist) return r.km < 1 ? t("spotOn") : t("kmOff", fmt(Math.round(r.km)));
+  if (!r.miss) return "";
+  return t("you", r.pickedKind === "place" ? placeName(r.picked) : countryName(r.picked));
+}
+function renderResults(){
+  if (!lastOutcome) return;
+  const { outOfLives, total } = lastOutcome;
+  const played = results.length, missed = played - total;
+  $("results").innerHTML = `<div class="sheet rsheet" role="dialog" aria-label="${esc(t("seeResults"))}">
+    <span class="rchip">${esc(boardTitle())}</span>
+    <div class="rhero">
+      ${total >= MEDAL_AT ? `<div class="medal" role="img" aria-label="${esc(t("medal"))}"><div class="m">🏅</div></div>` : ""}
+      <div class="rnum">${total}</div>
+      <div class="rlabel">${t("rightAnswers", total)}</div>
+    </div>
+    <div class="rsub"><b>${verdict(total)}</b><br>${outOfLives ? t("outOfLives") : t("youStopped")} · ${t("playedMissed", played, missed)}</div>
+    <div class="ractions">
+      <button class="btn" id="again">${t("playAgain")}</button>
+      ${total < STUDY_BELOW ? `<button class="btn2" id="study"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg>${t("studyBtn2")}</button>` : ""}
+    </div>
+    <div class="board" id="board"></div>
+    ${played ? `<details class="answers"><summary>${t("yourAnswers", played)}</summary>
+      <ul class="list">${results.map(r=>`<li class="${r.miss ? "miss" : ""}"><span>${r.flag ? flagImg(r.flag, "miniflag") : ""}${esc(resultName(r))}</span><span class="d">${esc(resultDetail(r))}</span><span class="p ${r.miss ? "no" : "ok"}">${r.miss ? "✕" : "✓"}</span></li>`).join("")}</ul>
+    </details>` : ""}
+    ${a2hsShown ? a2hsCard() : ""}
+    <div class="rfoot">
+      ${playerName ? `<span>${t("playingAs", `<bdi>${esc(playerName)}</bdi>`)}</span><button id="rename">${t("changeName")}</button>` : `<button id="rename">${t("addName")}</button>`}
+      <button id="how2">${t("howToPlay")}</button>
+    </div>
+  </div>`;
+  $("results").hidden = false;
+  $("rename").onclick = () => askName(false);
+  $("again").onclick = newGame;
+  if (a2hsShown) wireA2hs();
+  $("how2").onclick = showHelp;
+  $("study") && ($("study").onclick = () => { $("results").hidden = true; setMode("explore"); });
+  drawBoard();
+}
+
+/* ---------- explore ---------- */
+const CAPITAL_OF = Object.fromEntries(CAPITALS.map(c => [c[1], c]));
+/* Explore-only facts for map places that the quizzes leave out: territories, and places whose status or capital is
+   disputed. [capital or null, lat, lon, big cities, status note]. The note states the situation without taking a side. */
+const EXPLORE_EXTRA = {
+  "Puerto Rico":            ["San Juan", 18.4655, -66.1057, ["Bayamón", "Carolina", "Ponce"], "terrUS"],
+  "Greenland":              ["Nuuk", 64.1814, -51.6941, ["Sisimiut", "Ilulissat", "Qaqortoq"], "partDK"],
+  "New Caledonia":          ["Nouméa", -22.2758, 166.458, ["Dumbéa", "Mont-Dore", "Païta"], "terrFR"],
+  "Falkland Is.":           ["Stanley", -51.6977, -57.8517, ["Goose Green"], "falk"],
+  "Fr. S. Antarctic Lands": ["Port-aux-Français", -49.35, 70.2167, [], "fsal"],
+  "Israel":                 ["Jerusalem", 31.7683, 35.2137, ["Tel Aviv", "Haifa", "Beersheba"], "jlm"],
+  "Palestine":              ["East Jerusalem", 31.7833, 35.2333, ["Gaza", "Hebron", "Nablus"], "pse"],
+  "Taiwan":                 ["Taipei", 25.033, 121.5654, ["Kaohsiung", "Taichung", "Tainan"], "twn"],
+  "Kosovo":                 ["Pristina", 42.6629, 21.1655, ["Prizren", "Peja", "Mitrovica"], "xkx"],
+  "N. Cyprus":              ["North Nicosia", 35.19, 33.36, ["Famagusta", "Kyrenia"], "ncy"],
+  "Somaliland":             ["Hargeisa", 9.56, 44.065, ["Burao", "Berbera", "Borama"], "sld"],
+};
+const EXPLORE_NOTES = {
+  terrUS: ["Territory of the United States", "Territoire des États-Unis", "إقليم تابع للولايات المتحدة"],
+  partDK: ["Part of the Kingdom of Denmark", "Fait partie du Royaume du Danemark", "جزء من مملكة الدنمارك"],
+  terrFR: ["French overseas territory", "Collectivité française d'outre-mer", "إقليم فرنسي ما وراء البحار"],
+  falk:   ["British overseas territory, claimed by Argentina", "Territoire britannique d'outre-mer, revendiqué par l'Argentine", "إقليم بريطاني ما وراء البحار، تطالب به الأرجنتين"],
+  fsal:   ["French overseas territory with no permanent population. Port-aux-Français is its main base.", "Territoire français d'outre-mer sans population permanente. Port-aux-Français est sa base principale.", "إقليم فرنسي ما وراء البحار بلا سكان دائمين، وبور أو فرانسيه قاعدته الرئيسية."],
+  jlm:    ["The status of Jerusalem is disputed internationally.", "Le statut de Jérusalem est contesté au niveau international.", "وضع القدس محل نزاع دولي."],
+  pse:    ["Partly recognised state. Claims East Jerusalem as its capital; the government is based in Ramallah.", "État partiellement reconnu. Revendique Jérusalem-Est comme capitale ; le gouvernement siège à Ramallah.", "دولة معترف بها جزئيًا، تعدّ القدس الشرقية عاصمتها، ومقر الحكومة في رام الله."],
+  twn:    ["Its political status is disputed.", "Son statut politique est contesté.", "وضعها السياسي محل نزاع."],
+  xkx:    ["Independence recognised by some countries but not others.", "Indépendance reconnue par certains pays, pas par d'autres.", "استقلالها معترف به من بعض الدول دون غيرها."],
+  ncy:    ["Recognised only by Turkey; internationally considered part of Cyprus.", "Reconnue uniquement par la Turquie ; considérée comme partie de Chypre au niveau international.", "لا تعترف بها سوى تركيا، وتُعدّ دوليًا جزءًا من قبرص."],
+  sld:    ["Self-declared state, internationally considered part of Somalia.", "État autoproclamé, considéré comme faisant partie de la Somalie au niveau international.", "دولة معلنة من طرف واحد، وتُعدّ دوليًا جزءًا من الصومال."],
+};
+const exploreFacts = n => {
+  const cap = CAPITAL_OF[n], x = EXPLORE_EXTRA[n];
+  if (cap) return { capital: cap[0], ll: [cap[3], cap[2]], cities: OTHER_CITIES[n] || [], note: null };
+  if (x) return { capital: x[0], ll: x[0] ? [x[2], x[1]] : null, cities: x[3], note: EXPLORE_NOTES[x[4]][{en:0, fr:1, ar:2}[LANG]] };
+  return { capital: null, ll: null, cities: [], note: null };
+};
+function enterExplore(){
+  $("results").hidden = true;
+  current = null; revealed = false; answerLL = null; guess = null; pickedF = null; area = null;
+  $("app").classList.add("countries-mode");
+  $("app").classList.remove("easy");
+  $("levels").classList.add("off");
+  paintCountries(); renderPrompt(); redrawMarks(); renderCard();
+  svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
+}
+function exploreCountry(f){
+  if (f.properties.name === "Antarctica") return;
+  current = f; revealed = true;
+  answerLL = exploreFacts(f.properties.name).ll;
+  paintCountries(); renderPrompt(); redrawMarks(); renderCard();
+  focusBounds(safeBounds(mainShape(f)), 20, 0.6);
+}
+function renderExploreCard(c){
+  c.classList.remove("stack");
+  if (!current){
+    c.innerHTML = `<div class="txt"><div class="small">${t("exploreHint")}</div></div>`;
+    return;
+  }
+  const n = current.properties.name, fx = exploreFacts(n), others = fx.cities;
+  c.innerHTML = `<div class="excard txt">
+      ${FLAGS[n] ? `<img class="exflag" src="${FLAGS[n]}" alt="">` : ""}
+      <div class="exname">${esc(countryName(n))}</div>
+      <dl>
+        ${fx.capital ? `<dt>${t("capital")}</dt><dd>${esc(placeName(fx.capital))}</dd>` : ""}
+        ${others.length ? `<dt>${t("bigCities")}</dt><dd class="cities">${others.map(x => esc(placeName(x))).join(LANG === "ar" ? "، " : ", ")}</dd>` : ""}
+      </dl>
+      ${fx.note ? `<div class="exnote">${esc(fx.note)}</div>` : ""}
+      <div class="btns"><button class="btn2" id="worldview">${t("worldView")}</button></div>
+    </div>`;
+  $("worldview").onclick = enterExplore;
+}
+
+function paintLevel(){
+  $("l-easy").setAttribute("aria-pressed", level === "easy");
+  $("l-pro").setAttribute("aria-pressed", level === "pro");
+}
+const MODE_KEY = "globedrop-mode", LEVELS_KEY = "globedrop-levels";
+function rememberMode(){ try { localStorage.setItem(MODE_KEY, mode); localStorage.setItem(LEVELS_KEY, JSON.stringify(levelOf)); } catch(e){} }
+function setMode(m){
+  if (m === mode) return;
+  mode = m;
+  rememberMode();
+  if (m !== "explore" && tourWaiting){ tourWaiting = false; setTimeout(startTour, 500); }
+  if (levelOf[m]) { level = levelOf[m]; paintLevel(); }
+  for (const k of ["explore", "flags", "countries", "capitals", "cities"]) $("m-" + k).setAttribute("aria-pressed", m === k);
+  $("app").classList.toggle("exploring", m === "explore");
+  if (m === "explore") enterExplore(); else newGame();
+  layout(); // re-fit the map to the space this mode's card leaves free
+}
+function setLevel(l){
+  if (l === level) return;
+  level = l; levelOf[mode] = l;
+  paintLevel(); rememberMode();
+  newGame();
+}
+for (const k of ["explore", "flags", "countries", "capitals", "cities"]) $("m-" + k).onclick = () => setMode(k);
+$("l-easy").onclick = () => setLevel("easy");
+$("l-pro").onclick = () => setLevel("pro");
+
+document.addEventListener("keydown", e => {
+  if (!$("welcome").hidden) return;
+  if (mode === "explore"){ if (e.key === "Escape" && current && $("help").hidden) enterExplore(); return; }
+  if (isChoiceRound() && !revealed && /^[1-4]$/.test(e.key) && $("results").hidden && $("help").hidden){ pickCapital(choices[+e.key - 1]); return; }
+  if (e.key === "Enter" || e.key === " "){
+    if (!$("help").hidden) return;
+    const b = $("again") && !$("results").hidden ? $("again") : ($("next") || $("lock"));
+    if (b && !b.disabled && document.activeElement?.tagName !== "BUTTON"){ e.preventDefault(); b.click(); }
+  }
+});
+
+/* ---------- first-visit tour ----------
+   Three tips on the real controls, shown once after the welcome screen. Skippable at every step; replay from How to play. */
+const TOUR_KEY = "globedrop-toured";
+let tourWaiting = false;
+const TOUR = [
+  { el: () => document.querySelector(".modes"), h: "tour1h", p: "tour1p" },
+  { el: () => $("m-explore"), h: "tour2h", p: "tour2p" },
+  { el: () => document.querySelector(".meta"), h: "tour3h", p: "tour3p" },
+];
+let tourStep = -1;
+function maybeTour(){
+  let seen = false;
+  try { seen = !!localStorage.getItem(TOUR_KEY); } catch(e){}
+  if (!seen) afterSplash(() => { if (mode === "explore") tourWaiting = true; else setTimeout(startTour, 350); });
+}
+function startTour(){ tourStep = 0; $("tour").hidden = false; renderTourStep(); }
+function endTour(){
+  $("tour").hidden = true; tourStep = -1;
+  try { localStorage.setItem(TOUR_KEY, "1"); } catch(e){}
+}
+function renderTourStep(){
+  if (tourStep < 0) return;
+  const step = TOUR[tourStep], last = tourStep === TOUR.length - 1;
+  const tip = $("tour-tip");
+  tip.innerHTML = `<h4 id="tour-h">${t(step.h)}</h4><p>${t(step.p)}</p>
+    <div class="tour-foot">
+      <span class="tour-dots" aria-label="${tourStep + 1} / ${TOUR.length}">${TOUR.map((_, i) => `<i class="${i === tourStep ? "on" : ""}"></i>`).join("")}</span>
+      ${last ? "" : `<button class="tour-skip" id="tour-skip">${t("tourSkip")}</button>`}
+      <button class="btn" id="tour-next">${last ? t("tourGo") : t("tourNext")}</button>
+    </div>`;
+  $("tour-next").onclick = () => { if (last) endTour(); else { tourStep++; renderTourStep(); } };
+  if (!last) $("tour-skip").onclick = endTour;
+  placeTour();
+  $("tour-next").focus({preventScroll:true});
+}
+function placeTour(){
+  if (tourStep < 0) return;
+  const el = TOUR[tourStep].el(); if (!el) return endTour();
+  const r = el.getBoundingClientRect(), pad = 6, vw = window.innerWidth, vh = window.innerHeight;
+  const ring = $("tour-ring"), tip = $("tour-tip");
+  Object.assign(ring.style, { left: (r.left - pad) + "px", top: (r.top - pad) + "px", width: (r.width + pad * 2) + "px", height: (r.height + pad * 2) + "px" });
+  const tw = tip.offsetWidth, th = tip.offsetHeight, gap = 14;
+  let top = r.bottom + pad + gap;
+  if (top + th > vh - 12) top = Math.max(12, r.top - pad - gap - th); // no room below: sit above
+  let left = r.left + r.width / 2 - tw / 2;
+  left = Math.min(Math.max(12, left), vw - tw - 12);
+  Object.assign(tip.style, { left: left + "px", top: top + "px" });
+}
+window.addEventListener("resize", () => placeTour());
+document.addEventListener("keydown", e => { if (!$("tour").hidden && e.key === "Escape") endTour(); });
+
+/* ---------- how to play ---------- */
+function showHelp(){
+  $("help").innerHTML = `<div class="sheet" role="dialog" aria-labelledby="help-t">
+    <h3 id="help-t">${t("howToPlay")}</h3>
+    ${t("help")}
+    ${isStandalone ? "" : `<div class="helpa2hs"><p><b>${t("a2hsHelp")}</b></p><p><b>iPhone:</b> ${t("a2hsIOS")}</p><p><b>Android:</b> ${t("a2hsAndroid")}</p></div>`}
+    <button class="btn" id="help-ok">${t("gotIt")}</button>
+    <button class="linkbtn" id="help-tour">${t("tourAgain")}</button>
+  </div>`;
+  $("help").hidden = false;
+  $("help-ok").onclick = closeHelp;
+  $("help-tour").onclick = () => { closeHelp(); $("results").hidden = true; if (mode === "explore") setMode("flags"); startTour(); };
+  $("help-ok").focus({preventScroll:true});
+}
+function closeHelp(){ $("help").hidden = true; }
+$("how").onclick = showHelp;
+$("help").addEventListener("click", e => { if (e.target.id === "help") closeHelp(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("help").hidden) closeHelp(); closeLangMenu(); } });
+
+/* ---------- language switch ---------- */
+function applyStatic(){
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
+  $("langbtn").querySelector("span").textContent = LANG.toUpperCase();
+  $("langmenu").innerHTML = Object.entries(LANGS).map(([k, v]) => `<button type="button" role="menuitemradio" aria-checked="${k === LANG}" data-lang="${k}" lang="${k}">${v}</button>`).join("");
+  wireLangPills($("langmenu"));
+  paintThemeBtn?.();
+}
+function setLang(l){
+  if (splashOpen) setTimeout(renderSplash, 0);
+  if (!LANGS[l]) return;
+  LANG = l;
+  try { localStorage.setItem("globedrop-lang", l); } catch(e){}
+  closeLangMenu();
+  applyStatic();
+  renderPrompt(); renderTop(); redrawMarks(); renderCard(false);
+  if (!$("results").hidden) renderResults();
+  if (!$("help").hidden) showHelp();
+  if (!$("welcome").hidden) askName(welcomeFirst);
+  if (!$("tour").hidden) renderTourStep();
+}
+function closeLangMenu(){ $("langmenu").hidden = true; $("langbtn").setAttribute("aria-expanded", "false"); }
+$("langbtn").onclick = e => {
+  e.stopPropagation();
+  const open = $("langmenu").hidden;
+  $("langmenu").hidden = !open; $("langbtn").setAttribute("aria-expanded", String(open));
+};
+document.addEventListener("click", e => { if (!e.target.closest?.(".langwrap")) closeLangMenu(); });
+
+/* ---------- theme ---------- */
+const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const MOON='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
+function currentTheme(){
+  const th = document.documentElement.dataset.theme;
+  if (th === "dark" || th === "light") return th;
+  return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function paintThemeBtn(){
+  const dark = currentTheme() === "dark";
+  $("theme").innerHTML = dark ? SUN : MOON;
+  $("theme").setAttribute("aria-label", dark ? t("toLight") : t("toDark"));
+}
+try { const saved = localStorage.getItem("globedrop-theme"); if (saved) document.documentElement.dataset.theme = saved; } catch(e){}
+$("theme").onclick = () => {
+  const next = currentTheme() === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("globedrop-theme", next); } catch(e){}
+  paintThemeBtn();
+};
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", paintThemeBtn);
+
+applyStatic();
+let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(layout, 120); });
+layout();
+/* When a new version of the page is published while someone is playing, the viewer swaps it in and hands back what
+   snapshot() returned, so the game carries on (same mode, score, lives and streak) instead of starting over or sticking. */
+window.claude?.hot?.snapshot?.(() => ({ mode, level, levelOf, results, lives, streak, inGame: !splashOpen }));
+function boot(data){
+  data = data || {};
+  if (data.inGame){
+    splashOpen = false; $("splash")?.remove();
+    if (data.levelOf) Object.assign(levelOf, data.levelOf);
+    if (data.mode && data.mode !== mode){ mode = data.mode; level = data.level || levelOf[mode] || "easy";
+      for (const k of ["explore", "flags", "countries", "capitals", "cities"]) $("m-" + k).setAttribute("aria-pressed", mode === k);
+      $("app").classList.toggle("exploring", mode === "explore"); paintLevel(); }
+  }
+  // a returning player reopens where they left off; a brand-new one starts on Flags
+  if (!data.inGame){
+    try {
+      const lv = JSON.parse(localStorage.getItem(LEVELS_KEY) || "null"); if (lv) Object.assign(levelOf, lv);
+      const m = localStorage.getItem(MODE_KEY);
+      if (m && ["explore", "flags", "countries", "capitals", "cities"].includes(m)) mode = m;
+      level = levelOf[mode] || "easy";
+      for (const k of ["explore", "flags", "countries", "capitals", "cities"]) $("m-" + k).setAttribute("aria-pressed", mode === k);
+      $("app").classList.toggle("exploring", mode === "explore"); paintLevel();
+    } catch(e){}
+  }
+  if (mode === "explore") enterExplore(); else newGame();
+  if (data.inGame && mode !== "explore" && Array.isArray(data.results)){
+    results = data.results; lives = data.lives ?? LIVES; streak = data.streak || 0; renderTop();
+  }
+  layout();
+  if (!data.inGame) maybeTour();
+}
+window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
+document.fonts?.ready.then(() => { layout(); });
+/* fade the splash once the game is drawn, but keep it at least a moment so the logo registers */
+/* Splash: the logo pulses while the game loads, then a one-line tagline and a Play button appear.
+   The game starts underneath; anything that should be seen first (the tour) waits until the player taps Play. */
+/* The splash is the front door. New players: language, an optional name, Play. Returning players: a greeting and Play. */
+let splashAsk = !playerName; // ask for a name only if this device doesn't know one
+function renderSplash(){
+  const body = $("spbody"); if (!body) return;
+  const typed = $("spname") ? $("spname").value : "";
+  body.innerHTML = `${langPills()}
+    ${splashAsk ? `<p class="sptag">${t("spTag")}</p>
+      <form id="spform" autocomplete="off" novalidate>
+        <div class="namefield"><label for="spname">${t("playerName")}</label>
+          <input id="spname" type="text" maxlength="16" placeholder="${esc(t("placeholder"))}" value="${esc(typed)}" autocapitalize="words" spellcheck="false" enterkeyhint="go">
+          <span class="hint">${t("spNameHint")}</span><div class="err" id="sperr"></div></div>
+        <button class="btn spgo" id="spgo" type="submit">${t("spGo")}</button>
+        <button class="btn2 spexplore" id="spexplore" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg>${t("spExplore")}</button>
+      </form>`
+    : `<p class="sphi">${t("spHi", `<bdi>${esc(playerName)}</bdi>`)}</p><p class="sptag">${t("spTag")}</p>
+      <button class="btn spgo" id="spgo" type="button">${t("spGo")}</button>
+      <button class="btn2 spexplore" id="spexplore" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg>${t("spExplore")}</button>
+      <button class="linkbtn" id="spnotyou" type="button">${t("spNotYou")}</button>`}`;
+  wireLangPills(body);
+  $("spexplore").onclick = () => enterGame(true);
+  if (splashAsk) $("spform").onsubmit = e => { e.preventDefault(); enterGame(); };
+  else { $("spgo").onclick = enterGame; $("spnotyou").onclick = () => { splashAsk = true; renderSplash(); $("spname")?.focus(); }; }
+}
+function enterGame(toExplore){
+  if (splashAsk){
+    const raw = $("spname").value, n = cleanName(raw);
+    if (raw.trim() && n.length < 2){ $("sperr").textContent = t("nameErr"); return; }
+    if (n){ playerName = n; try { localStorage.setItem(NAME_KEY, n); } catch(e){} if (lb.ready && lb.mine) saveMine({}); }
+  }
+  if (toExplore === true) setMode("explore");
+  const sp = $("splash");
+  sp.classList.add("out"); splashOpen = false;
+  setTimeout(() => { sp.remove(); afterSplashQueue.splice(0).forEach(f => f()); }, 450);
+}
+setTimeout(() => { if (!$("splash")) return; renderSplash(); $("splash").classList.add("ready"); }, Math.max(0, 900 - performance.now()));
+// Enter starts the game from anywhere on the splash (except on the language buttons)
+document.addEventListener("keydown", e => {
+  if (!splashOpen || e.key !== "Enter" || !$("spgo") || e.target.closest?.(".langpills, #spnotyou")) return;
+  e.preventDefault(); e.stopImmediatePropagation(); enterGame();
+}, true);
+if (window.ResizeObserver){ let lastH = 0; new ResizeObserver(() => { const h = $("top").offsetHeight; if (h !== lastH){ lastH = h; clearTimeout(rt); rt = setTimeout(layout, 60); } }).observe($("top")); }
+</script>

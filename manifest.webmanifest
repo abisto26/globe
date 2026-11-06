@@ -1,0 +1,15 @@
+{
+  "name": "Globe by Abisto",
+  "short_name": "Globe",
+  "description": "A free geography game: flags, countries, capitals and cities.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#8fc6ea",
+  "theme_color": "#8fc6ea",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
