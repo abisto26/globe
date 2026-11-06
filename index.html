@@ -301,6 +301,11 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .namefield input{font:700 1.1rem var(--display);color:var(--ink);background:var(--chip);border:1px solid var(--panel-edge);border-radius:14px;padding:12px 14px;width:100%}
 .namefield input:focus{outline:3px solid color-mix(in srgb,var(--pin) 55%,transparent);outline-offset:1px}
 .namefield .err{color:var(--pin);font-size:.85rem;min-height:1.1em}
+/* username + PIN side by side */
+.idrow{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:8px;align-items:end}
+.idrow .f{display:flex;flex-direction:column;gap:6px;min-width:0}
+.idrow input.pin{text-align:center;letter-spacing:.3em;font-variant-numeric:tabular-nums;padding-inline:8px}
+.btn[aria-busy="true"]{opacity:.65;pointer-events:none}
 .board{display:flex;flex-direction:column;gap:6px;background:var(--chip);border-radius:16px;padding:12px 14px}
 .board .bh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:700}
 .board .bh small{font:500 .78rem var(--mono);color:var(--ink-soft);font-weight:500}
@@ -791,10 +796,10 @@ const T = {
     appName:"Globe by Abisto", spTag:"Learn the world: flags, countries, capitals and cities.", spGo:"Play", spExplore:"Explore the map first", studyHint:"Want to study first?", studyBtn:"Explore the map", studyBtn2:"Study on the map first", yourAnswers:n => `Your answers (${n})`, spHi:n => `Welcome back, ${n}!`, spNameHint:"Optional. Shown on the leaderboard.", spNotYou:"Not you? Change name", welcomeTitle:"Welcome to Globe by Abisto", welcomeText:"Pick a player name. Your best score in each mode goes on the leaderboard, so you can see where you stand.",
     renameTitle:"Change your name", renameText:"This is the name other players see on the leaderboard.",
     playerName:"Player name", placeholder:"e.g. MapMaster", startPlaying:"Start playing", saveName:"Save name", playNoName:"Play without a name", cancel:"Cancel",
-    nameErr:"Use 2 to 16 letters or numbers.", player:"Player",
+    nameErr:"Use 2 to 16 letters or numbers.", player:"Player", userLabel:"Username", userPh:"e.g. MapMaster", pinLabel:"PIN", userErr:"Use 3 to 16 letters or numbers (no spaces).", pinErr:"Choose a 4-digit PIN.", wrongPin:"That username is taken. If it's yours, check the PIN; if not, pick another.", lockedErr:m => `Too many wrong PINs. Try again in ${m} min.`, netErr:"Can't reach the leaderboard. Check your connection.", checking:"Checking…", userHint:"Optional. Saves your scores. Already have one? Enter it with your PIN.", userRenameTitle:"Your username", userRenameText:"Pick a new username, or sign in to the one you use on another device. Remember your PIN: you need it on other devices.", saveUser:"Save", changeUser:"Change username", addUser:"Add a username", spNotYouU:"Not you? Use another username",
     leaderboard:"Leaderboard", loading:"Loading…", lbSignin:"The leaderboard works when you're signed in to Claude.",
     lbDown:"The leaderboard can't be reached right now. Your score is kept on this device.", lbDown2:"The leaderboard can't be reached right now.",
-    youTag:" (you)", joinName:"Add a name to join the leaderboard.", joinOne:"Get at least 1 right to join the leaderboard.", noScores:"No scores yet. Be the first.",
+    youTag:" (you)", joinName:"Add a name to join the leaderboard.", joinUser:"Add a username to save this score on the leaderboard.", joinOne:"Get at least 1 right to join the leaderboard.", noScores:"No scores yet. Be the first.",
     rank:(nb, r, n) => `${nb ? "New best! " : ""}You're <b>#${r}</b> of ${n} ${n === 1 ? "player" : "players"}.`,
     gotIt:"Got it",
     help:`<p>Your score is the number of <b>right answers</b>. Each right answer is <b>+1</b>. Each miss costs one of your <b>3 lives</b>. The game ends when you run out of lives or press <b>Stop</b>.</p>
@@ -831,10 +836,10 @@ const T = {
     appName:"Globe by Abisto", spTag:"Découvre le monde : drapeaux, pays, capitales et villes.", spGo:"Jouer", spExplore:"Explorer la carte d'abord", studyHint:"Envie de réviser d'abord ?", studyBtn:"Explorer la carte", studyBtn2:"Réviser sur la carte d'abord", yourAnswers:n => `Tes réponses (${n})`, spHi:n => `Bon retour, ${n} !`, spNameHint:"Facultatif. Affiché au classement.", spNotYou:"Ce n'est pas toi ? Changer de nom", welcomeTitle:"Bienvenue sur Globe by Abisto", welcomeText:"Choisis un nom de joueur. Ton meilleur score dans chaque mode apparaît au classement, pour voir où tu te situes.",
     renameTitle:"Changer ton nom", renameText:"C'est le nom que les autres joueurs voient au classement.",
     playerName:"Nom de joueur", placeholder:"ex. : AsDesCartes", startPlaying:"Commencer", saveName:"Enregistrer", playNoName:"Jouer sans nom", cancel:"Annuler",
-    nameErr:"Utilise 2 à 16 lettres ou chiffres.", player:"Joueur",
+    nameErr:"Utilise 2 à 16 lettres ou chiffres.", player:"Joueur", userLabel:"Pseudo", userPh:"ex. : AsDesCartes", pinLabel:"Code", userErr:"Utilise 3 à 16 lettres ou chiffres (sans espace).", pinErr:"Choisis un code à 4 chiffres.", wrongPin:"Ce pseudo est déjà pris. Si c'est le tien, vérifie le code ; sinon, choisis-en un autre.", lockedErr:m => `Trop de codes erronés. Réessaie dans ${m} min.`, netErr:"Classement inaccessible. Vérifie ta connexion.", checking:"Vérification…", userHint:"Facultatif. Enregistre tes scores. Tu as déjà un pseudo ? Entre-le avec ton code.", userRenameTitle:"Ton pseudo", userRenameText:"Choisis un nouveau pseudo, ou connecte-toi à celui de ton autre appareil. Retiens ton code : il te le faudra sur tes autres appareils.", saveUser:"Enregistrer", changeUser:"Changer de pseudo", addUser:"Ajouter un pseudo", spNotYouU:"Ce n'est pas toi ? Utilise un autre pseudo",
     leaderboard:"Classement", loading:"Chargement…", lbSignin:"Le classement fonctionne quand tu es connecté à Claude.",
     lbDown:"Le classement est inaccessible pour l'instant. Ton score est gardé sur cet appareil.", lbDown2:"Le classement est inaccessible pour l'instant.",
-    youTag:" (toi)", joinName:"Ajoute un nom pour entrer au classement.", joinOne:"Trouve au moins 1 bonne réponse pour entrer au classement.", noScores:"Aucun score pour l'instant. Sois le premier !",
+    youTag:" (toi)", joinName:"Ajoute un nom pour entrer au classement.", joinUser:"Ajoute un pseudo pour enregistrer ce score au classement.", joinOne:"Trouve au moins 1 bonne réponse pour entrer au classement.", noScores:"Aucun score pour l'instant. Sois le premier !",
     rank:(nb, r, n) => `${nb ? "Nouveau record ! " : ""}Tu es <b>n° ${r}</b> sur ${n} ${n > 1 ? "joueurs" : "joueur"}.`,
     gotIt:"Compris",
     help:`<p>Ton score est le nombre de <b>bonnes réponses</b>. Chaque bonne réponse vaut <b>+1</b>. Chaque erreur te coûte une de tes <b>3 vies</b>. La partie s'arrête quand tu n'as plus de vies ou quand tu touches <b>Arrêter</b>.</p>
@@ -871,10 +876,10 @@ const T = {
     appName:"العالم مع Abisto", spTag:"اكتشف العالم: الأعلام والدول والعواصم والمدن.", spGo:"العب", spExplore:"استكشف الخريطة أولًا", studyHint:"تريد المراجعة أولًا؟", studyBtn:"استكشف الخريطة", studyBtn2:"راجع على الخريطة أولًا", yourAnswers:n => `إجاباتك (${n})`, spHi:n => `أهلًا بعودتك يا ${n}!`, spNameHint:"اختياري. يظهر في لوحة الترتيب.", spNotYou:"لست أنت؟ غيّر الاسم", welcomeTitle:"مرحبًا بك في العالم مع Abisto", welcomeText:"اختر اسم لاعب. تظهر أفضل نتيجة لك في كل نمط في لوحة الترتيب، لترى مركزك بين اللاعبين.",
     renameTitle:"غيّر اسمك", renameText:"هذا هو الاسم الذي يراه اللاعبون الآخرون في لوحة الترتيب.",
     playerName:"اسم اللاعب", placeholder:"مثال: بطل الخرائط", startPlaying:"ابدأ اللعب", saveName:"حفظ الاسم", playNoName:"العب بدون اسم", cancel:"إلغاء",
-    nameErr:"استخدم من 2 إلى 16 حرفًا أو رقمًا.", player:"لاعب",
+    nameErr:"استخدم من 2 إلى 16 حرفًا أو رقمًا.", player:"لاعب", userLabel:"اسم المستخدم", userPh:"مثال: MapMaster", pinLabel:"الرمز", userErr:"استخدم من 3 إلى 16 حرفًا أو رقمًا (بدون مسافات).", pinErr:"اختر رمزًا من 4 أرقام.", wrongPin:"اسم المستخدم هذا محجوز. إن كان لك فتحقّق من الرمز، وإلا فاختر اسمًا آخر.", lockedErr:m => `محاولات خاطئة كثيرة. حاول مجددًا بعد ${m} دقيقة.`, netErr:"تعذّر الوصول إلى لوحة الترتيب. تحقّق من اتصالك.", checking:"جارٍ التحقق…", userHint:"اختياري. يحفظ نتائجك. لديك اسم مستخدم؟ أدخله مع رمزك.", userRenameTitle:"اسم المستخدم", userRenameText:"اختر اسم مستخدم جديدًا، أو سجّل الدخول بالاسم الذي تستخدمه على جهاز آخر. احفظ رمزك: ستحتاجه على أجهزتك الأخرى.", saveUser:"حفظ", changeUser:"تغيير اسم المستخدم", addUser:"أضف اسم مستخدم", spNotYouU:"لست أنت؟ استخدم اسم مستخدم آخر",
     leaderboard:"لوحة الترتيب", loading:"جارٍ التحميل…", lbSignin:"تعمل لوحة الترتيب عند تسجيل الدخول إلى Claude.",
     lbDown:"تعذّر الوصول إلى لوحة الترتيب الآن. نتيجتك محفوظة على هذا الجهاز.", lbDown2:"تعذّر الوصول إلى لوحة الترتيب الآن.",
-    youTag:" (أنت)", joinName:"أضف اسمًا لتنضم إلى لوحة الترتيب.", joinOne:"أجب إجابة صحيحة واحدة على الأقل لتدخل لوحة الترتيب.", noScores:"لا توجد نتائج بعد. كن الأول!",
+    youTag:" (أنت)", joinName:"أضف اسمًا لتنضم إلى لوحة الترتيب.", joinUser:"أضف اسم مستخدم لحفظ هذه النتيجة في لوحة الترتيب.", joinOne:"أجب إجابة صحيحة واحدة على الأقل لتدخل لوحة الترتيب.", noScores:"لا توجد نتائج بعد. كن الأول!",
     rank:(nb, r, n) => `${nb ? "رقم قياسي جديد! " : ""}أنت في المركز <b>${r}</b> من ${n}.`,
     gotIt:"فهمت",
     help:`<p>نتيجتك هي عدد <b>الإجابات الصحيحة</b>. كل إجابة صحيحة تساوي <b>+1</b>، وكل خطأ يكلّفك روحًا من <b>أرواحك الثلاث</b>. تنتهي اللعبة عندما تنفد أرواحك أو عندما تضغط <b>توقف</b>.</p>
@@ -1199,6 +1204,45 @@ let lb = { kind: "", db: null, uid: null, mine: null, ready: false, off: false }
    - anywhere else (GitHub Pages): Convex, through its HTTP API. build.js fills in the URL. */
 const CONVEX_URL = "https://handsome-squirrel-794.eu-west-1.convex.cloud";
 const PID_KEY = "globedrop-pid";
+const USE_CONVEX = !window.claude?.use && /^https:\/\//.test(CONVEX_URL);
+const cleanUser = s => String(s || "").normalize("NFKC").replace(/[^\p{L}\p{N}_.\-]/gu, "").slice(0, 16);
+const BOARDS = ["flags_easy", "flags_pro", "countries", "capitals_easy", "capitals_pro", "cities_easy", "cities_pro"];
+// the best kept on this device for each board (saved by showResults even without a username)
+function localBests(){
+  const out = [];
+  for (const b of BOARDS){
+    let v = 0; try { v = +localStorage.getItem("globedrop-right-best-" + b.replace("_", "-")) || 0; } catch(e){}
+    if (v > 0) out.push({ board: b, best: v });
+  }
+  return out;
+}
+async function syncLocalBests(){
+  if (lb.kind !== "convex" || !playerName) return;
+  const scores = localBests(); if (!scores.length) return;
+  try { await cx("mutation", "scores:submit", { pid: lb.uid, scores }); } catch(e){}
+}
+/* Create, rename or sign in to a username. Returns an error message, or "" when done. */
+async function claimUsername(raw, pin){
+  const name = cleanUser(raw);
+  if (name.length < 3) return t("userErr");
+  if (!/^\d{4}$/.test(pin)) return t("pinErr");
+  let res;
+  try { res = await cx("mutation", "scores:claim", { pid: lb.uid, username: name, pin }); }
+  catch(e){ return t("netErr"); }
+  if (!res.ok) return res.reason === "wrong_pin" ? t("wrongPin") : res.reason === "locked" ? t("lockedErr", res.wait || 10)
+    : res.reason === "bad_pin" ? t("pinErr") : t("userErr");
+  lb.uid = res.pid; playerName = res.name;
+  try { localStorage.setItem(PID_KEY, res.pid); localStorage.setItem(NAME_KEY, res.name); } catch(e){}
+  boardCache = null;
+  await syncLocalBests();
+  return "";
+}
+const idFields = (pre, typed) => `<div class="idrow">
+    <div class="f"><label for="${pre}name">${t("userLabel")}</label>
+      <input id="${pre}name" type="text" maxlength="16" placeholder="${esc(t("userPh"))}" value="${esc(typed)}" autocapitalize="none" autocomplete="username" spellcheck="false" dir="auto"></div>
+    <div class="f"><label for="${pre}pin">${t("pinLabel")}</label>
+      <input id="${pre}pin" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" autocomplete="current-password" enterkeyhint="go"></div>
+  </div>`;
 async function cx(kind, path, args){
   const r = await fetch(CONVEX_URL.replace(/\/$/, "") + "/api/" + kind, {
     method: "POST", headers: { "Content-Type": "application/json" },
@@ -1224,6 +1268,12 @@ const cleanName = s => String(s || "").replace(/[^\p{L}\p{N} _.\-]/gu, "").repla
         try { localStorage.setItem(PID_KEY, pid); } catch(e){}
       }
       Object.assign(lb, { kind: "convex", uid: pid, mine: {}, ready: true });
+      // check the username this device thinks it has; names from the first version (no PIN) need setting again
+      try {
+        const me = await cx("query", "scores:me", { pid });
+        if (me){ if (me.name !== playerName){ playerName = me.name; try { localStorage.setItem(NAME_KEY, me.name); } catch(e){} } syncLocalBests(); }
+        else if (playerName){ playerName = ""; if (splashOpen){ splashAsk = true; renderSplash(); } }
+      } catch(e){}
       return;
     }
     lb.kind = "claude";
@@ -1241,10 +1291,7 @@ const cleanName = s => String(s || "").replace(/[^\p{L}\p{N} _.\-]/gu, "").repla
 
 async function saveMine(patch){
   if (!lb.ready) return false;
-  if (lb.kind === "convex"){ // only a name change comes through here; scores are saved by refreshBoard
-    if (!playerName) return false;
-    try { await cx("mutation", "scores:rename", { pid: lb.uid, name: playerName }); return true; } catch(e){ return false; }
-  }
+  if (lb.kind === "convex") return false; // usernames go through claimUsername; scores through refreshBoard
   const next = Object.assign({}, lb.mine || {}, patch, { name: playerName || "Player", updated: Date.now() });
   try { await lb.db.doc("scores/" + lb.uid).set(next); lb.mine = next; return true; }
   catch(e){ if (e?.code === "invalid_argument") lb.off = true; return false; }
@@ -1259,6 +1306,31 @@ function askName(first){
   welcomeFirst = first;
   const w = $("welcome");
   const typed = $("pname") ? $("pname").value : playerName;
+  if (USE_CONVEX){
+    w.innerHTML = `<div class="sheet welcome" role="dialog" aria-labelledby="w-t">
+      <h3 id="w-t">${t("userRenameTitle")}</h3>
+      <p>${t("userRenameText")}</p>
+      <form class="namefield" id="nameform" autocomplete="off" novalidate>
+        ${idFields("p", playerName)}
+        <div class="err" id="nameerr"></div>
+        <button class="btn" type="submit" id="namesave">${t("saveUser")}</button>
+      </form>
+      <button class="linkbtn" id="skipname">${t("cancel")}</button>
+    </div>`;
+    w.hidden = false;
+    $("nameform").onsubmit = async e => {
+      e.preventDefault();
+      const b = $("namesave"); b.setAttribute("aria-busy", "true"); b.textContent = t("checking");
+      const err = await claimUsername($("pname").value, $("ppin").value);
+      b.removeAttribute("aria-busy"); b.textContent = t("saveUser");
+      if (err){ $("nameerr").textContent = err; return; }
+      closeWelcome();
+      if (!$("results").hidden) { renderResults(); refreshBoard(); }
+    };
+    $("skipname").onclick = closeWelcome;
+    setTimeout(() => $("pname")?.focus({preventScroll:true}), 50);
+    return;
+  }
   w.innerHTML = `<div class="sheet welcome" role="dialog" aria-labelledby="w-t">
     ${first ? langPills() : ""}
     <h3 id="w-t">${first ? t("welcomeTitle") : t("renameTitle")}</h3>
@@ -1305,7 +1377,7 @@ async function refreshBoard(total){
     const board = boardKey();
     let newBest = false, res;
     if (typeof total === "number" && total > 0 && playerName){
-      try { newBest = !!(await cx("mutation", "scores:submit", { pid: lb.uid, name: playerName, board, best: total })).newBest; } catch(e){}
+      try { newBest = ((await cx("mutation", "scores:submit", { pid: lb.uid, scores: [{ board, best: total }] })).newBest || []).includes(board); } catch(e){}
     }
     try { res = await cx("query", "scores:board", { board, pid: lb.uid }); }
     catch(e){ if (seq === boardSeq) el.innerHTML = `<div class="note">${t("lbDown2")}</div>`; return; }
@@ -1333,7 +1405,7 @@ function drawBoard(){
     const line = (name, isMe, rank, score) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rank}</span><span class="nm"><bdi>${esc(name || t("player"))}</bdi>${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
     let list = top.map((r, i) => line(r.name, r.me, i + 1, r.best)).join("");
     if (me && me.rank > top.length) list += (me.rank > top.length + 1 ? `<li class="gap">⋯</li>` : "") + line(me.name, true, me.rank, me.best);
-    const where = !playerName ? t("joinName") : me ? t("rank", boardCache.newBest, me.rank, count) : t("joinOne");
+    const where = !playerName ? t("joinUser") : me ? t("rank", boardCache.newBest, me.rank, count) : t("joinOne");
     document.querySelector(".sheet .best")?.setAttribute("hidden", "");
     el.innerHTML = `<div class="bh">${t("leaderboard")}</div>
       <div class="note">${where}</div>
@@ -1461,7 +1533,7 @@ function renderResults(){
     </details>` : ""}
     ${a2hsShown ? a2hsCard() : ""}
     <div class="rfoot">
-      ${playerName ? `<span>${t("playingAs", `<bdi>${esc(playerName)}</bdi>`)}</span><button id="rename">${t("changeName")}</button>` : `<button id="rename">${t("addName")}</button>`}
+      ${playerName ? `<span>${t("playingAs", `<bdi>${esc(playerName)}</bdi>`)}</span><button id="rename">${t(USE_CONVEX ? "changeUser" : "changeName")}</button>` : `<button id="rename">${t(USE_CONVEX ? "addUser" : "addName")}</button>`}
       <button id="how2">${t("howToPlay")}</button>
     </div>
   </div>`;
@@ -1750,27 +1822,39 @@ document.fonts?.ready.then(() => { layout(); });
 let splashAsk = !playerName; // ask for a name only if this device doesn't know one
 function renderSplash(){
   const body = $("spbody"); if (!body) return;
-  const typed = $("spname") ? $("spname").value : "";
+  let typed = $("spname") ? $("spname").value : "";
+  if (!typed && USE_CONVEX){ try { typed = localStorage.getItem(NAME_KEY) || ""; } catch(e){} } // a name from before usernames: suggest it
   body.innerHTML = `${langPills()}
     ${splashAsk ? `<p class="sptag">${t("spTag")}</p>
       <form id="spform" autocomplete="off" novalidate>
-        <div class="namefield"><label for="spname">${t("playerName")}</label>
+        ${USE_CONVEX ? `<div class="namefield">${idFields("sp", typed)}
+          <span class="hint">${t("userHint")}</span><div class="err" id="sperr"></div></div>` : `<div class="namefield"><label for="spname">${t("playerName")}</label>
           <input id="spname" type="text" maxlength="16" placeholder="${esc(t("placeholder"))}" value="${esc(typed)}" autocapitalize="words" spellcheck="false" enterkeyhint="go">
-          <span class="hint">${t("spNameHint")}</span><div class="err" id="sperr"></div></div>
+          <span class="hint">${t("spNameHint")}</span><div class="err" id="sperr"></div></div>`}
         <button class="btn spgo" id="spgo" type="submit">${t("spGo")}</button>
         <button class="btn2 spexplore" id="spexplore" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg>${t("spExplore")}</button>
       </form>`
     : `<p class="sphi">${t("spHi", `<bdi>${esc(playerName)}</bdi>`)}</p><p class="sptag">${t("spTag")}</p>
       <button class="btn spgo" id="spgo" type="button">${t("spGo")}</button>
       <button class="btn2 spexplore" id="spexplore" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg>${t("spExplore")}</button>
-      <button class="linkbtn" id="spnotyou" type="button">${t("spNotYou")}</button>`}`;
+      <button class="linkbtn" id="spnotyou" type="button">${t(USE_CONVEX ? "spNotYouU" : "spNotYou")}</button>`}`;
   wireLangPills(body);
   $("spexplore").onclick = () => enterGame(true);
   if (splashAsk) $("spform").onsubmit = e => { e.preventDefault(); enterGame(); };
   else { $("spgo").onclick = enterGame; $("spnotyou").onclick = () => { splashAsk = true; renderSplash(); $("spname")?.focus(); }; }
 }
-function enterGame(toExplore){
-  if (splashAsk){
+let entering = false;
+async function enterGame(toExplore){
+  if (entering) return;
+  if (splashAsk && USE_CONVEX){
+    const raw = $("spname").value, pin = $("sppin").value;
+    if (raw.trim() || pin){
+      const b = $("spgo"); entering = true; b.setAttribute("aria-busy", "true"); b.textContent = t("checking");
+      const err = lb.ready ? await claimUsername(raw, pin) : t("netErr");
+      entering = false; b.removeAttribute("aria-busy"); b.textContent = t("spGo");
+      if (err){ $("sperr").textContent = err; return; }
+    }
+  } else if (splashAsk && !USE_CONVEX){
     const raw = $("spname").value, n = cleanName(raw);
     if (raw.trim() && n.length < 2){ $("sperr").textContent = t("nameErr"); return; }
     if (n){ playerName = n; try { localStorage.setItem(NAME_KEY, n); } catch(e){} if (lb.ready && lb.mine) saveMine({}); }
