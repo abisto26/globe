@@ -1258,17 +1258,32 @@ let lb = { kind: "", db: null, uid: null, mine: null, ready: false, off: false }
 /* ---------- offline ----------
    The hosted site registers sw.js, which keeps a copy of the game on the device so it opens without a connection.
    The "Offline" tab shows only while there is no connection; back online, scores saved meanwhile are uploaded. */
-function paintOnline(){
-  const off = !navigator.onLine;
-  if ($("offline")) $("offline").hidden = !off;
+const HOSTED = !!document.querySelector('link[rel="manifest"]') && /^(https:|http:\/\/localhost)/.test(location.href);
+let isOffline = !navigator.onLine;
+function setOffline(v){
+  if ($("offline")) $("offline").hidden = !v;
+  if (v === isOffline) return;
+  isOffline = v;
+  if (!v && lb.kind === "convex") syncLocalBests().then(() => { if (!$("results").hidden) refreshBoard(); });
 }
-addEventListener("offline", paintOnline);
-addEventListener("online", () => {
-  paintOnline();
-  if (lb.kind === "convex"){ syncLocalBests().then(() => { if (!$("results").hidden) refreshBoard(); }); }
-});
-paintOnline();
-if ("serviceWorker" in navigator && document.querySelector('link[rel="manifest"]') && /^(https:|http:\/\/localhost)/.test(location.href)){
+/* iPhones often keep saying "online" in airplane mode, so on the hosted site the game also checks for itself
+   with a tiny request that skips the offline copy (?ping). */
+let probing = false;
+async function checkOnline(){
+  if (!navigator.onLine) return setOffline(true);
+  if (!HOSTED || probing) return setOffline(false);
+  probing = true;
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 5000);
+  try { await fetch(`index.html?ping=${Date.now()}`, { method: "HEAD", cache: "no-store", signal: ctl.signal }); setOffline(false); }
+  catch(e){ setOffline(true); }
+  finally { clearTimeout(timer); probing = false; }
+}
+addEventListener("offline", () => setOffline(true));
+addEventListener("online", checkOnline);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkOnline(); });
+setInterval(() => { if (!document.hidden) checkOnline(); }, 20000);
+setOffline(isOffline); checkOnline();
+if ("serviceWorker" in navigator && HOSTED){
   addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
 /* Two leaderboard backends:
@@ -1299,9 +1314,9 @@ async function claimUsername(raw, pin){
   if (name.length < 3) return t("userErr");
   if (!/^\d{4}$/.test(pin)) return t("pinErr");
   let res;
-  if (!navigator.onLine) return t("offUser");
+  if (isOffline) return t("offUser");
   try { res = await cx("mutation", "scores:claim", { pid: lb.uid, username: name, pin }); }
-  catch(e){ return navigator.onLine ? t("netErr") : t("offUser"); }
+  catch(e){ await checkOnline(); return isOffline ? t("offUser") : t("netErr"); }
   if (!res.ok) return res.reason === "wrong_pin" ? t("wrongPin") : res.reason === "locked" ? t("lockedErr", res.wait || 10)
     : res.reason === "bad_pin" ? t("pinErr") : t("userErr");
   lb.uid = res.pid; playerName = res.name;
@@ -1317,12 +1332,15 @@ const idFields = (pre, typed) => `<div class="idrow">
       <input id="${pre}pin" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" autocomplete="current-password" enterkeyhint="go"></div>
   </div>`;
 async function cx(kind, path, args){
+  if (isOffline) await checkOnline();
+  if (isOffline) throw new Error("offline");
   const r = await fetch(CONVEX_URL.replace(/\/$/, "") + "/api/" + kind, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ path, args, format: "json" }),
   });
   const j = await r.json();
   if (j.status !== "success") throw new Error(j.errorMessage || "convex error");
+  if (isOffline) setOffline(false);
   return j.value;
 }
 const boardKey = () => mode + (mode !== "countries" ? "_" + level : "");
@@ -1447,14 +1465,14 @@ async function refreshBoard(total){
   if (seq !== boardSeq) return;
   if (!lb.ready){ el.innerHTML = `<div class="note">${t("lbDown")}</div>`; return; }
   if (lb.kind === "convex"){
-    if (!navigator.onLine){ el.innerHTML = `<div class="note">${t("offBoard")}</div>`; return; }
+    if (isOffline){ el.innerHTML = `<div class="note">${t("offBoard")}</div>`; return; }
     const board = boardKey();
     let newBest = false, res;
     if (typeof total === "number" && total > 0 && playerName){
       try { newBest = ((await cx("mutation", "scores:submit", { pid: lb.uid, scores: [{ board, best: total }] })).newBest || []).includes(board); } catch(e){}
     }
     try { res = await cx("query", "scores:board", { board, pid: lb.uid }); }
-    catch(e){ if (seq === boardSeq) el.innerHTML = `<div class="note">${t("lbDown2")}</div>`; return; }
+    catch(e){ await checkOnline(); if (seq === boardSeq) el.innerHTML = `<div class="note">${t(isOffline ? "offBoard" : "lbDown2")}</div>`; return; }
     if (seq !== boardSeq) return;
     boardCache = { convex: res, board, newBest: newBest || (boardCache?.newBest && boardCache.board === board) };
     drawBoard(); return;
@@ -1929,7 +1947,7 @@ async function enterGame(toExplore){
     const raw = $("spname").value, pin = $("sppin").value;
     if (raw.trim() || pin){
       const b = $("spgo"); entering = true; b.setAttribute("aria-busy", "true"); b.textContent = t("checking");
-      const err = lb.ready ? await claimUsername(raw, pin) : navigator.onLine ? t("netErr") : t("offUser");
+      const err = lb.ready ? await claimUsername(raw, pin) : !isOffline ? t("netErr") : t("offUser");
       entering = false; b.removeAttribute("aria-busy"); b.textContent = t("spGo");
       if (err){ $("sperr").textContent = err; return; }
     }

@@ -19,7 +19,9 @@ self.addEventListener("activate", e => {
 // Anything else, like the leaderboard, goes to the network as usual.
 self.addEventListener("fetch", e => {
   const req = e.request;
-  if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin || url.searchParams.has("ping")) return; // connection checks go straight to the network
+  if (req.method !== "GET") return;
   if (req.mode === "navigate") {
     e.respondWith(caches.match("./", { cacheName: CACHE }).then(r => r || fetch(req)).catch(() => caches.match("index.html")));
     return;
