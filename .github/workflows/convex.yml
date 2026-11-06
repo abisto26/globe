@@ -19,3 +19,13 @@ jobs:
       - run: npx convex deploy -y
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+      # Ask the live leaderboard for a board, the same way the game does from the site.
+      - name: Check the live leaderboard answers
+        run: |
+          URL=$(node -p "require('./site.config.json').convexUrl")
+          RES=$(curl -sS -i -X POST "$URL/api/query" \
+            -H "Content-Type: application/json" -H "Origin: https://abistoufisbot.github.io" \
+            -d '{"path":"scores:board","args":{"board":"flags_easy"},"format":"json"}')
+          echo "$RES"
+          echo "$RES" | grep -qi '^access-control-allow-origin' || { echo "no CORS header"; exit 1; }
+          echo "$RES" | grep -q '"status":"success"' || { echo "query failed"; exit 1; }
