@@ -14,6 +14,7 @@
   --glass:rgba(255,255,255,.58); --glass-edge:rgba(255,255,255,.75); --glass-shadow:0 10px 30px rgba(20,60,90,.18), inset 0 1px 0 rgba(255,255,255,.6);
   --display:"Bricolage Grotesque", "IBM Plex Sans Arabic", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --mono:"IBM Plex Mono", "IBM Plex Sans Arabic", ui-monospace, "SF Mono", Menlo, monospace;
+  --sp-bg:rgba(255,255,255,.82); --sp-ink:#46525e; --sp-edge:rgba(255,255,255,.9); --sp-lt:block; --sp-dk:none;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --ocean:#0c3a5e; --ocean-line:#134871; --chip:#0a1a22;
@@ -23,6 +24,7 @@
   --pin:#ff6a50; --target:#4fd08e; --gold:#f0b83a;
   --btn:#e8f2f3; --btn-ink:#0f2730; color-scheme:dark;
   --glass:rgba(12,28,38,.55); --glass-edge:rgba(255,255,255,.14); --glass-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+  --sp-bg:rgba(10,24,32,.78); --sp-ink:#a9bec4; --sp-edge:rgba(255,255,255,.12); --sp-lt:none; --sp-dk:block;
 }}
 :root[data-theme="dark"]{
   --ocean:#0c3a5e; --ocean-line:#134871; --chip:#0a1a22;
@@ -32,6 +34,7 @@
   --pin:#ff6a50; --target:#4fd08e; --gold:#f0b83a;
   --btn:#e8f2f3; --btn-ink:#0f2730; color-scheme:dark;
   --glass:rgba(12,28,38,.55); --glass-edge:rgba(255,255,255,.14); --glass-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+  --sp-bg:rgba(10,24,32,.78); --sp-ink:#a9bec4; --sp-edge:rgba(255,255,255,.12); --sp-lt:none; --sp-dk:block;
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{height:100%}
@@ -284,9 +287,10 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .btn[aria-busy="true"]{opacity:.65;pointer-events:none}
 /* "Powered by" sponsor: a small pill under the answers and at the foot of the start screen */
 .sponsor{pointer-events:auto;display:inline-flex;align-items:center;gap:8px;padding:5px 8px 5px 12px;border-radius:999px;text-decoration:none;
-  background:color-mix(in srgb,#fff 82%,transparent);box-shadow:0 2px 10px rgba(10,30,40,.12);color:#46525e;font:600 .72rem/1 var(--display);letter-spacing:.01em;white-space:nowrap;transition:transform .15s ease}
+  background:var(--sp-bg);border:1px solid var(--sp-edge);box-shadow:0 2px 10px rgba(10,30,40,.14);color:var(--sp-ink);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font:600 .72rem/1 var(--display);letter-spacing:.01em;white-space:nowrap;transition:transform .15s ease}
 .sponsor:active{transform:scale(.96)}
-.sponsor img{height:22px;width:auto;max-width:130px;display:block}
+.sponsor img{height:22px;width:auto;max-width:130px;display:var(--sp-lt)}
+.sponsor img.dk{display:var(--sp-dk)}
 /* in the game the pill sits halfway between the answers and the bottom edge of the screen (home-bar area included) */
 .tray.sp{padding-bottom:0}
 .tray.sp .sponsor{margin-top:calc(env(safe-area-inset-bottom,0px) + 4px);margin-bottom:14px}
@@ -435,12 +439,12 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
 .pinmark{animation:drop .22s ease-out}
 </style>
 
-<div class="splash" id="splash" role="dialog" aria-label="Globe by Abisto"><div class="spin"><img src="__LOGO_BIG__" alt="Globe by Abisto"><div class="spbody" id="spbody"></div></div><a class="sponsor" data-sponsor hidden target="_blank" rel="noopener sponsored"><span class="spby" data-i18n="poweredBy">Powered by</span><img alt=""></a></div>
+<div class="splash" id="splash" role="dialog" aria-label="Globe by Abisto"><div class="spin"><img src="__LOGO_BIG__" alt="Globe by Abisto"><div class="spbody" id="spbody"></div></div><a class="sponsor" data-sponsor hidden target="_blank" rel="noopener sponsored"><span class="spby" data-i18n="poweredBy">Powered by</span><img class="lt" alt=""><img class="dk" alt=""></a></div>
 <div class="app" id="app">
 
   <div class="mapwrap" id="mapwrap">
     <svg id="map" role="img" data-i18n-aria="mapLabel" aria-label="World map"></svg>
-    <div class="tray"><div class="card glass resultbar" id="resultbar" role="status" hidden></div><div class="card glass" id="card"></div><a class="sponsor" data-sponsor hidden target="_blank" rel="noopener sponsored"><span class="spby" data-i18n="poweredBy">Powered by</span><img alt=""></a></div>
+    <div class="tray"><div class="card glass resultbar" id="resultbar" role="status" hidden></div><div class="card glass" id="card"></div><a class="sponsor" data-sponsor hidden target="_blank" rel="noopener sponsored"><span class="spby" data-i18n="poweredBy">Powered by</span><img class="lt" alt=""><img class="dk" alt=""></a></div>
     <div class="results" id="results" hidden></div>
     <div class="results" id="help" hidden></div>
     <div class="results" id="welcome" hidden></div>
@@ -1306,7 +1310,8 @@ const SPONSOR = __SPONSOR__;
 document.querySelectorAll("[data-sponsor]").forEach(a => {
   if (!SPONSOR || !SPONSOR.url || !SPONSOR.logo) return;
   a.href = SPONSOR.url; a.title = SPONSOR.name || ""; a.setAttribute("aria-label", "Sponsor: " + (SPONSOR.name || SPONSOR.url));
-  a.querySelector("img").src = SPONSOR.logo; a.querySelector("img").alt = SPONSOR.name || "";
+  a.querySelector("img.lt").src = SPONSOR.logo;
+  a.querySelector("img.dk").src = SPONSOR.logoDark || SPONSOR.logo; // dark mode uses the light-on-dark logo if there is one
   a.hidden = false;
   a.parentElement.classList.add("sp");
 });

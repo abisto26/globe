@@ -3,6 +3,7 @@
   "sponsor": {
     "name": "Your Brand",
     "url": "https://example.com",
-    "logo": "sponsor/logo.svg"
+    "logo": "sponsor/logo.svg",
+    "logoDark": "sponsor/logo-dark.svg"
   }
 }

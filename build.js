@@ -45,11 +45,13 @@ const fontCSS = [
 function sponsorJSON(){
   const sp = config.sponsor;
   if (!sp || !sp.url || !sp.logo) return 'null';
-  const ext = sp.logo.split('.').pop().toLowerCase();
-  const mime = { svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' }[ext];
-  if (!mime) throw new Error('sponsor logo must be svg, png, jpg or webp');
-  const logo = `data:${mime};base64,` + fs.readFileSync(sp.logo).toString('base64');
-  return JSON.stringify({ name: sp.name || '', url: sp.url, logo }).replace(/</g, '\\u003c');
+  const embed = f => {
+    const mime = { svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' }[f.split('.').pop().toLowerCase()];
+    if (!mime) throw new Error('sponsor logo must be svg, png, jpg or webp');
+    return `data:${mime};base64,` + fs.readFileSync(f).toString('base64');
+  };
+  // logoDark (optional): a light-on-dark version for dark mode
+  return JSON.stringify({ name: sp.name || '', url: sp.url, logo: embed(sp.logo), logoDark: sp.logoDark ? embed(sp.logoDark) : '' }).replace(/</g, '\\u003c');
 }
 const logo = 'data:image/webp;base64,' + fs.readFileSync('src/logo/big.webp').toString('base64');
 let body = rd('src/game.src.html')
