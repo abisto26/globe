@@ -321,6 +321,19 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .idrow .f{display:flex;flex-direction:column;gap:6px;min-width:0}
 .idrow input.pin{text-align:center;letter-spacing:.3em;font-variant-numeric:tabular-nums;padding-inline:8px}
 .btn[aria-busy="true"]{opacity:.65;pointer-events:none}
+/* 🏆 leaderboard: button in the top bar, link on the start screen, and a sheet with every board */
+.lbbtn span{font-size:.8rem;line-height:1}
+.lbwrap{position:fixed;z-index:70}
+.lbsheet{gap:12px;text-align:center}
+.lbsheet h3{margin:0;display:flex;align-items:center;justify-content:center;gap:8px}
+.lbtabs{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:var(--chip);align-self:center;max-width:100%}
+.lbtabs button{border:0;background:none;padding:6px 11px;border-radius:999px;font:600 .82rem var(--display);color:var(--ink-soft);cursor:pointer;touch-action:manipulation}
+.lbtabs button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.lbtabs.lv{min-height:32px}
+.lbtabs.lv.off{visibility:hidden}
+.lbsheet .board{text-align:start;min-height:252px}
+.lbsheet .board > .note{text-align:center}
+.splb{display:inline-flex;align-items:center;gap:6px}
 /* "Powered by" sponsor: a small pill under the answers and at the foot of the start screen */
 .sponsor{pointer-events:auto;display:inline-flex;align-items:center;gap:8px;padding:5px 8px 5px 12px;border-radius:999px;text-decoration:none;
   background:var(--sp-bg);border:1px solid var(--sp-edge);box-shadow:0 2px 10px rgba(10,30,40,.14);color:var(--sp-ink);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font:600 .72rem/1 var(--display);letter-spacing:.01em;white-space:nowrap;transition:transform .15s ease}
@@ -444,6 +457,9 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
   .scorebox b::before{content:"✓ ";color:var(--target);font-weight:700}
   .levels button{padding:3px 7px}
   .controls{gap:4px}
+  /* the language button keeps only its globe so the 🏆 fits */
+  .langbtn > :not(svg){display:none}
+  .langbtn{padding:0 5px}
 }
 @media (max-width:430px){
   .stats{gap:8px}
@@ -483,6 +499,7 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
     <div class="tray"><div class="card glass resultbar" id="resultbar" role="status" hidden></div><div class="card glass" id="card"></div><a class="sponsor" data-sponsor hidden target="_blank" rel="noopener sponsored"><span class="spby" data-i18n="poweredBy">Powered by</span><img class="lt" alt=""><img class="dk" alt=""></a></div>
     <div class="results" id="results" hidden></div>
     <div class="results" id="help" hidden></div>
+    <div class="results lbwrap" id="lbsheet" hidden></div>
     <div class="results" id="welcome" hidden></div>
     <div class="toast glass" id="toast" role="status" aria-live="polite"></div>
   </div>
@@ -502,7 +519,7 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
       <div class="controls"><span class="levels" id="levels" role="group" data-i18n-aria="level" aria-label="Level">
           <button id="l-easy" aria-pressed="true" data-i18n="easy">Easy</button>
           <button id="l-pro" aria-pressed="false" data-i18n="pro">Pro</button>
-        </span><button class="how" id="how" data-i18n-aria="howToPlay" aria-label="How to play">?</button><span class="langwrap"><button class="langbtn" id="langbtn" data-i18n-aria="language" aria-label="Language" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>EN</span></button><span class="langmenu glass" id="langmenu" role="menu" hidden></span></span><button class="theme" id="theme" aria-label="Switch to dark mode"></button></div>
+        </span><button class="how lbbtn" id="lbbtn" data-i18n-aria="leaderboard" aria-label="Leaderboard"><span aria-hidden="true">🏆</span></button><button class="how" id="how" data-i18n-aria="howToPlay" aria-label="How to play">?</button><span class="langwrap"><button class="langbtn" id="langbtn" data-i18n-aria="language" aria-label="Language" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>EN</span></button><span class="langmenu glass" id="langmenu" role="menu" hidden></span></span><button class="theme" id="theme" aria-label="Switch to dark mode"></button></div>
     </div>
     <div class="prompt">
       <div class="timer" id="timer" aria-hidden="true"><i></i></div>
@@ -867,7 +884,7 @@ const T = {
     lbDown:"The leaderboard can't be reached right now. Your score is kept on this device.", lbDown2:"The leaderboard can't be reached right now.", offline:"Offline", poweredBy:"Powered by", offBoard:"You're offline. Your best is saved on this device and goes on the leaderboard when you're back online.", offUser:"You're offline. Play as a guest now and add your username when you're back online.",
     youTag:" (you)", joinName:"Add a name to join the leaderboard.", joinUser:"Add a username to save this score on the leaderboard.", joinOne:"Get at least 1 right to join the leaderboard.", noScores:"No scores yet. Be the first.",
     rank:(nb, r, n) => `${nb ? "New best! " : ""}You're <b>#${r}</b> of ${n} ${n === 1 ? "player" : "players"}.`,
-    gotIt:"Got it",
+    gotIt:"Got it", seeBoard:"Leaderboard", lbClose:"Close",
     help:`<p>Your score is the number of <b>right answers</b>. Each right answer is <b>+1</b>. Each miss costs one of your <b>3 lives</b>. The game ends when you run out of lives or press <b>Stop</b>.</p>
     <p><b>Explore (compass):</b> no score, no lives. Tap any country to see its flag, capital and big cities. Good homework before you play.</p>
     <p><b>Flags · Easy:</b> pick the country from 4 names. The wrong ones are neighbours, so similar flags show up.</p>
@@ -907,7 +924,7 @@ const T = {
     lbDown:"Le classement est inaccessible pour l'instant. Ton score est gardé sur cet appareil.", lbDown2:"Le classement est inaccessible pour l'instant.", offline:"Hors ligne", poweredBy:"Propulsé par", offBoard:"Tu es hors ligne. Ton record est gardé sur cet appareil et ira au classement dès ton retour en ligne.", offUser:"Tu es hors ligne. Joue en invité et ajoute ton pseudo une fois reconnecté.",
     youTag:" (toi)", joinName:"Ajoute un nom pour entrer au classement.", joinUser:"Ajoute un pseudo pour enregistrer ce score au classement.", joinOne:"Trouve au moins 1 bonne réponse pour entrer au classement.", noScores:"Aucun score pour l'instant. Sois le premier !",
     rank:(nb, r, n) => `${nb ? "Nouveau record ! " : ""}Tu es <b>n° ${r}</b> sur ${n} ${n > 1 ? "joueurs" : "joueur"}.`,
-    gotIt:"Compris",
+    gotIt:"Compris", seeBoard:"Classement", lbClose:"Fermer",
     help:`<p>Ton score est le nombre de <b>bonnes réponses</b>. Chaque bonne réponse vaut <b>+1</b>. Chaque erreur te coûte une de tes <b>3 vies</b>. La partie s'arrête quand tu n'as plus de vies ou quand tu touches <b>Arrêter</b>.</p>
     <p><b>Explorer (boussole) :</b> pas de score, pas de vies. Touche un pays pour voir son drapeau, sa capitale et ses grandes villes. Parfait pour réviser avant de jouer.</p>
     <p><b>Drapeaux · Facile :</b> choisis le pays parmi 4 noms. Les mauvaises réponses sont des voisins, donc les drapeaux se ressemblent.</p>
@@ -947,7 +964,7 @@ const T = {
     lbDown:"تعذّر الوصول إلى لوحة الترتيب الآن. نتيجتك محفوظة على هذا الجهاز.", lbDown2:"تعذّر الوصول إلى لوحة الترتيب الآن.", offline:"غير متصل", poweredBy:"برعاية", offBoard:"أنت غير متصل. أفضل نتيجة لك محفوظة على هذا الجهاز وستُضاف إلى لوحة الترتيب عند عودة الاتصال.", offUser:"أنت غير متصل. العب كضيف الآن وأضف اسم المستخدم عند عودة الاتصال.",
     youTag:" (أنت)", joinName:"أضف اسمًا لتنضم إلى لوحة الترتيب.", joinUser:"أضف اسم مستخدم لحفظ هذه النتيجة في لوحة الترتيب.", joinOne:"أجب إجابة صحيحة واحدة على الأقل لتدخل لوحة الترتيب.", noScores:"لا توجد نتائج بعد. كن الأول!",
     rank:(nb, r, n) => `${nb ? "رقم قياسي جديد! " : ""}أنت في المركز <b>${r}</b> من ${n}.`,
-    gotIt:"فهمت",
+    gotIt:"فهمت", seeBoard:"لوحة الترتيب", lbClose:"إغلاق",
     help:`<p>نتيجتك هي عدد <b>الإجابات الصحيحة</b>. كل إجابة صحيحة تساوي <b>+1</b>، وكل خطأ يكلّفك روحًا من <b>أرواحك الثلاث</b>. تنتهي اللعبة عندما تنفد أرواحك أو عندما تضغط <b>توقف</b>.</p>
     <p><b>الاستكشاف (البوصلة):</b> بدون نقاط ولا أرواح. المس أي دولة لترى علمها وعاصمتها وأكبر مدنها. مراجعة مفيدة قبل اللعب.</p>
     <p><b>الأعلام · سهل:</b> اختر الدولة من بين 4 أسماء. الخيارات الخاطئة دول مجاورة، لذا قد تتشابه الأعلام.</p>
@@ -1083,7 +1100,7 @@ function renderPrompt(){
    not when the player switches app or tab, so there is no time to look the answer up. */
 const ROUND_MS = 15000, TIMER_GRACE = 700; // a moment for the map to settle before the clock visibly moves
 let tLeft = 0, tLast = 0, tOn = false;
-const timerBlocked = () => splashOpen || !$("tour").hidden || !$("help").hidden || !$("welcome").hidden || !$("results").hidden;
+const timerBlocked = () => splashOpen || !$("tour").hidden || !$("help").hidden || !$("welcome").hidden || !$("results").hidden || !$("lbsheet").hidden;
 function paintTimer(){
   const el = $("timer"); if (!el) return;
   el.style.setProperty("--f", tOn ? Math.max(0, Math.min(1, tLeft / ROUND_MS)) : 0);
@@ -1586,6 +1603,65 @@ function drawBoard(){
     ${rows.length ? `<ol>${list}</ol>` : `<div class="note">${t("noScores")}</div>`}`;
 }
 
+/* ---------- leaderboard sheet: any game and level, from the top bar or the start screen ---------- */
+const LB_MODES = ["flags", "countries", "capitals", "cities"];
+let lbView = { mode: "flags", level: "easy" }, lbSeq = 0;
+const lbKeyOf = v => v.mode === "countries" ? "countries" : v.mode + "_" + v.level;
+async function standings(board){
+  // { top:[{name,best,me}], me:{rank,best,name}|null, count } from whichever leaderboard this copy uses
+  if (lb.kind === "convex") return cx("query", "scores:board", { board, pid: lb.uid });
+  const field = "b_" + board, tf = "t_" + board;
+  const docs = (await lb.db.collection("scores").orderBy(field, "desc").limit(500).get()).docs;
+  const rows = docs.map(d => ({ id: d.id, ...d.data() })).filter(r => +r[field] > 0)
+    .sort((a, b) => (+b[field] - +a[field]) || ((+a[tf] || 0) - (+b[tf] || 0)));
+  const i = rows.findIndex(r => r.id === lb.uid);
+  return { top: rows.slice(0, 5).map(r => ({ name: r.name, best: +r[field], me: r.id === lb.uid })),
+           me: i < 0 ? null : { rank: i + 1, best: +rows[i][field], name: rows[i].name }, count: rows.length };
+}
+function openBoardSheet(){
+  lbView = { mode: mode === "explore" ? "flags" : mode, level: levelOf[mode === "explore" ? "flags" : mode] || "easy" };
+  $("lbsheet").hidden = false; renderBoardSheet();
+  setTimeout(() => $("lbsheet").querySelector("[aria-pressed=true]")?.focus({preventScroll:true}), 50);
+}
+function closeBoardSheet(){ $("lbsheet").hidden = true; lbSeq++; }
+function renderBoardSheet(){
+  const v = lbView;
+  $("lbsheet").innerHTML = `<div class="sheet lbsheet" role="dialog" aria-labelledby="lb-t">
+    <h3 id="lb-t"><span aria-hidden="true">🏆</span>${t("leaderboard")}</h3>
+    <div class="lbtabs" role="group">${LB_MODES.map(m => `<button data-m="${m}" aria-pressed="${v.mode === m}">${t("m_" + m)}</button>`).join("")}</div>
+    <div class="lbtabs lv${v.mode === "countries" ? " off" : ""}" role="group" aria-label="${esc(t("level"))}">${["easy", "pro"].map(l => `<button data-l="${l}" aria-pressed="${v.level === l}">${t(l)}</button>`).join("")}</div>
+    <div class="board" id="lbboard"></div>
+    <button class="btn" id="lbclose">${t("lbClose")}</button>
+  </div>`;
+  $("lbsheet").querySelectorAll("[data-m]").forEach(b => onTap(b, () => { lbView.mode = b.dataset.m; renderBoardSheet(); }));
+  $("lbsheet").querySelectorAll("[data-l]").forEach(b => onTap(b, () => { lbView.level = b.dataset.l; renderBoardSheet(); }));
+  onTap($("lbclose"), closeBoardSheet);
+  fillBoardSheet();
+}
+async function fillBoardSheet(){
+  const el = $("lbboard"), seq = ++lbSeq, board = lbKeyOf(lbView);
+  const note = k => { if (seq === lbSeq) el.innerHTML = `<div class="note">${t(k)}</div>`; };
+  if (lb.off){ note("lbSignin"); return; }
+  note("loading");
+  const t0 = Date.now();
+  while (!lb.ready && !lb.off && Date.now() - t0 < 10000) await new Promise(r => setTimeout(r, 200));
+  if (seq !== lbSeq) return;
+  if (!lb.ready){ note(lb.off ? "lbSignin" : "lbDown"); return; }
+  if (lb.kind === "convex" && isOffline){ note("offBoard"); return; }
+  let st;
+  try { st = await standings(board); }
+  catch(e){ if (lb.kind === "convex") await checkOnline(); note(lb.kind === "convex" && isOffline ? "offBoard" : "lbDown2"); return; }
+  if (seq !== lbSeq) return;
+  const line = (name, isMe, rank, score) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rank}</span><span class="nm">${medalCell(rank)}<bdi>${esc(name || t("player"))}</bdi>${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
+  let list = st.top.map((r, i) => line(r.name, r.me, i + 1, r.best)).join("");
+  if (st.me && st.me.rank > st.top.length) list += (st.me.rank > st.top.length + 1 ? `<li class="gap">⋯</li>` : "") + line(st.me.name, true, st.me.rank, st.me.best);
+  const where = st.me ? t("rank", false, st.me.rank, st.count) : !playerName ? t(USE_CONVEX ? "joinUser" : "joinName") : "";
+  el.innerHTML = `${where ? `<div class="note">${where}</div>` : ""}${st.top.length ? `<ol>${list}</ol>` : `<div class="note">${t("noScores")}</div>`}`;
+}
+onTap($("lbbtn"), openBoardSheet);
+$("lbsheet").addEventListener("click", e => { if (e.target.id === "lbsheet") closeBoardSheet(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("lbsheet").hidden) closeBoardSheet(); });
+
 const MEDAL_AT = 3; // right answers needed for the end-of-game medal
 /* A short confetti burst from the medal, drawn on a canvas over the results; skipped when the viewer prefers less motion. */
 function celebrate(){
@@ -1996,13 +2072,16 @@ function renderSplash(){
           <span class="hint">${t("spNameHint")}</span><div class="err" id="sperr"></div></div>`}
         <button class="btn spgo" id="spgo" type="submit">${t("spGo")}</button>
         <button class="btn2 spexplore" id="spexplore" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg>${t("spExplore")}</button>
-      </form>`
+      </form>
+      <button class="linkbtn splb" id="splb" type="button"><span aria-hidden="true">🏆</span>${t("seeBoard")}</button>`
     : `<p class="sphi">${t("spHi", `<bdi>${esc(playerName)}</bdi>`)}</p><p class="sptag">${t("spTag")}</p>
       <button class="btn spgo" id="spgo" type="button">${t("spGo")}</button>
       <button class="btn2 spexplore" id="spexplore" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg>${t("spExplore")}</button>
+      <button class="linkbtn splb" id="splb" type="button"><span aria-hidden="true">🏆</span>${t("seeBoard")}</button>
       <button class="linkbtn" id="spnotyou" type="button">${t(USE_CONVEX ? "spNotYouU" : "spNotYou")}</button>`}`;
   wireLangPills(body);
   $("spexplore").onclick = () => enterGame(true);
+  $("splb").onclick = () => openBoardSheet();
   if (splashAsk) $("spform").onsubmit = e => { e.preventDefault(); enterGame(); };
   else { $("spgo").onclick = enterGame; $("spnotyou").onclick = () => { splashAsk = true; renderSplash(); $("spname")?.focus(); }; }
 }
