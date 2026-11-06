@@ -1,3 +1,8 @@
 {
-  "convexUrl": "https://handsome-squirrel-794.eu-west-1.convex.cloud"
+  "convexUrl": "https://handsome-squirrel-794.eu-west-1.convex.cloud",
+  "sponsor": {
+    "name": "Your Brand",
+    "url": "https://example.com",
+    "logo": "sponsor/logo.svg"
+  }
 }

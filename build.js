@@ -41,6 +41,16 @@ const fontCSS = [
   ...[500, 600].flatMap(w => [face('IBM Plex Mono', `ibm-plex-mono-latin-${w}-normal.woff2`, w, LATIN), face('IBM Plex Mono', `ibm-plex-mono-latin-ext-${w}-normal.woff2`, w, LATINEXT)]),
   ...[400, 500, 600, 700].map(w => face('IBM Plex Sans Arabic', `ibm-plex-sans-arabic-arabic-${w}-normal.woff2`, w, ARABIC)),
 ].join('\n');
+// sponsor: { name, url, logo } in site.config.json; the logo file is embedded so it also shows offline
+function sponsorJSON(){
+  const sp = config.sponsor;
+  if (!sp || !sp.url || !sp.logo) return 'null';
+  const ext = sp.logo.split('.').pop().toLowerCase();
+  const mime = { svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' }[ext];
+  if (!mime) throw new Error('sponsor logo must be svg, png, jpg or webp');
+  const logo = `data:${mime};base64,` + fs.readFileSync(sp.logo).toString('base64');
+  return JSON.stringify({ name: sp.name || '', url: sp.url, logo }).replace(/</g, '\\u003c');
+}
 const logo = 'data:image/webp;base64,' + fs.readFileSync('src/logo/big.webp').toString('base64');
 let body = rd('src/game.src.html')
   .replace(/<title>[^<]*<\/title>\n/, '')
@@ -53,6 +63,7 @@ let body = rd('src/game.src.html')
   .replace('__COUNTRIES_I18N__', () => rd('src/data/countries_i18n.json'))
   .replace(/__LOGO_(BIG|SMALL)__/g, () => logo)
   .replace('__CONVEX_URL__', () => (process.env.CONVEX_URL || config.convexUrl || '').trim())
+  .replace('__SPONSOR__', () => sponsorJSON())
   // bundle the two libraries so the game also works offline from the home screen
   .replace(/<script src="[^"]*d3[^"]*"><\/script>/, () => '<script>' + rd('src/vendor/d3.min.js') + '</script>')
   .replace(/<script src="[^"]*topojson[^"]*"><\/script>/, () => '<script>' + rd('src/vendor/topojson-client.min.js') + '</script>');

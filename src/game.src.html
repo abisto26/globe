@@ -282,6 +282,15 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .idrow .f{display:flex;flex-direction:column;gap:6px;min-width:0}
 .idrow input.pin{text-align:center;letter-spacing:.3em;font-variant-numeric:tabular-nums;padding-inline:8px}
 .btn[aria-busy="true"]{opacity:.65;pointer-events:none}
+/* "Powered by" sponsor: a small pill under the answers and at the foot of the start screen */
+.sponsor{pointer-events:auto;display:inline-flex;align-items:center;gap:8px;padding:5px 8px 5px 12px;border-radius:999px;text-decoration:none;
+  background:color-mix(in srgb,#fff 82%,transparent);box-shadow:0 2px 10px rgba(10,30,40,.12);color:#46525e;font:600 .72rem/1 var(--display);letter-spacing:.01em;white-space:nowrap;transition:transform .15s ease}
+.sponsor:active{transform:scale(.96)}
+.sponsor img{height:22px;width:auto;max-width:130px;display:block}
+.tray .sponsor{margin-top:-2px}
+.splash{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+.splash > .sponsor{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%)}
+.splash > .sponsor:active{transform:translateX(-50%) scale(.96)}
 /* "Offline" tab hanging from the top bar; hidden whenever there is a connection */
 .offbadge{position:absolute;left:50%;bottom:-13px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;padding:4px 11px 4px 9px;border-radius:999px;
   background:var(--ink);color:var(--panel);font:700 .74rem/1 var(--display);letter-spacing:.02em;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.18);animation:offin .3s ease}
@@ -424,12 +433,12 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
 .pinmark{animation:drop .22s ease-out}
 </style>
 
-<div class="splash" id="splash" role="dialog" aria-label="Globe by Abisto"><div class="spin"><img src="__LOGO_BIG__" alt="Globe by Abisto"><div class="spbody" id="spbody"></div></div></div>
+<div class="splash" id="splash" role="dialog" aria-label="Globe by Abisto"><div class="spin"><img src="__LOGO_BIG__" alt="Globe by Abisto"><div class="spbody" id="spbody"></div></div><a class="sponsor" data-sponsor hidden target="_blank" rel="noopener sponsored"><span class="spby" data-i18n="poweredBy">Powered by</span><img alt=""></a></div>
 <div class="app" id="app">
 
   <div class="mapwrap" id="mapwrap">
     <svg id="map" role="img" data-i18n-aria="mapLabel" aria-label="World map"></svg>
-    <div class="tray"><div class="card glass resultbar" id="resultbar" role="status" hidden></div><div class="card glass" id="card"></div></div>
+    <div class="tray"><div class="card glass resultbar" id="resultbar" role="status" hidden></div><div class="card glass" id="card"></div><a class="sponsor" data-sponsor hidden target="_blank" rel="noopener sponsored"><span class="spby" data-i18n="poweredBy">Powered by</span><img alt=""></a></div>
     <div class="results" id="results" hidden></div>
     <div class="results" id="help" hidden></div>
     <div class="results" id="welcome" hidden></div>
@@ -808,7 +817,7 @@ const T = {
     playerName:"Player name", placeholder:"e.g. MapMaster", startPlaying:"Start playing", saveName:"Save name", playNoName:"Play without a name", cancel:"Cancel",
     nameErr:"Use 2 to 16 letters or numbers.", player:"Player", userLabel:"Username", userPh:"e.g. MapMaster", pinLabel:"PIN", userErr:"Use 3 to 16 letters or numbers (no spaces).", pinErr:"Choose a 4-digit PIN.", wrongPin:"That username is taken. If it's yours, check the PIN; if not, pick another.", lockedErr:m => `Too many wrong PINs. Try again in ${m} min.`, netErr:"Can't reach the leaderboard. Check your connection.", checking:"Checking…", userHint:"Optional. Saves your scores. Already have one? Enter it with your PIN.", userRenameTitle:"Your username", userRenameText:"Pick a new username, or sign in to the one you use on another device. Remember your PIN: you need it on other devices.", saveUser:"Save", changeUser:"Change username", addUser:"Add a username", spNotYouU:"Not you? Use another username",
     leaderboard:"Leaderboard", loading:"Loading…", lbSignin:"The leaderboard works when you're signed in to Claude.",
-    lbDown:"The leaderboard can't be reached right now. Your score is kept on this device.", lbDown2:"The leaderboard can't be reached right now.", offline:"Offline", offBoard:"You're offline. Your best is saved on this device and goes on the leaderboard when you're back online.", offUser:"You're offline. Play as a guest now and add your username when you're back online.",
+    lbDown:"The leaderboard can't be reached right now. Your score is kept on this device.", lbDown2:"The leaderboard can't be reached right now.", offline:"Offline", poweredBy:"Powered by", offBoard:"You're offline. Your best is saved on this device and goes on the leaderboard when you're back online.", offUser:"You're offline. Play as a guest now and add your username when you're back online.",
     youTag:" (you)", joinName:"Add a name to join the leaderboard.", joinUser:"Add a username to save this score on the leaderboard.", joinOne:"Get at least 1 right to join the leaderboard.", noScores:"No scores yet. Be the first.",
     rank:(nb, r, n) => `${nb ? "New best! " : ""}You're <b>#${r}</b> of ${n} ${n === 1 ? "player" : "players"}.`,
     gotIt:"Got it",
@@ -848,7 +857,7 @@ const T = {
     playerName:"Nom de joueur", placeholder:"ex. : AsDesCartes", startPlaying:"Commencer", saveName:"Enregistrer", playNoName:"Jouer sans nom", cancel:"Annuler",
     nameErr:"Utilise 2 à 16 lettres ou chiffres.", player:"Joueur", userLabel:"Pseudo", userPh:"ex. : AsDesCartes", pinLabel:"Code", userErr:"Utilise 3 à 16 lettres ou chiffres (sans espace).", pinErr:"Choisis un code à 4 chiffres.", wrongPin:"Ce pseudo est déjà pris. Si c'est le tien, vérifie le code ; sinon, choisis-en un autre.", lockedErr:m => `Trop de codes erronés. Réessaie dans ${m} min.`, netErr:"Classement inaccessible. Vérifie ta connexion.", checking:"Vérification…", userHint:"Facultatif. Enregistre tes scores. Tu as déjà un pseudo ? Entre-le avec ton code.", userRenameTitle:"Ton pseudo", userRenameText:"Choisis un nouveau pseudo, ou connecte-toi à celui de ton autre appareil. Retiens ton code : il te le faudra sur tes autres appareils.", saveUser:"Enregistrer", changeUser:"Changer de pseudo", addUser:"Ajouter un pseudo", spNotYouU:"Ce n'est pas toi ? Utilise un autre pseudo",
     leaderboard:"Classement", loading:"Chargement…", lbSignin:"Le classement fonctionne quand tu es connecté à Claude.",
-    lbDown:"Le classement est inaccessible pour l'instant. Ton score est gardé sur cet appareil.", lbDown2:"Le classement est inaccessible pour l'instant.", offline:"Hors ligne", offBoard:"Tu es hors ligne. Ton record est gardé sur cet appareil et ira au classement dès ton retour en ligne.", offUser:"Tu es hors ligne. Joue en invité et ajoute ton pseudo une fois reconnecté.",
+    lbDown:"Le classement est inaccessible pour l'instant. Ton score est gardé sur cet appareil.", lbDown2:"Le classement est inaccessible pour l'instant.", offline:"Hors ligne", poweredBy:"Propulsé par", offBoard:"Tu es hors ligne. Ton record est gardé sur cet appareil et ira au classement dès ton retour en ligne.", offUser:"Tu es hors ligne. Joue en invité et ajoute ton pseudo une fois reconnecté.",
     youTag:" (toi)", joinName:"Ajoute un nom pour entrer au classement.", joinUser:"Ajoute un pseudo pour enregistrer ce score au classement.", joinOne:"Trouve au moins 1 bonne réponse pour entrer au classement.", noScores:"Aucun score pour l'instant. Sois le premier !",
     rank:(nb, r, n) => `${nb ? "Nouveau record ! " : ""}Tu es <b>n° ${r}</b> sur ${n} ${n > 1 ? "joueurs" : "joueur"}.`,
     gotIt:"Compris",
@@ -888,7 +897,7 @@ const T = {
     playerName:"اسم اللاعب", placeholder:"مثال: بطل الخرائط", startPlaying:"ابدأ اللعب", saveName:"حفظ الاسم", playNoName:"العب بدون اسم", cancel:"إلغاء",
     nameErr:"استخدم من 2 إلى 16 حرفًا أو رقمًا.", player:"لاعب", userLabel:"اسم المستخدم", userPh:"مثال: MapMaster", pinLabel:"الرمز", userErr:"استخدم من 3 إلى 16 حرفًا أو رقمًا (بدون مسافات).", pinErr:"اختر رمزًا من 4 أرقام.", wrongPin:"اسم المستخدم هذا محجوز. إن كان لك فتحقّق من الرمز، وإلا فاختر اسمًا آخر.", lockedErr:m => `محاولات خاطئة كثيرة. حاول مجددًا بعد ${m} دقيقة.`, netErr:"تعذّر الوصول إلى لوحة الترتيب. تحقّق من اتصالك.", checking:"جارٍ التحقق…", userHint:"اختياري. يحفظ نتائجك. لديك اسم مستخدم؟ أدخله مع رمزك.", userRenameTitle:"اسم المستخدم", userRenameText:"اختر اسم مستخدم جديدًا، أو سجّل الدخول بالاسم الذي تستخدمه على جهاز آخر. احفظ رمزك: ستحتاجه على أجهزتك الأخرى.", saveUser:"حفظ", changeUser:"تغيير اسم المستخدم", addUser:"أضف اسم مستخدم", spNotYouU:"لست أنت؟ استخدم اسم مستخدم آخر",
     leaderboard:"لوحة الترتيب", loading:"جارٍ التحميل…", lbSignin:"تعمل لوحة الترتيب عند تسجيل الدخول إلى Claude.",
-    lbDown:"تعذّر الوصول إلى لوحة الترتيب الآن. نتيجتك محفوظة على هذا الجهاز.", lbDown2:"تعذّر الوصول إلى لوحة الترتيب الآن.", offline:"غير متصل", offBoard:"أنت غير متصل. أفضل نتيجة لك محفوظة على هذا الجهاز وستُضاف إلى لوحة الترتيب عند عودة الاتصال.", offUser:"أنت غير متصل. العب كضيف الآن وأضف اسم المستخدم عند عودة الاتصال.",
+    lbDown:"تعذّر الوصول إلى لوحة الترتيب الآن. نتيجتك محفوظة على هذا الجهاز.", lbDown2:"تعذّر الوصول إلى لوحة الترتيب الآن.", offline:"غير متصل", poweredBy:"برعاية", offBoard:"أنت غير متصل. أفضل نتيجة لك محفوظة على هذا الجهاز وستُضاف إلى لوحة الترتيب عند عودة الاتصال.", offUser:"أنت غير متصل. العب كضيف الآن وأضف اسم المستخدم عند عودة الاتصال.",
     youTag:" (أنت)", joinName:"أضف اسمًا لتنضم إلى لوحة الترتيب.", joinUser:"أضف اسم مستخدم لحفظ هذه النتيجة في لوحة الترتيب.", joinOne:"أجب إجابة صحيحة واحدة على الأقل لتدخل لوحة الترتيب.", noScores:"لا توجد نتائج بعد. كن الأول!",
     rank:(nb, r, n) => `${nb ? "رقم قياسي جديد! " : ""}أنت في المركز <b>${r}</b> من ${n}.`,
     gotIt:"فهمت",
@@ -1290,6 +1299,14 @@ if ("serviceWorker" in navigator && HOSTED){
    - inside claude.ai: the artifact's shared database (claude.use("db"));
    - anywhere else (GitHub Pages): Convex, through its HTTP API. build.js fills in the URL. */
 const CONVEX_URL = "__CONVEX_URL__";
+/* Sponsor shown as "Powered by <logo>" (set in site.config.json; empty = nothing shown) */
+const SPONSOR = __SPONSOR__;
+document.querySelectorAll("[data-sponsor]").forEach(a => {
+  if (!SPONSOR || !SPONSOR.url || !SPONSOR.logo) return;
+  a.href = SPONSOR.url; a.title = SPONSOR.name || ""; a.setAttribute("aria-label", "Sponsor: " + (SPONSOR.name || SPONSOR.url));
+  a.querySelector("img").src = SPONSOR.logo; a.querySelector("img").alt = SPONSOR.name || "";
+  a.hidden = false;
+});
 const PID_KEY = "globedrop-pid";
 const USE_CONVEX = !window.claude?.use && /^https:\/\//.test(CONVEX_URL);
 const cleanUser = s => String(s || "").normalize("NFKC").replace(/[^\p{L}\p{N}_.\-]/gu, "").slice(0, 16);
