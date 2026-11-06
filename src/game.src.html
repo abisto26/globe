@@ -287,6 +287,62 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .btn[aria-busy="true"]{opacity:.65;pointer-events:none}
 /* 🏆 leaderboard: button in the top bar, link on the start screen, and a sheet with every board */
 .lbbtn span{font-size:.8rem;line-height:1}
+.oldctl{display:none!important}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* ⚙ settings: one button in the top bar; its dot is green with a username, grey for a guest */
+.gearbtn{position:relative;width:30px;height:30px;flex:none;border-radius:50%;border:1px solid var(--glass-edge);background:color-mix(in srgb,var(--chip) 55%,transparent);color:var(--ink);display:grid;place-items:center;padding:0;cursor:pointer;touch-action:manipulation;transition:background .2s,color .2s,transform .15s}
+.gearbtn svg{width:17px;height:17px;transition:transform .35s ease}
+.gearbtn[aria-expanded="true"]{background:var(--ink);color:var(--panel)}
+.gearbtn[aria-expanded="true"] svg{transform:rotate(60deg)}
+.gearbtn:active{transform:scale(.92)}
+.gearbtn .gdot{position:absolute;inset-inline-end:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:#9aa9b2;border:2px solid var(--panel)}
+.gearbtn .gdot.on{background:var(--target)}
+.sscrim{position:fixed;inset:0;z-index:65;background:rgba(10,25,35,.16);-webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);animation:fadein .2s ease}
+@keyframes fadein{from{opacity:0}}
+.smenu{position:fixed;z-index:66;width:min(320px,calc(100vw - 24px));padding:10px;border-radius:24px;text-align:start;
+  background:color-mix(in srgb,var(--panel) 88%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);
+  border:1px solid var(--glass-edge);box-shadow:0 24px 60px rgba(10,30,45,.28),inset 0 1px 0 rgba(255,255,255,.25);display:flex;flex-direction:column;gap:8px;
+  transform-origin:top right;animation:smpop .22s cubic-bezier(.2,1.3,.4,1)}
+[dir="rtl"] .smenu{transform-origin:top left}
+@keyframes smpop{from{opacity:0;transform:scale(.92) translateY(-6px)}}
+.smenu .tip{position:absolute;top:-7px;width:14px;height:14px;background:inherit;border-left:1px solid var(--glass-edge);border-top:1px solid var(--glass-edge);transform:rotate(45deg);border-radius:3px 0 0 0;-webkit-backdrop-filter:none;backdrop-filter:none}
+.smenu .prof{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--target) 22%,var(--panel)),color-mix(in srgb,var(--ocean) 35%,var(--panel)))}
+.smenu .prof.guest{background:var(--chip)}
+.smenu .avbig{width:44px;height:44px;flex:none;border-radius:50%;display:grid;place-items:center;font:800 1.2rem var(--display);color:#fff;background:linear-gradient(135deg,#2bb673,#1f8a5b);box-shadow:0 4px 12px rgba(31,138,91,.35);text-transform:uppercase}
+.smenu .guest .avbig{background:linear-gradient(135deg,#a8b6bf,#7f909b);box-shadow:none}
+.smenu .avbig svg{width:24px;height:24px}
+.smenu .who{flex:1;min-width:0;text-align:start}
+.smenu .who small span{overflow:hidden;text-overflow:ellipsis}
+.smenu .who b{display:block;font:800 1.02rem var(--display);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.smenu .who small{display:flex;align-items:center;gap:5px;white-space:nowrap;font:600 .74rem var(--display);color:var(--ink-soft);margin-top:2px}
+.smenu .who small i{width:7px;height:7px;flex:none;border-radius:50%;background:var(--target)}
+.smenu .guest .who small i{background:#9aa9b2}
+.smenu .act{flex:none;white-space:nowrap;border:0;border-radius:999px;padding:7px 11px;font:700 .76rem var(--display);background:var(--panel);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1);cursor:pointer;touch-action:manipulation}
+.smenu .guest .act{background:var(--target);color:#fff}
+.smenu .rowq{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.smenu .tile{border-radius:16px;background:var(--chip);padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.smenu .tl{font:600 .7rem var(--display);color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em}
+[dir="rtl"] .smenu .tl{letter-spacing:0}
+.smenu .seg{display:flex;background:color-mix(in srgb,var(--panel) 60%,transparent);border-radius:999px;padding:3px;gap:2px}
+.smenu .seg button{flex:1;border:0;background:none;text-align:center;padding:6px 0;border-radius:999px;font:700 .8rem var(--display);color:var(--ink-soft);cursor:pointer;touch-action:manipulation;display:grid;place-items:center}
+.smenu .seg button svg{width:15px;height:15px}
+.smenu .seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.smenu .list{background:var(--chip);border-radius:16px;padding:4px;display:flex;flex-direction:column}
+.smenu .item{display:flex;align-items:center;gap:12px;padding:9px 10px;border:0;background:none;border-radius:12px;font:650 .95rem var(--display);color:var(--ink);text-align:start;cursor:pointer;touch-action:manipulation}
+.smenu .item:active:not(:disabled){background:color-mix(in srgb,var(--panel) 70%,transparent)}
+.smenu .item .ic{width:32px;height:32px;flex:none;border-radius:10px;display:grid;place-items:center;font-size:1rem}
+.smenu .ic.gold{background:linear-gradient(135deg,#ffd76a,#f0a92b)}
+.smenu .ic.blue{background:linear-gradient(135deg,#6cc3ff,#3d8be0);color:#fff;font:800 1rem var(--display)}
+.smenu .item .chev{display:inline-block;margin-inline-start:auto;color:var(--ink-soft);font-size:1.15rem;line-height:1}
+.smenu .item:disabled{cursor:default}
+.smenu .item:disabled > :not(.lockhint){opacity:.5}
+.smenu .lockhint{margin-inline-start:auto;white-space:nowrap;font:600 .7rem var(--display);color:var(--ink-soft)}
+@media (max-width:360px){.smenu .act{padding:7px 9px;font-size:.72rem}.smenu .item{gap:10px;font-size:.9rem}.smenu .avbig{width:40px;height:40px}}
+.smenu .foot{display:flex;justify-content:center}
+.smenu .tick{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,#ff7a1a 16%,transparent);color:#c2560c;font:600 .72rem var(--display)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .smenu .tick{color:#ffae6b}}
+:root[data-theme="dark"] .smenu .tick{color:#ffae6b}
+@media (prefers-reduced-motion: reduce){.smenu,.sscrim{animation:none}.gearbtn svg{transition:none}}
 .lbwrap{position:fixed;z-index:70}
 .lbsheet{gap:12px;text-align:center}
 .lbsheet h3{margin:0;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -421,9 +477,6 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
   .scorebox b::before{content:"✓ ";color:var(--target);font-weight:700}
   .levels button{padding:3px 7px}
   .controls{gap:4px}
-  /* the language button keeps only its globe so the 🏆 fits */
-  .langbtn > :not(svg){display:none}
-  .langbtn{padding:0 5px}
 }
 @media (max-width:430px){
   .stats{gap:8px}
@@ -464,6 +517,7 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
     <div class="results" id="results" hidden></div>
     <div class="results" id="help" hidden></div>
     <div class="results lbwrap" id="lbsheet" hidden></div>
+    <div class="sscrim" id="sscrim" hidden></div><div class="smenu" id="smenu" role="dialog" aria-labelledby="sm-t" hidden></div>
     <div class="results" id="welcome" hidden></div>
     <div class="toast glass" id="toast" role="status" aria-live="polite"></div>
   </div>
@@ -483,7 +537,7 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
       <div class="controls"><span class="levels" id="levels" role="group" data-i18n-aria="level" aria-label="Level">
           <button id="l-easy" aria-pressed="true" data-i18n="easy">Easy</button>
           <button id="l-pro" aria-pressed="false" data-i18n="pro">Pro</button>
-        </span><button class="how lbbtn" id="lbbtn" data-i18n-aria="leaderboard" aria-label="Leaderboard"><span aria-hidden="true">🏆</span></button><button class="how" id="how" data-i18n-aria="howToPlay" aria-label="How to play">?</button><span class="langwrap"><button class="langbtn" id="langbtn" data-i18n-aria="language" aria-label="Language" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>EN</span></button><span class="langmenu glass" id="langmenu" role="menu" hidden></span></span><button class="theme" id="theme" aria-label="Switch to dark mode"></button></div>
+        </span><button class="gearbtn" id="gear" aria-haspopup="dialog" aria-expanded="false" data-i18n-aria="settings" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="gdot" id="gdot"></span></button><button class="how lbbtn oldctl" id="lbbtn" data-i18n-aria="leaderboard" aria-label="Leaderboard"><span aria-hidden="true">🏆</span></button><button class="how oldctl" id="how" data-i18n-aria="howToPlay" aria-label="How to play">?</button><span class="langwrap oldctl"><button class="langbtn" id="langbtn" data-i18n-aria="language" aria-label="Language" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>EN</span></button><span class="langmenu glass" id="langmenu" role="menu" hidden></span></span><button class="theme oldctl" id="theme" aria-label="Switch to dark mode"></button></div>
     </div>
     <div class="prompt">
       <div class="timer" id="timer" aria-hidden="true"><i></i></div>
@@ -843,7 +897,7 @@ const T = {
     lbDown:"The leaderboard can't be reached right now. Your score is kept on this device.", lbDown2:"The leaderboard can't be reached right now.", offline:"Offline", poweredBy:"Powered by", offBoard:"You're offline. Your best is saved on this device and goes on the leaderboard when you're back online.", offUser:"You're offline. Play as a guest now and add your username when you're back online.",
     youTag:" (you)", joinName:"Add a name to join the leaderboard.", joinUser:"Add a username to save this score on the leaderboard.", joinOne:"Get at least 1 right to join the leaderboard.", noScores:"No scores yet. Be the first.",
     rank:(nb, r, n) => `${nb ? "New best! " : ""}You're <b>#${r}</b> of ${n} ${n === 1 ? "player" : "players"}.`,
-    gotIt:"Got it", seeBoard:"Leaderboard", lbClose:"Close",
+    gotIt:"Got it", settings:"Settings", guest:"Guest", onBoard:"On the leaderboard", notRanked:"Not ranked yet", changeShort:"Change", addUserShort:"Add username", addNameShort:"Add name", langLbl:"Language", themeLbl:"Theme", afterQ:"after this question", timerRuns:"The timer keeps running", lightLbl:"Light", darkLbl:"Dark", seeBoard:"Leaderboard", lbClose:"Close",
     help:`<p>Your score is the number of <b>right answers</b>. Each right answer is <b>+1</b>. Each miss costs one of your <b>3 lives</b>. The game ends when you run out of lives or press <b>Stop</b>.</p>
     <p><b>Explore (compass):</b> no score, no lives. Tap any country to see its flag, capital and big cities. Good homework before you play.</p>
     <p><b>Flags · Easy:</b> pick the country from 4 names. The wrong ones are neighbours, so similar flags show up.</p>
@@ -883,7 +937,7 @@ const T = {
     lbDown:"Le classement est inaccessible pour l'instant. Ton score est gardé sur cet appareil.", lbDown2:"Le classement est inaccessible pour l'instant.", offline:"Hors ligne", poweredBy:"Propulsé par", offBoard:"Tu es hors ligne. Ton record est gardé sur cet appareil et ira au classement dès ton retour en ligne.", offUser:"Tu es hors ligne. Joue en invité et ajoute ton pseudo une fois reconnecté.",
     youTag:" (toi)", joinName:"Ajoute un nom pour entrer au classement.", joinUser:"Ajoute un pseudo pour enregistrer ce score au classement.", joinOne:"Trouve au moins 1 bonne réponse pour entrer au classement.", noScores:"Aucun score pour l'instant. Sois le premier !",
     rank:(nb, r, n) => `${nb ? "Nouveau record ! " : ""}Tu es <b>n° ${r}</b> sur ${n} ${n > 1 ? "joueurs" : "joueur"}.`,
-    gotIt:"Compris", seeBoard:"Classement", lbClose:"Fermer",
+    gotIt:"Compris", settings:"Réglages", guest:"Invité", onBoard:"Au classement", notRanked:"Pas encore classé", changeShort:"Changer", addUserShort:"Ajouter un pseudo", addNameShort:"Ajouter un nom", langLbl:"Langue", themeLbl:"Thème", afterQ:"après cette question", timerRuns:"Le chrono continue", lightLbl:"Clair", darkLbl:"Sombre", seeBoard:"Classement", lbClose:"Fermer",
     help:`<p>Ton score est le nombre de <b>bonnes réponses</b>. Chaque bonne réponse vaut <b>+1</b>. Chaque erreur te coûte une de tes <b>3 vies</b>. La partie s'arrête quand tu n'as plus de vies ou quand tu touches <b>Arrêter</b>.</p>
     <p><b>Explorer (boussole) :</b> pas de score, pas de vies. Touche un pays pour voir son drapeau, sa capitale et ses grandes villes. Parfait pour réviser avant de jouer.</p>
     <p><b>Drapeaux · Facile :</b> choisis le pays parmi 4 noms. Les mauvaises réponses sont des voisins, donc les drapeaux se ressemblent.</p>
@@ -923,7 +977,7 @@ const T = {
     lbDown:"تعذّر الوصول إلى لوحة الترتيب الآن. نتيجتك محفوظة على هذا الجهاز.", lbDown2:"تعذّر الوصول إلى لوحة الترتيب الآن.", offline:"غير متصل", poweredBy:"برعاية", offBoard:"أنت غير متصل. أفضل نتيجة لك محفوظة على هذا الجهاز وستُضاف إلى لوحة الترتيب عند عودة الاتصال.", offUser:"أنت غير متصل. العب كضيف الآن وأضف اسم المستخدم عند عودة الاتصال.",
     youTag:" (أنت)", joinName:"أضف اسمًا لتنضم إلى لوحة الترتيب.", joinUser:"أضف اسم مستخدم لحفظ هذه النتيجة في لوحة الترتيب.", joinOne:"أجب إجابة صحيحة واحدة على الأقل لتدخل لوحة الترتيب.", noScores:"لا توجد نتائج بعد. كن الأول!",
     rank:(nb, r, n) => `${nb ? "رقم قياسي جديد! " : ""}أنت في المركز <b>${r}</b> من ${n}.`,
-    gotIt:"فهمت", seeBoard:"لوحة الترتيب", lbClose:"إغلاق",
+    gotIt:"فهمت", settings:"الإعدادات", guest:"ضيف", onBoard:"في لوحة الترتيب", notRanked:"غير مصنّف بعد", changeShort:"تغيير", addUserShort:"أضف اسم مستخدم", addNameShort:"أضف اسمًا", langLbl:"اللغة", themeLbl:"المظهر", afterQ:"بعد هذا السؤال", timerRuns:"المؤقت مستمر", lightLbl:"فاتح", darkLbl:"داكن", seeBoard:"لوحة الترتيب", lbClose:"إغلاق",
     help:`<p>نتيجتك هي عدد <b>الإجابات الصحيحة</b>. كل إجابة صحيحة تساوي <b>+1</b>، وكل خطأ يكلّفك روحًا من <b>أرواحك الثلاث</b>. تنتهي اللعبة عندما تنفد أرواحك أو عندما تضغط <b>توقف</b>.</p>
     <p><b>الاستكشاف (البوصلة):</b> بدون نقاط ولا أرواح. المس أي دولة لترى علمها وعاصمتها وأكبر مدنها. مراجعة مفيدة قبل اللعب.</p>
     <p><b>الأعلام · سهل:</b> اختر الدولة من بين 4 أسماء. الخيارات الخاطئة دول مجاورة، لذا قد تتشابه الأعلام.</p>
@@ -1618,6 +1672,70 @@ async function fillBoardSheet(){
   el.innerHTML = `${where ? `<div class="note">${where}</div>` : ""}${st.top.length ? `<ol>${list}</ol>` : `<div class="note">${t("noScores")}</div>`}`;
 }
 onTap($("lbbtn"), openBoardSheet);
+
+/* ---------- ⚙ settings menu ----------
+   Profile (username or guest), language, theme, leaderboard and How to play. Opening it doesn't pause the game:
+   the timer keeps running, and the leaderboard waits until the question is answered. */
+const PERSON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8.5" r="4"/><path d="M4 20.5c.6-4 4-6.5 8-6.5s7.4 2.5 8 6.5z"/></svg>';
+const questionLive = () => mode !== "explore" && !!current && !revealed && tOn;
+function paintGearDot(){ $("gdot")?.classList.toggle("on", !!playerName); }
+function settingsOpen(){ return !$("smenu").hidden; }
+function renderSettings(){
+  const m = $("smenu"), live = questionLive(), dark = currentTheme() === "dark";
+  const isUser = !!playerName;
+  m.innerHTML = `<span class="tip" aria-hidden="true"></span>
+    <h2 id="sm-t" class="vh">${t("settings")}</h2>
+    <div class="prof${isUser ? "" : " guest"}">
+      <div class="avbig" aria-hidden="true">${isUser ? esc([...playerName][0]) : PERSON}</div>
+      <div class="who"><b><bdi>${isUser ? esc(playerName) : t("guest")}</bdi></b><small><i></i><span>${t(isUser ? "onBoard" : "notRanked")}</span></small></div>
+      <button class="act" id="sm-user">${t(isUser ? "changeShort" : (USE_CONVEX ? "addUserShort" : "addNameShort"))}</button>
+    </div>
+    <div class="rowq">
+      <div class="tile"><span class="tl">${t("langLbl")}</span><div class="seg" role="group" aria-label="${esc(t("langLbl"))}">
+        ${[["en", "EN"], ["fr", "FR"], ["ar", "ع"]].map(([l, x]) => `<button data-lang="${l}" lang="${l}" aria-pressed="${LANG === l}">${x}</button>`).join("")}</div></div>
+      <div class="tile"><span class="tl">${t("themeLbl")}</span><div class="seg" role="group" aria-label="${esc(t("themeLbl"))}">
+        <button data-th="light" aria-pressed="${!dark}" aria-label="${esc(t("lightLbl"))}">${SUN}</button><button data-th="dark" aria-pressed="${dark}" aria-label="${esc(t("darkLbl"))}">${MOON}</button></div></div>
+    </div>
+    <div class="list">
+      <button class="item" id="sm-lb"${live ? " disabled" : ""}><span class="ic gold" aria-hidden="true">🏆</span>${t("leaderboard")}${live ? `<span class="lockhint">${t("afterQ")}</span>` : `<span class="chev" aria-hidden="true">›</span>`}</button>
+      <button class="item" id="sm-how"><span class="ic blue" aria-hidden="true">?</span>${t("howToPlay")}<span class="chev" aria-hidden="true">›</span></button>
+    </div>
+    ${live ? `<div class="foot"><span class="tick">⏱ ${t("timerRuns")}</span></div>` : ""}`;
+  m.querySelectorAll("[data-lang]").forEach(b => onTap(b, () => { if (LANG !== b.dataset.lang) setLang(b.dataset.lang); renderSettings(); }));
+  m.querySelectorAll("[data-th]").forEach(b => onTap(b, () => {
+    document.documentElement.dataset.theme = b.dataset.th;
+    try { localStorage.setItem("globedrop-theme", b.dataset.th); } catch(e){}
+    paintThemeBtn(); renderSettings();
+  }));
+  onTap($("sm-user"), () => { closeSettings(); askName(false); });
+  onTap($("sm-lb"), () => { if (questionLive()) return; closeSettings(); openBoardSheet(); });
+  onTap($("sm-how"), () => { closeSettings(); showHelp(); });
+  placeSettings();
+}
+function placeSettings(){
+  const m = $("smenu"), g = $("gear").getBoundingClientRect(), rtl = document.documentElement.dir === "rtl";
+  m.style.top = (g.bottom + 12) + "px";
+  if (rtl){ m.style.left = Math.max(12, g.left - 8) + "px"; m.style.right = "auto"; }
+  else { m.style.right = Math.max(12, innerWidth - g.right - 8) + "px"; m.style.left = "auto"; }
+  const tip = m.querySelector(".tip"), mr = m.getBoundingClientRect();
+  if (tip) tip.style.left = (g.left + g.width / 2 - mr.left - 7) + "px";
+}
+function openSettings(){
+  $("sscrim").hidden = false; $("smenu").hidden = false; $("gear").setAttribute("aria-expanded", "true");
+  renderSettings();
+  setTimeout(() => $("smenu").querySelector("button")?.focus({preventScroll:true}), 30);
+}
+function closeSettings(){
+  if (!settingsOpen()) return;
+  $("sscrim").hidden = true; $("smenu").hidden = true; $("gear").setAttribute("aria-expanded", "false");
+}
+onTap($("gear"), () => settingsOpen() ? closeSettings() : openSettings());
+onTap($("sscrim"), closeSettings);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && settingsOpen()) { closeSettings(); $("gear").focus(); } });
+addEventListener("resize", () => { if (settingsOpen()) placeSettings(); });
+// the question ends (answered or time's up) while the menu is open: the leaderboard unlocks there and then
+setInterval(() => { paintGearDot(); if (settingsOpen() && !!$("sm-lb")?.disabled !== questionLive()) renderSettings(); }, 250);
+paintGearDot();
 $("lbsheet").addEventListener("click", e => { if (e.target.id === "lbsheet") closeBoardSheet(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("lbsheet").hidden) closeBoardSheet(); });
 
@@ -2031,16 +2149,13 @@ function renderSplash(){
           <span class="hint">${t("spNameHint")}</span><div class="err" id="sperr"></div></div>`}
         <button class="btn spgo" id="spgo" type="submit">${t("spGo")}</button>
         <button class="btn2 spexplore" id="spexplore" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg>${t("spExplore")}</button>
-      </form>
-      <button class="linkbtn splb" id="splb" type="button"><span aria-hidden="true">🏆</span>${t("seeBoard")}</button>`
+      </form>`
     : `<p class="sphi">${t("spHi", `<bdi>${esc(playerName)}</bdi>`)}</p><p class="sptag">${t("spTag")}</p>
       <button class="btn spgo" id="spgo" type="button">${t("spGo")}</button>
       <button class="btn2 spexplore" id="spexplore" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg>${t("spExplore")}</button>
-      <button class="linkbtn splb" id="splb" type="button"><span aria-hidden="true">🏆</span>${t("seeBoard")}</button>
       <button class="linkbtn" id="spnotyou" type="button">${t(USE_CONVEX ? "spNotYouU" : "spNotYou")}</button>`}`;
   wireLangPills(body);
   $("spexplore").onclick = () => enterGame(true);
-  $("splb").onclick = () => openBoardSheet();
   if (splashAsk) $("spform").onsubmit = e => { e.preventDefault(); enterGame(); };
   else { $("spgo").onclick = enterGame; $("spnotyou").onclick = () => { splashAsk = true; renderSplash(); $("spname")?.focus(); }; }
 }
