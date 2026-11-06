@@ -1,0 +1,21 @@
+# Uploads the leaderboard functions in convex/ to Convex whenever they change.
+# Needs the repository secret CONVEX_DEPLOY_KEY (a Production deploy key from the Convex dashboard).
+name: Deploy leaderboard to Convex
+on:
+  push:
+    branches: [main]
+    paths: ["convex/**", "package.json", "package-lock.json", ".github/workflows/convex.yml"]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx convex deploy -y
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}

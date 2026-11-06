@@ -1,6 +1,7 @@
 // Builds index.html from src/. No dependencies: `node build.js`
 const fs = require('fs');
 const rd = f => fs.readFileSync(f, 'utf8');
+const config = JSON.parse(rd('site.config.json')); // convexUrl: the leaderboard's Convex deployment
 const DESC = 'Globe by Abisto — a free geography game: flags, countries, capitals and cities. Three lives, no sign-up, English, French and Arabic.';
 const head = `<!doctype html>
 <html lang="en">
@@ -38,6 +39,7 @@ let body = rd('src/game.src.html')
   .replace('__PLACES_I18N__', () => rd('src/data/places_i18n.json'))
   .replace('__COUNTRIES_I18N__', () => rd('src/data/countries_i18n.json'))
   .replace(/__LOGO_(BIG|SMALL)__/g, () => logo)
+  .replace('__CONVEX_URL__', () => (process.env.CONVEX_URL || config.convexUrl || '').trim())
   // bundle the two libraries so the game also works offline from the home screen
   .replace(/<script src="[^"]*d3[^"]*"><\/script>/, () => '<script>' + rd('src/vendor/d3.min.js') + '</script>')
   .replace(/<script src="[^"]*topojson[^"]*"><\/script>/, () => '<script>' + rd('src/vendor/topojson-client.min.js') + '</script>');

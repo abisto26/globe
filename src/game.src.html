@@ -1162,7 +1162,21 @@ function verdict(n){
 const NAME_KEY = "globedrop-name";
 let playerName = "";
 try { playerName = localStorage.getItem(NAME_KEY) || ""; } catch(e){}
-let lb = { db: null, uid: null, mine: null, ready: false, off: false };
+let lb = { kind: "", db: null, uid: null, mine: null, ready: false, off: false };
+/* Two leaderboard backends:
+   - inside claude.ai: the artifact's shared database (claude.use("db"));
+   - anywhere else (GitHub Pages): Convex, through its HTTP API. build.js fills in the URL. */
+const CONVEX_URL = "__CONVEX_URL__";
+const PID_KEY = "globedrop-pid";
+async function cx(kind, path, args){
+  const r = await fetch(CONVEX_URL.replace(/\/$/, "") + "/api/" + kind, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path, args, format: "json" }),
+  });
+  const j = await r.json();
+  if (j.status !== "success") throw new Error(j.errorMessage || "convex error");
+  return j.value;
+}
 const boardKey = () => mode + (mode !== "countries" ? "_" + level : "");
 const boardTitle = () => mode === "countries" ? t("m_countries") : t("m_" + mode) + " · " + t(level);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
@@ -1170,7 +1184,18 @@ const cleanName = s => String(s || "").replace(/[^\p{L}\p{N} _.\-]/gu, "").repla
 
 (async () => {
   try {
-    if (!window.claude?.use) { lb.off = true; return; }
+    if (!window.claude?.use){
+      if (!/^https:\/\//.test(CONVEX_URL)) { lb.off = true; return; }
+      // a random id for this device; it stays private (the server never sends ids back)
+      let pid = ""; try { pid = localStorage.getItem(PID_KEY) || ""; } catch(e){}
+      if (!/^[a-z0-9]{20,40}$/.test(pid)){
+        pid = Array.from(crypto.getRandomValues(new Uint8Array(24)), b => "abcdefghijklmnopqrstuvwxyz0123456789"[b % 36]).join("");
+        try { localStorage.setItem(PID_KEY, pid); } catch(e){}
+      }
+      Object.assign(lb, { kind: "convex", uid: pid, mine: {}, ready: true });
+      return;
+    }
+    lb.kind = "claude";
     const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
     const uid = user ? await user.id() : null;
     if (!db || !uid) { lb.off = true; return; }
@@ -1185,6 +1210,10 @@ const cleanName = s => String(s || "").replace(/[^\p{L}\p{N} _.\-]/gu, "").repla
 
 async function saveMine(patch){
   if (!lb.ready) return false;
+  if (lb.kind === "convex"){ // only a name change comes through here; scores are saved by refreshBoard
+    if (!playerName) return false;
+    try { await cx("mutation", "scores:rename", { pid: lb.uid, name: playerName }); return true; } catch(e){ return false; }
+  }
   const next = Object.assign({}, lb.mine || {}, patch, { name: playerName || "Player", updated: Date.now() });
   try { await lb.db.doc("scores/" + lb.uid).set(next); lb.mine = next; return true; }
   catch(e){ if (e?.code === "invalid_argument") lb.off = true; return false; }
@@ -1241,6 +1270,18 @@ async function refreshBoard(total){
   while (!lb.ready && !lb.off && Date.now() - t0 < 10000) await new Promise(r => setTimeout(r, 200));
   if (seq !== boardSeq) return;
   if (!lb.ready){ el.innerHTML = `<div class="note">${t("lbDown")}</div>`; return; }
+  if (lb.kind === "convex"){
+    const board = boardKey();
+    let newBest = false, res;
+    if (typeof total === "number" && total > 0 && playerName){
+      try { newBest = !!(await cx("mutation", "scores:submit", { pid: lb.uid, name: playerName, board, best: total })).newBest; } catch(e){}
+    }
+    try { res = await cx("query", "scores:board", { board, pid: lb.uid }); }
+    catch(e){ if (seq === boardSeq) el.innerHTML = `<div class="note">${t("lbDown2")}</div>`; return; }
+    if (seq !== boardSeq) return;
+    boardCache = { convex: res, board, newBest: newBest || (boardCache?.newBest && boardCache.board === board) };
+    drawBoard(); return;
+  }
   let newBest = false;
   if (typeof total === "number" && total > 0 && playerName && total > (+lb.mine?.[field] || 0)){
     newBest = await saveMine({ [field]: total, ["t_" + boardKey()]: Date.now() });
@@ -1256,6 +1297,18 @@ async function refreshBoard(total){
 }
 function drawBoard(){
   const el = $("board"); if (!el || !boardCache) return;
+  if (boardCache.convex){
+    const { top, me, count } = boardCache.convex;
+    const line = (name, isMe, rank, score) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rank}</span><span class="nm"><bdi>${esc(name || t("player"))}</bdi>${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
+    let list = top.map((r, i) => line(r.name, r.me, i + 1, r.best)).join("");
+    if (me && me.rank > top.length) list += (me.rank > top.length + 1 ? `<li class="gap">⋯</li>` : "") + line(me.name, true, me.rank, me.best);
+    const where = !playerName ? t("joinName") : me ? t("rank", boardCache.newBest, me.rank, count) : t("joinOne");
+    document.querySelector(".sheet .best")?.setAttribute("hidden", "");
+    el.innerHTML = `<div class="bh">${t("leaderboard")}</div>
+      <div class="note">${where}</div>
+      ${top.length ? `<ol>${list}</ol>` : `<div class="note">${t("noScores")}</div>`}`;
+    return;
+  }
   const { rows, field, newBest } = boardCache;
   const meIdx = rows.findIndex(r => r.id === lb.uid);
   const line = (r, i) => `<li class="${r.id === lb.uid ? "me" : ""}"><span class="rk">${i + 1}</span><span class="nm"><bdi>${esc(r.name || t("player"))}</bdi>${r.id === lb.uid ? t("youTag") : ""}</span><span class="sc">${+r[field]}</span></li>`;

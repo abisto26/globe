@@ -23,10 +23,15 @@ Plus **Explore**: tap any country to see its flag, capital and biggest cities.
 - `src/game.src.html`: the source you edit.
 - `src/data/`: map, flags and translated names. `src/vendor/`: d3 and topojson.
 - `build.js`: run `node build.js` after editing `src/` to rebuild `index.html`.
+- `convex/`: the leaderboard's server functions.
 - `icons/`, `manifest.webmanifest`: home-screen icons and app info.
 
-## Notes
-The leaderboard uses the claude.ai artifact runtime, so it only works in the claude.ai version. Everywhere else the game is fully playable and the leaderboard shows a short note.
+## Leaderboard
+- On this site the leaderboard runs on [Convex](https://convex.dev). The functions are in `convex/scores.ts`.
+- Each device gets a random player id, kept in the browser. Players only ever see names and scores.
+- `.github/workflows/convex.yml` uploads the functions whenever `convex/` changes. It needs the repo secret `CONVEX_DEPLOY_KEY`.
+- The Convex URL is set in `site.config.json`. Run `node build.js` after changing it.
+- The claude.ai version of the game keeps its own separate leaderboard.
 
 ## Credits
 - Map: [world-atlas](https://github.com/topojson/world-atlas) (Natural Earth, public domain), ISC

@@ -1,0 +1,24 @@
+{
+  "name": "globe-by-abisto",
+  "version": "1.0.0",
+  "description": "Globe by Abisto",
+  "scripts": {
+    "build": "node build.js",
+    "deploy": "convex deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abistoufisbot/globe-by-abisto.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abistoufisbot/globe-by-abisto/issues"
+  },
+  "homepage": "https://github.com/abistoufisbot/globe-by-abisto#readme",
+  "dependencies": {
+    "convex": "^1.49.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "private": true
+}
