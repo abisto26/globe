@@ -26,6 +26,7 @@
 Pick a game at the top, answer, and see how far you can go.
 
 - You have **3 lives**. A wrong answer costs one.
+- You have **15 seconds** for each question. If time runs out, it counts as a miss.
 - Every **10 right answers in a row** gives you a life back.
 - Your score is the number of right answers. Get **3 or more** to win the 🏅.
 
