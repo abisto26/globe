@@ -11,6 +11,14 @@
 
 <p align="center"><b><a href="https://abistoufisbot.github.io/Globe-by-Abisto/">▶ Play now</a></b></p>
 
+<p align="center">
+  Follow <b>@abisto26</b>:
+  <a href="https://www.instagram.com/abisto26">Instagram</a> ·
+  <a href="https://www.tiktok.com/@abisto26">TikTok</a> ·
+  <a href="https://www.youtube.com/@abisto26">YouTube</a> ·
+  <a href="https://www.facebook.com/abisto26">Facebook</a>
+</p>
+
 ---
 
 ## How to play
@@ -67,6 +75,14 @@ convex/           leaderboard server functions
 build.js          rebuilds index.html from src/  →  node build.js
 icons/            app icons
 ```
+
+## Follow Abisto
+
+**@abisto26** on
+[Instagram](https://www.instagram.com/abisto26) ·
+[TikTok](https://www.tiktok.com/@abisto26) ·
+[YouTube](https://www.youtube.com/@abisto26) ·
+[Facebook](https://www.facebook.com/abisto26)
 
 ---
 
