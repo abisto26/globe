@@ -305,6 +305,8 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .board ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
 .board li{display:grid;grid-template-columns:2.6ch 1fr auto;gap:10px;align-items:center;padding:6px 8px;border-radius:10px;font-variant-numeric:tabular-nums}
 .board li .rk{font:600 .85rem var(--mono);color:var(--ink-soft);text-align:right}
+.board li .rk .medalrk{font:1.15rem/1 system-ui,sans-serif}
+.board .bh .bht{display:inline-flex;align-items:center;gap:7px}
 .board li .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .board li .sc{font:600 .95rem var(--mono)}
 .board li.me{background:color-mix(in srgb,var(--gold) 22%,transparent);font-weight:700}
@@ -1415,7 +1417,7 @@ async function refreshBoard(total){
   if (lb.off || (!lb.ready && !window.claude?.use)){
     el.innerHTML = `<div class="note">${t("lbSignin")}</div>`; return;
   }
-  el.innerHTML = `<div class="bh">${t("leaderboard")} <small>${esc(boardTitle())}</small></div><div class="note">${t("loading")}</div>`;
+  el.innerHTML = `<div class="bh">${lbTitle()} <small>${esc(boardTitle())}</small></div><div class="note">${t("loading")}</div>`;
   const t0 = Date.now();
   while (!lb.ready && !lb.off && Date.now() - t0 < 10000) await new Promise(r => setTimeout(r, 200));
   if (seq !== boardSeq) return;
@@ -1445,29 +1447,32 @@ async function refreshBoard(total){
   boardCache = { rows, field, newBest: newBest || boardCache?.newBest && boardCache.field === field };
   drawBoard();
 }
+/* 🥇🥈🥉 for the podium, numbers after that */
+const rankMark = r => r <= 3 ? `<span class="medalrk" role="img" aria-label="${r}">${["🥇", "🥈", "🥉"][r - 1]}</span>` : r;
+const lbTitle = () => `<span class="bht"><span aria-hidden="true">🏆</span>${t("leaderboard")}</span>`;
 function drawBoard(){
   const el = $("board"); if (!el || !boardCache) return;
   if (boardCache.convex){
     const { top, me, count } = boardCache.convex;
-    const line = (name, isMe, rank, score) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rank}</span><span class="nm"><bdi>${esc(name || t("player"))}</bdi>${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
+    const line = (name, isMe, rank, score) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rankMark(rank)}</span><span class="nm"><bdi>${esc(name || t("player"))}</bdi>${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
     let list = top.map((r, i) => line(r.name, r.me, i + 1, r.best)).join("");
     if (me && me.rank > top.length) list += (me.rank > top.length + 1 ? `<li class="gap">⋯</li>` : "") + line(me.name, true, me.rank, me.best);
     const where = !playerName ? t("joinUser") : me ? t("rank", boardCache.newBest, me.rank, count) : t("joinOne");
     document.querySelector(".sheet .best")?.setAttribute("hidden", "");
-    el.innerHTML = `<div class="bh">${t("leaderboard")}</div>
+    el.innerHTML = `<div class="bh">${lbTitle()}</div>
       <div class="note">${where}</div>
       ${top.length ? `<ol>${list}</ol>` : `<div class="note">${t("noScores")}</div>`}`;
     return;
   }
   const { rows, field, newBest } = boardCache;
   const meIdx = rows.findIndex(r => r.id === lb.uid);
-  const line = (r, i) => `<li class="${r.id === lb.uid ? "me" : ""}"><span class="rk">${i + 1}</span><span class="nm"><bdi>${esc(r.name || t("player"))}</bdi>${r.id === lb.uid ? t("youTag") : ""}</span><span class="sc">${+r[field]}</span></li>`;
-  const TOP = 3;
+  const line = (r, i) => `<li class="${r.id === lb.uid ? "me" : ""}"><span class="rk">${rankMark(i + 1)}</span><span class="nm"><bdi>${esc(r.name || t("player"))}</bdi>${r.id === lb.uid ? t("youTag") : ""}</span><span class="sc">${+r[field]}</span></li>`;
+  const TOP = 5;
   let list = rows.slice(0, TOP).map(line).join("");
   if (meIdx >= TOP) list += (meIdx > TOP ? `<li class="gap">⋯</li>` : "") + line(rows[meIdx], meIdx);
   const where = !playerName ? t("joinName") : meIdx >= 0 ? t("rank", newBest, meIdx + 1, rows.length) : t("joinOne");
   document.querySelector(".sheet .best")?.setAttribute("hidden", "");
-  el.innerHTML = `<div class="bh">${t("leaderboard")}</div>
+  el.innerHTML = `<div class="bh">${lbTitle()}</div>
     <div class="note">${where}</div>
     ${rows.length ? `<ol>${list}</ol>` : `<div class="note">${t("noScores")}</div>`}`;
 }

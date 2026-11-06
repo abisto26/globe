@@ -105,7 +105,7 @@ export const me = query({
   },
 });
 
-/** Top players on a board, plus this player's own rank. */
+/** Top 5 players on a board, plus this player's own rank. */
 export const board = query({
   args: { board: v.string(), pid: v.optional(v.string()) },
   handler: async (ctx, { board, pid }) => {
@@ -124,6 +124,6 @@ export const board = query({
       }
     }
     const count = (await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board)).collect()).length;
-    return { top: top.slice(0, 3).map(r => ({ name: r.name, best: r.best, me: r.pid === pid })), me, count };
+    return { top: top.slice(0, 5).map(r => ({ name: r.name, best: r.best, me: r.pid === pid })), me, count };
   },
 });
