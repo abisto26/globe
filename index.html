@@ -647,6 +647,19 @@ const gMarks = gZoom.append("g");
 /* After a Flags answer, the right country is painted with its flag, fitted to its main landmass */
 const flagPattern = svg.append("defs").append("pattern").attr("id", "flagfill").attr("patternUnits", "userSpaceOnUse");
 const flagPatternImg = flagPattern.append("image").attr("preserveAspectRatio", "none");
+/* Safari draws an SVG image with its own aspect ratio and ignores preserveAspectRatio="none" on <image>,
+   leaving gaps around the flag. So the copy used to fill a country says "stretch" inside the flag file itself. */
+const stretchedFlags = {};
+function stretchFlag(name){
+  if (stretchedFlags[name]) return stretchedFlags[name];
+  const uri = FLAGS[name] || "";
+  try {
+    const bin = atob(uri.slice(uri.indexOf(",") + 1));
+    const svgText = new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)))
+      .replace(/<svg\b(?![^>]*preserveAspectRatio)/, '<svg preserveAspectRatio="none"');
+    return stretchedFlags[name] = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText);
+  } catch(e){ return uri; }
+}
 /* Morocco is drawn as one shape: its geometry is merged with the W. Sahara polygon so no inner border shows. */
 const MERGE_INTO = {"Morocco": ["Morocco", "W. Sahara"]};
 const mergedAway = new Set(Object.values(MERGE_INTO).flat());
@@ -706,7 +719,8 @@ function setFlagPattern(f){
   const [[x0, y0], [x1, y1]] = safeBounds(main);
   const w = Math.max(x1 - x0, 1), h = Math.max(y1 - y0, 1);
   flagPattern.attr("x", x0).attr("y", y0).attr("width", w).attr("height", h);
-  if (flagPatternImg.attr("href") !== FLAGS[f.properties.name]) flagPatternImg.attr("href", FLAGS[f.properties.name]);
+  const src = stretchFlag(f.properties.name);
+  if (flagPatternImg.attr("href") !== src) flagPatternImg.attr("href", src);
   // Cover the whole shape. The flag may stretch up to 2x to match the shape, so every stripe stays visible
   // (Russia is very wide, Chile very tall); only beyond that is it cropped, centred.
   const flagAR = 4 / 3, minAR = flagAR / 2, maxAR = flagAR * 2, ar = w / h;
