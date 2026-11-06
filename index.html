@@ -200,6 +200,7 @@ body{background:var(--ocean);color:var(--ink);font-family:var(--display);overflo
 @keyframes tipin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .a2hs{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;padding:14px;border-radius:16px;background:var(--chip);text-align:start}
 .a2hs .ic{grid-row:span 2;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--ocean);box-shadow:0 2px 6px rgba(10,30,40,.15)}
+.a2hs .ic{overflow:hidden}.a2hs .ic img{display:block;padding:2px;box-sizing:border-box}
 .a2hs .ic svg{width:24px;height:24px}
 .a2hs b.tt{font:800 .98rem var(--display)}
 .a2hs .st{color:var(--ink-soft);font-size:.9rem;line-height:1.4}
@@ -1348,7 +1349,7 @@ function shouldOfferA2hs(){
   if (isStandalone || !(isIOS || isAndroid || installEvt)) return false;
   try { return !localStorage.getItem(A2HS_KEY); } catch(e){ return false; }
 }
-const APP_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="var(--pin)"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></svg>`;
+const APP_ICON = `<img src="${document.querySelector(".splash img")?.src || ""}" alt="" style="width:100%;height:100%;object-fit:contain">`; // the game logo, read from the splash
 function a2hsCard(){
   return `<details class="a2hs" id="a2hs">
     <summary><span class="ic">${APP_ICON}</span><span class="tt">${t("a2hsTitle")}</span></summary>
