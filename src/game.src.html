@@ -96,7 +96,7 @@ body{background:var(--ocean);color:var(--ink);font-family:var(--display);overflo
 .stats b{color:var(--ink);font-weight:600}
 .controls{display:flex;align-items:center;gap:6px}
 .levels.off,.exploring .stats > *{visibility:hidden}
-.prompt{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;min-width:0;border-top:1px solid var(--glass-edge);padding-top:9px}
+.prompt{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;min-width:0;border-top:1px solid var(--glass-edge);padding-top:9px}
 .qline{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;max-width:100%;height:clamp(44px,11vw,58px)}
 .qline .place{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .qline .place.long{font-size:clamp(1.15rem,4.4vw,1.6rem)}
@@ -282,6 +282,13 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .idrow .f{display:flex;flex-direction:column;gap:6px;min-width:0}
 .idrow input.pin{text-align:center;letter-spacing:.3em;font-variant-numeric:tabular-nums;padding-inline:8px}
 .btn[aria-busy="true"]{opacity:.65;pointer-events:none}
+/* 15-second timer: a thin line along the top of the question that empties, red for the last 3 seconds */
+.timer{position:absolute;top:-2px;left:0;right:0;height:3px;pointer-events:none}
+.timer i{display:block;height:100%;border-radius:3px;background:var(--target);transform:scaleX(var(--f,0));transform-origin:left center;transition:transform .12s linear,background-color .3s ease,opacity .3s ease;opacity:0}
+[dir="rtl"] .timer i{transform-origin:right center}
+.timer.on i{opacity:1}
+.timer.low i{background:var(--pin)}
+@media (prefers-reduced-motion: reduce){.timer i{transition:background-color .3s ease}}
 .board{display:flex;flex-direction:column;gap:6px;background:var(--chip);border-radius:16px;padding:12px 14px}
 .board .bh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:700}
 .board .bh small{font:500 .78rem var(--mono);color:var(--ink-soft);font-weight:500}
@@ -429,6 +436,7 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
         </span><button class="how" id="how" data-i18n-aria="howToPlay" aria-label="How to play">?</button><span class="langwrap"><button class="langbtn" id="langbtn" data-i18n-aria="language" aria-label="Language" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>EN</span></button><span class="langmenu glass" id="langmenu" role="menu" hidden></span></span><button class="theme" id="theme" aria-label="Switch to dark mode"></button></div>
     </div>
     <div class="prompt">
+      <div class="timer" id="timer" aria-hidden="true"><i></i></div>
       <span class="label" id="p-label">Capital of</span>
       <div class="qline"><span class="place" id="p-place">…</span><span class="hint" id="p-hint"></span></div>
     </div>
@@ -753,7 +761,7 @@ const T = {
     tapCountryFlag:"Tap the country this flag belongs to", tapCountry:"Tap the country on the map", wrongCountry:"A wrong country loses a life.",
     rightOnIt:"Right on it", pinFrom:(km, p) => `Your pin was ${km} km from ${p}`,
     rightCountry:"Right country", tappedFrom:(x, km, p) => `You tapped ${x}, ${km} km from ${p}`,
-    stop:"Stop", next:"Next", seeResults:"See results", right:"✓ Right", miss:"✕ Miss", minusLife:"−1 life", outOfLives:"Out of lives",
+    stop:"Stop", next:"Next", seeResults:"See results", right:"✓ Right", miss:"✕ Miss", timesUp:"⏱ Time's up", hereIs:c => `Here's ${c}.`, timeoutTag:"time's up", helpTimer:"<p>⏱ You have <b>15 seconds</b> for each question. If time runs out, it counts as a miss.</p>", minusLife:"−1 life", outOfLives:"Out of lives",
     hintFlags:"Pick the country. Neighbours can look alike.", hintCapPro:"All 4 are cities in this country. Only one is the capital.", hintCap:"Pick the capital. A wrong answer loses a life.",
     flagHit:c => `That's the flag of ${c}.`, flagMiss:(c, p) => `That's the flag of ${c}, not ${p}.`,
     capHit:(cap, c) => `${cap} is the capital of ${c}.`, capMiss:(cap, c, p) => `The capital of ${c} is ${cap}${p ? `, not ${p}` : ""}.`,
@@ -793,7 +801,7 @@ const T = {
     tapCountryFlag:"Touche le pays de ce drapeau", tapCountry:"Touche le pays sur la carte", wrongCountry:"Un mauvais pays te coûte une vie.",
     rightOnIt:"En plein dessus", pinFrom:(km, p) => `Ton repère était à ${km} km du bon endroit`,
     rightCountry:"C'est le bon pays", tappedFrom:(x, km, p) => `Tu as touché : ${x}, à ${km} km de la bonne réponse`,
-    stop:"Arrêter", next:"Suivant", seeResults:"Voir les résultats", right:"✓ Juste", miss:"✕ Raté", minusLife:"−1 vie", outOfLives:"Plus de vies",
+    stop:"Arrêter", next:"Suivant", seeResults:"Voir les résultats", right:"✓ Juste", miss:"✕ Raté", timesUp:"⏱ Temps écoulé", hereIs:c => `C'était ici : ${c}.`, timeoutTag:"temps écoulé", helpTimer:"<p>⏱ Tu as <b>15 secondes</b> par question. Si le temps est écoulé, ça compte comme une erreur.</p>", minusLife:"−1 vie", outOfLives:"Plus de vies",
     hintFlags:"Choisis le pays. Les voisins se ressemblent parfois.", hintCapPro:"Les 4 sont des villes de ce pays. Une seule est la capitale.", hintCap:"Choisis la capitale. Une erreur te coûte une vie.",
     flagHit:c => `Bonne réponse : ${c}.`, flagMiss:(c, p) => `La réponse était ${c}, pas ${p}.`,
     capHit:(cap, c) => `Oui ! ${cap} est bien la capitale.`, capMiss:(cap, c, p) => `La bonne réponse était ${cap}${p ? `, pas ${p}` : ""}.`,
@@ -833,7 +841,7 @@ const T = {
     tapCountryFlag:"المس الدولة صاحبة هذا العلم", tapCountry:"المس الدولة على الخريطة", wrongCountry:"الدولة الخاطئة تكلّفك روحًا.",
     rightOnIt:"في المكان تمامًا", pinFrom:(km, p) => `كان الدبوس على بعد ${km} كم من ${p}`,
     rightCountry:"الدولة الصحيحة", tappedFrom:(x, km, p) => `لمست ${x}، على بعد ${km} كم من ${p}`,
-    stop:"توقف", next:"التالي", seeResults:"عرض النتائج", right:"✓ صحيح", miss:"✕ خطأ", minusLife:"−1 روح", outOfLives:"نفدت الأرواح",
+    stop:"توقف", next:"التالي", seeResults:"عرض النتائج", right:"✓ صحيح", miss:"✕ خطأ", timesUp:"⏱ انتهى الوقت", hereIs:c => `هنا ${c}.`, timeoutTag:"انتهى الوقت", helpTimer:"<p>⏱ لديك <b>15 ثانية</b> لكل سؤال. إذا انتهى الوقت تُحسب خطأً.</p>", minusLife:"−1 روح", outOfLives:"نفدت الأرواح",
     hintFlags:"اختر الدولة. قد تتشابه أعلام الجيران.", hintCapPro:"الخيارات الأربعة مدن في هذه الدولة، وواحدة فقط هي العاصمة.", hintCap:"اختر العاصمة. الإجابة الخاطئة تكلّفك روحًا.",
     flagHit:c => `صحيح، هذا علم ${c}.`, flagMiss:(c, p) => `هذا علم ${c}، وليس ${p}.`,
     capHit:(cap, c) => `${cap} هي عاصمة ${c}.`, capMiss:(cap, c, p) => `عاصمة ${c} هي ${cap}${p ? `، وليست ${p}` : ""}.`,
@@ -947,6 +955,7 @@ function startRound(){
   $("app").classList.toggle("easy", lit);
   $("levels").classList.toggle("off", mode === "countries");
   renderPrompt(); renderTop(); redrawMarks(); renderCard();
+  startTimer();
   // frame after the card is drawn, so the country sits in the space that is actually free
   if (lit) focusBounds(safeBounds(area.shape), 30, 0.8);
   else svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
@@ -979,6 +988,48 @@ function renderPrompt(){
     $("p-hint").textContent = "";
   }
   fitPlace();
+}
+/* ---------- 15-second timer ----------
+   Runs while a question is on screen. It pauses only for the game's own screens (welcome, tour, help, results),
+   not when the player switches app or tab, so there is no time to look the answer up. */
+const ROUND_MS = 15000, TIMER_GRACE = 700; // a moment for the map to settle before the clock visibly moves
+let tLeft = 0, tLast = 0, tOn = false;
+const timerBlocked = () => splashOpen || !$("tour").hidden || !$("help").hidden || !$("welcome").hidden || !$("results").hidden;
+function paintTimer(){
+  const el = $("timer"); if (!el) return;
+  el.style.setProperty("--f", tOn ? Math.max(0, Math.min(1, tLeft / ROUND_MS)) : 0);
+  el.classList.toggle("on", tOn); el.classList.toggle("low", tOn && tLeft <= 3000);
+}
+function startTimer(){ tLeft = ROUND_MS + TIMER_GRACE; tLast = performance.now(); tOn = mode !== "explore"; paintTimer(); }
+function stopTimer(){ tOn = false; paintTimer(); }
+setInterval(() => {
+  const now = performance.now(), dt = now - tLast; tLast = now;
+  if (!tOn || revealed || timerBlocked()) return;
+  tLeft -= dt;
+  if (tLeft <= 0){ stopTimer(); timeUp(); } else paintTimer();
+}, 100);
+/* Time ran out: counts as a miss and shows the answer (in Cities, a pin already placed is locked in instead). */
+function timeUp(){
+  if (revealed || !current || mode === "explore") return;
+  if (mode === "cities"){
+    if (guess) return reveal();
+    answerLL = [current[3], current[2]];
+    results.push({kind:"place", key: current[0], km: 0, miss: true, timeout: true});
+    afterAnswer(true);
+    revealed = true; redrawMarks(); renderTop(); renderCard();
+    focusBounds(safeBounds(d3.geoCircle().center(answerLL).radius(Math.max(missKm, 300) * 1.15 / 6371 * 180 / Math.PI)()), 30, 0.85);
+    return;
+  }
+  chosen = null; pickedF = null;
+  if (mode === "capitals"){
+    answerLL = [current[3], current[2]];
+    results.push({kind:"place", key: current[0], picked: null, pickedKind:"place", km: 0, miss: true, timeout: true});
+  } else {
+    results.push({kind:"country", key: current.properties.name, flag: mode === "flags" ? current.properties.name : null, picked: null, km: 0, miss: true, timeout: true});
+  }
+  afterAnswer(true);
+  revealed = true; paintCountries(); redrawMarks(); renderTop(); renderCard();
+  if (mode === "capitals") focusBounds(safeBounds(area.shape), 30, 0.8); else focusFeatures(current);
 }
 /* Lives and streaks: a miss costs a life and resets the streak; every 10 right in a row gives back a lost life. */
 const STREAK_FOR_LIFE = 10;
@@ -1061,7 +1112,7 @@ function renderCard(focus = true){
   const r = results[results.length-1];
   const last = lives === 0;
   const km = fmt(Math.round(r.km));
-  const msg = mode === "cities"
+  const msg = r.timeout ? t("hereIs", mode === "cities" ? placeName(r.key) : countryName(r.key)) : mode === "cities"
     ? (r.km < 1 ? t("rightOnIt") : t("pinFrom", km, placeName(r.key)))
     : (r.km < 1 ? t("rightCountry") : t("tappedFrom", countryName(r.picked), km, countryName(r.key)));
   c.innerHTML = `<div class="txt">${resultLine(r, last)}<div class="small">${esc(msg)}</div></div>` + nextButtons(last);
@@ -1070,7 +1121,7 @@ function renderCard(focus = true){
 
 function resultLine(r, last){
   if (!r.miss) return `<div class="verdictline ok">${t("right")} <span class="tag hit">+1</span></div>`;
-  return `<div class="verdictline no">${t("miss")} <span class="tag miss">${last ? t("outOfLives") : t("minusLife")}</span></div>`;
+  return `<div class="verdictline no">${r.timeout ? t("timesUp") : t("miss")} <span class="tag miss">${last ? t("outOfLives") : t("minusLife")}</span></div>`;
 }
 function renderChoiceCard(c, focus){
   if (!revealed){
@@ -1081,7 +1132,7 @@ function renderChoiceCard(c, focus){
   }
   const r = results[results.length-1];
   const last = lives === 0;
-  const msg = mode === "flags"
+  const msg = r.timeout ? (mode === "flags" ? t("flagHit", countryName(r.key)) : t("capHit", placeName(r.key), countryName(current[1]))) : mode === "flags"
     ? (r.miss ? t("flagMiss", countryName(r.key), countryName(r.picked)) : t("flagHit", countryName(r.key)))
     : (r.miss ? t("capMiss", placeName(r.key), countryName(current[1]), level === "pro" ? placeName(r.picked) : "") : t("capHit", placeName(r.key), countryName(current[1])));
   const hint = mode === "flags" ? t("hintFlags") : level === "pro" ? t("hintCapPro") : t("hintCap");
@@ -1095,6 +1146,7 @@ function renderChoiceCard(c, focus){
    so switching language mid-game re-labels everything without changing what was answered. */
 function pickCapital(name){
   if (revealed) return;
+  stopTimer();
   chosen = name;
   const ok = name === rightAnswer();
   if (mode === "flags"){
@@ -1110,7 +1162,8 @@ function pickCapital(name){
   else focusBounds(safeBounds(area.shape), 30, 0.8);
 }
 function reveal(){
-  if (!guess) return;
+  if (!guess || revealed) return;
+  stopTimer();
   answerLL = [current[3], current[2]];
   const km = kmBetween(guess, answerLL);
   const miss = km > missKm;
@@ -1122,6 +1175,7 @@ function reveal(){
 }
 function guessCountry(d){
   if (revealed) return;
+  stopTimer();
   const correct = d === current;
   const km = correct ? 0 : kmBetween(d3.geoCentroid(d), d3.geoCentroid(current));
   results.push({kind:"country", key: current.properties.name, flag: mode === "flags" ? current.properties.name : null, picked: d.properties.name, km, miss: !correct});
@@ -1476,6 +1530,7 @@ function showResults(outOfLives){
 }
 function resultName(r){ return r.kind === "place" ? placeName(r.key) : countryName(r.key); }
 function resultDetail(r){
+  if (r.timeout) return "⏱ " + t("timeoutTag");
   if (r.dist) return r.km < 1 ? t("spotOn") : t("kmOff", fmt(Math.round(r.km)));
   if (!r.miss) return "";
   return t("you", r.pickedKind === "place" ? placeName(r.picked) : countryName(r.picked));
@@ -1554,6 +1609,7 @@ const exploreFacts = n => {
 function enterExplore(){
   $("results").hidden = true;
   current = null; revealed = false; answerLL = null; guess = null; pickedF = null; area = null;
+  stopTimer();
   $("app").classList.add("countries-mode");
   $("app").classList.remove("easy");
   $("levels").classList.add("off");
@@ -1680,7 +1736,7 @@ document.addEventListener("keydown", e => { if (!$("tour").hidden && e.key === "
 function showHelp(){
   $("help").innerHTML = `<div class="sheet" role="dialog" aria-labelledby="help-t">
     <h3 id="help-t">${t("howToPlay")}</h3>
-    ${t("help")}
+    ${t("help")}${t("helpTimer")}
     ${isStandalone ? "" : `<div class="helpa2hs"><p><b>${t("a2hsHelp")}</b></p><p><b>iPhone:</b> ${t("a2hsIOS")}</p><p><b>Android:</b> ${t("a2hsAndroid")}</p></div>`}
     <button class="btn" id="help-ok">${t("gotIt")}</button>
     <button class="linkbtn" id="help-tour">${t("tourAgain")}</button>
