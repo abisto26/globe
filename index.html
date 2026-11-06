@@ -329,7 +329,7 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .board ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
 .board li{display:grid;grid-template-columns:2.6ch 1fr auto;gap:10px;align-items:center;padding:6px 8px;border-radius:10px;font-variant-numeric:tabular-nums}
 .board li .rk{font:600 .85rem var(--mono);color:var(--ink-soft);text-align:right}
-.board li .rk .medalrk{font:1.15rem/1 system-ui,sans-serif}
+.board li .nm .medalrk{display:inline-block;width:1.5em;margin-inline-end:6px;text-align:center;font:1.1rem/1 system-ui,sans-serif;vertical-align:-.12em}
 .board .bh .bht{display:inline-flex;align-items:center;gap:7px}
 .board li .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .board li .sc{font:600 .95rem var(--mono)}
@@ -1479,14 +1479,14 @@ async function refreshBoard(total){
   boardCache = { rows, field, newBest: newBest || boardCache?.newBest && boardCache.field === field };
   drawBoard();
 }
-/* 🥇🥈🥉 for the podium, numbers after that */
-const rankMark = r => r <= 3 ? `<span class="medalrk" role="img" aria-label="${r}">${["🥇", "🥈", "🥉"][r - 1]}</span>` : r;
+/* every row is numbered; the podium also gets 🥇🥈🥉 in its own column before the name */
+const medalCell = r => `<span class="medalrk" aria-hidden="true">${r <= 3 ? ["🥇", "🥈", "🥉"][r - 1] : ""}</span>`;
 const lbTitle = () => `<span class="bht"><span aria-hidden="true">🏆</span>${t("leaderboard")}</span>`;
 function drawBoard(){
   const el = $("board"); if (!el || !boardCache) return;
   if (boardCache.convex){
     const { top, me, count } = boardCache.convex;
-    const line = (name, isMe, rank, score) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rankMark(rank)}</span><span class="nm"><bdi>${esc(name || t("player"))}</bdi>${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
+    const line = (name, isMe, rank, score) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rank}</span><span class="nm">${medalCell(rank)}<bdi>${esc(name || t("player"))}</bdi>${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
     let list = top.map((r, i) => line(r.name, r.me, i + 1, r.best)).join("");
     if (me && me.rank > top.length) list += (me.rank > top.length + 1 ? `<li class="gap">⋯</li>` : "") + line(me.name, true, me.rank, me.best);
     const where = !playerName ? t("joinUser") : me ? t("rank", boardCache.newBest, me.rank, count) : t("joinOne");
@@ -1498,7 +1498,7 @@ function drawBoard(){
   }
   const { rows, field, newBest } = boardCache;
   const meIdx = rows.findIndex(r => r.id === lb.uid);
-  const line = (r, i) => `<li class="${r.id === lb.uid ? "me" : ""}"><span class="rk">${rankMark(i + 1)}</span><span class="nm"><bdi>${esc(r.name || t("player"))}</bdi>${r.id === lb.uid ? t("youTag") : ""}</span><span class="sc">${+r[field]}</span></li>`;
+  const line = (r, i) => `<li class="${r.id === lb.uid ? "me" : ""}"><span class="rk">${i + 1}</span><span class="nm">${medalCell(i + 1)}<bdi>${esc(r.name || t("player"))}</bdi>${r.id === lb.uid ? t("youTag") : ""}</span><span class="sc">${+r[field]}</span></li>`;
   const TOP = 5;
   let list = rows.slice(0, TOP).map(line).join("");
   if (meIdx >= TOP) list += (meIdx > TOP ? `<li class="gap">⋯</li>` : "") + line(rows[meIdx], meIdx);
