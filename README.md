@@ -1,42 +1,73 @@
-# Globe by Abisto · العالم مع Abisto
+<p align="center">
+  <img src="icons/share.png" alt="Globe by Abisto · العالم مع Abisto" width="560">
+</p>
 
-A free geography game that runs in the browser. Open it and you're playing: no sign-up, no install.
+<h1 align="center">Globe by Abisto · العالم مع Abisto</h1>
 
-**Play:** https://abistoufisbot.github.io/Globe-by-Abisto/
+<p align="center">
+  A free geography game for your phone or computer: flags, countries, capitals and cities.<br>
+  No sign-up and nothing to install. Open it and you're playing.
+</p>
 
-## Games
-| | Easy | Pro |
+<p align="center"><b><a href="https://abistoufisbot.github.io/Globe-by-Abisto/">▶ Play now</a></b></p>
+
+---
+
+## How to play
+
+Pick a game at the top, answer, and see how far you can go.
+
+- You have **3 lives**. A wrong answer costs one.
+- Every **10 right answers in a row** gives you a life back.
+- Your score is the number of right answers. Get **3 or more** to win the 🏅.
+
+| Game | Easy | Pro |
 |---|---|---|
-| **Flags** | Pick the country from 4 | Tap it on the map |
-| **Countries** | Pick from 4 neighbours | — |
-| **Capitals** | 4 nearby capitals | 4 cities from the same country |
-| **Cities** | Map zoomed to the country | Within 1000 km |
+| **Flags** | Pick the country from 4 choices | Find it on the map |
+| **Countries** | Pick from 4 neighbouring countries | — |
+| **Capitals** | Choose from 4 nearby capitals | Choose from 4 cities in the same country |
+| **Cities** | Find the city on a map zoomed to its country | Find it on the world map, within 1000 km |
 
-Plus **Explore**: tap any country to see its flag, capital and biggest cities.
+**Explore** (🧭) is for learning: tap any country to see its flag, capital and biggest cities.
 
-- Three lives. Every 10 right answers in a row gives a life back. Get 3 or more right to win the 🏅.
-- English, French and Arabic (right-to-left).
-- Light and dark mode. Can be added to the home screen as an app.
+## Features
 
-## Files
-- `index.html`: the whole game in one file (built; don't edit it by hand).
-- `src/game.src.html`: the source you edit.
-- `src/data/`: map, flags and translated names. `src/vendor/`: d3 and topojson.
-- `build.js`: run `node build.js` after editing `src/` to rebuild `index.html`.
-- `convex/`: the leaderboard's server functions.
-- `icons/`, `manifest.webmanifest`: home-screen icons and app info.
+- **3 languages:** English, French and Arabic.
+- **Light and dark mode.**
+- **Works on any phone.** Add it to your home screen and it opens like an app:
+  - **iPhone:** in Safari, tap Share, then *Add to Home Screen*.
+  - **Android:** in Chrome, open the ⋮ menu, then *Add to Home screen*.
+- **Leaderboard** for each game and level.
 
-## Leaderboard
-- On this site the leaderboard runs on [Convex](https://convex.dev). The functions are in `convex/scores.ts`.
-- Each device gets a random player id, kept in the browser. Players only ever see names and scores.
-- `.github/workflows/convex.yml` uploads the functions whenever `convex/` changes. It needs the repo secret `CONVEX_DEPLOY_KEY`.
-- The Convex URL is set in `site.config.json`. Run `node build.js` after changing it.
-- The claude.ai version of the game keeps its own separate leaderboard.
+## Leaderboard and your data
 
-## Credits
-- Map: [world-atlas](https://github.com/topojson/world-atlas) (Natural Earth, public domain), ISC
-- [D3](https://d3js.org) and [topojson-client](https://github.com/topojson/topojson-client), ISC
-- Flags: [flag-icons](https://github.com/lipis/flag-icons), MIT
-- Fonts: Bricolage Grotesque, IBM Plex Mono and IBM Plex Sans Arabic via Google Fonts (SIL Open Font License)
+The leaderboard is optional. You can always play without a username.
 
-Licence texts are in `licenses/`.
+- To appear on it, pick a **username** and a **4-digit PIN** on the start screen.
+- To use the same username on another phone or browser, enter it with your PIN.
+- Other players only see usernames and scores.
+- Nothing else about you is stored: no email and no account. Your PIN is stored scrambled (hashed), never as typed.
+- Keep your PIN to yourself, and don't reuse a PIN you use for anything important.
+
+## Built with
+
+- [D3](https://d3js.org) and [topojson-client](https://github.com/topojson/topojson-client) for the map, with [world-atlas](https://github.com/topojson/world-atlas) country shapes (Natural Earth)
+- [flag-icons](https://github.com/lipis/flag-icons) for the flags
+- [Convex](https://convex.dev) for the leaderboard
+- Fonts: Bricolage Grotesque, IBM Plex Mono and IBM Plex Sans Arabic (Google Fonts)
+
+Licence texts for these are in [`licenses/`](licenses).
+
+## Project layout
+
+```
+index.html        the game, built into one file
+src/              the source: game.src.html, map and flag data, translations
+convex/           leaderboard server functions
+build.js          rebuilds index.html from src/  →  node build.js
+icons/            app icons
+```
+
+---
+
+<p align="center">Made by Abisto 🌍</p>
