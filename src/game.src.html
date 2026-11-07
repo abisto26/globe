@@ -2042,8 +2042,8 @@ function renderSettings(){
         <button data-vib="1" aria-pressed="${vibOn}">${t("onLbl")}</button><button data-vib="0" aria-pressed="${!vibOn}">${t("offLbl")}</button></div></div>` : ""}
     </div>
     <div class="list">
-      <button class="item" id="sm-lb"${live ? " disabled" : ""}><span class="ic gold" aria-hidden="true">🏆</span>${t("leaderboard")}${live ? `<span class="lockhint">${t("afterQ")}</span>` : `<span class="chev" aria-hidden="true">›</span>`}</button>
       <button class="item" id="sm-ach"><span class="ic green" aria-hidden="true">🏅</span>${t("achievements")}<span class="chev" aria-hidden="true">›</span></button>
+      <button class="item" id="sm-lb"${live ? " disabled" : ""}><span class="ic gold" aria-hidden="true">🏆</span>${t("leaderboard")}${live ? `<span class="lockhint">${t("afterQ")}</span>` : `<span class="chev" aria-hidden="true">›</span>`}</button>
       <button class="item" id="sm-how"><span class="ic blue" aria-hidden="true">?</span>${t("howToPlay")}<span class="chev" aria-hidden="true">›</span></button>
     </div>
     ${live ? `<div class="foot"><span class="tick">⏱ ${t("timerRuns")}</span></div>` : ""}`;
