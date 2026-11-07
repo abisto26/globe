@@ -74,7 +74,7 @@ export const claim = mutation({
 
 /** Save results (one finished game, or the bests a device kept while offline). Keeps the best per board. */
 export const submit = mutation({
-  args: { pid: v.string(), scores: v.array(v.object({ board: v.string(), best: v.number() })) },
+  args: { pid: v.string(), scores: v.array(v.object({ board: v.string(), best: v.number(), tours: v.optional(v.number()) })) },
   handler: async (ctx, { pid, scores }) => {
     if (!PID.test(pid)) throw new Error("bad player id");
     if (scores.length > 10) throw new Error("too many");
@@ -85,11 +85,17 @@ export const submit = mutation({
     await ctx.db.patch(user._id, { lastSubmit: now });
 
     const newBest: string[] = [];
-    for (const { board, best } of scores) {
+    for (const { board, best, tours: t } of scores) {
       if (!BOARD.test(board) || !Number.isInteger(best) || best < 1 || best > MAX_BEST) continue;
+      // a world tour means the whole list was played (72 to 171 places, depending on the game),
+      // so there can't be more tours than right answers allow
+      const tours = t !== undefined && Number.isInteger(t) && t > 0 && t * 60 <= best + 10 ? t : 0;
       const row = await ctx.db.query("bests").withIndex("by_pid_board", q => q.eq("pid", pid).eq("board", board)).unique();
-      if (!row) { await ctx.db.insert("bests", { pid, name: user.name, board, best, at: now }); newBest.push(board); }
-      else if (best > row.best) { await ctx.db.patch(row._id, { name: user.name, best, at: now }); newBest.push(board); }
+      if (!row) { await ctx.db.insert("bests", { pid, name: user.name, board, best, at: now, ...(tours ? { tours } : {}) }); newBest.push(board); continue; }
+      const patch: { name?: string; best?: number; at?: number; tours?: number } = {};
+      if (best > row.best) { Object.assign(patch, { name: user.name, best, at: now }); newBest.push(board); }
+      if (tours > (row.tours ?? 0)) patch.tours = tours;
+      if (Object.keys(patch).length) await ctx.db.patch(row._id, patch);
     }
     return { newBest };
   },
@@ -113,17 +119,17 @@ export const board = query({
     const top = await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board)).order("desc").take(50);
     top.sort((a, b) => b.best - a.best || a.at - b.at);
 
-    let me: { rank: number; best: number; name: string } | null = null;
+    let me: { rank: number; best: number; name: string; tours: number } | null = null;
     if (pid && PID.test(pid)) {
       const mine = await ctx.db.query("bests").withIndex("by_pid_board", q => q.eq("pid", pid).eq("board", board)).unique();
       if (mine) {
         // everyone with a higher score, plus those who reached the same score earlier
         const higher = await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board).gt("best", mine.best)).collect();
         const tied = await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board).eq("best", mine.best)).collect();
-        me = { rank: higher.length + tied.filter(r => r.at < mine.at).length + 1, best: mine.best, name: mine.name };
+        me = { rank: higher.length + tied.filter(r => r.at < mine.at).length + 1, best: mine.best, name: mine.name, tours: mine.tours ?? 0 };
       }
     }
     const count = (await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board)).collect()).length;
-    return { top: top.slice(0, 5).map(r => ({ name: r.name, best: r.best, me: r.pid === pid })), me, count };
+    return { top: top.slice(0, 5).map(r => ({ name: r.name, best: r.best, tours: r.tours ?? 0, me: r.pid === pid })), me, count };
   },
 });

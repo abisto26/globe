@@ -23,6 +23,7 @@ export default defineSchema({
     name: v.string(),
     board: v.string(), // "flags_easy", "countries", "cities_pro", ...
     best: v.number(),
+    tours: v.optional(v.number()), // most "world tours" (whole list seen) in one game
     at: v.number(),    // when that best was set; earlier wins a tie
   })
     .index("by_board_best", ["board", "best"])

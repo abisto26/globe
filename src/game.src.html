@@ -287,6 +287,25 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .btn[aria-busy="true"]{opacity:.65;pointer-events:none}
 /* 🏆 leaderboard: button in the top bar, link on the start screen, and a sheet with every board */
 .lbbtn span{font-size:.8rem;line-height:1}
+/* 🌍 world tour: the whole list of a game played through without running out of lives */
+.wtwrap{z-index:72;background:radial-gradient(circle at 50% 40%,rgba(255,215,106,.35),rgba(10,30,45,.55))}
+.wt{position:relative;overflow:hidden;width:min(340px,92vw);border-radius:28px;padding:26px 22px 20px;text-align:center;background:var(--panel);box-shadow:0 30px 80px rgba(0,0,0,.35);animation:smpop .35s cubic-bezier(.2,1.3,.4,1)}
+.wt::before{content:"";position:absolute;inset:-40% -20% auto;height:220px;background:conic-gradient(from 0deg,#ffd76a33,#6cc3ff33,#2bb67333,#ffd76a33);filter:blur(30px);pointer-events:none}
+.wt .globe{position:relative;font-size:84px;line-height:1;filter:drop-shadow(0 10px 18px rgba(0,0,0,.25));animation:wtspin 1.2s ease-out}
+@keyframes wtspin{from{transform:scale(.4) rotate(-40deg);opacity:0}}
+.wt .lap{position:absolute;top:18px;inset-inline-end:18px;font:800 .78rem var(--display);background:linear-gradient(135deg,#ffd76a,#f0a92b);color:#3b2600;border-radius:999px;padding:5px 10px}
+.wt h2{position:relative;margin:14px 0 6px;font:800 1.45rem/1.15 var(--display);color:var(--ink);letter-spacing:-.01em}
+.wt p{position:relative;margin:0 0 14px;color:var(--ink-soft);font:500 .95rem/1.4 var(--display)}
+.wt .flags{position:relative;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;margin:0 auto 16px;max-width:290px}
+.wt .flags img{width:30px;height:22px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.2);object-fit:cover}
+.wt .stats{position:relative;display:flex;justify-content:center;gap:8px;margin-bottom:16px}
+.wt .stats div{background:var(--chip);border-radius:14px;padding:8px 10px;font:600 .72rem var(--display);color:var(--ink-soft);min-width:70px}
+.wt .stats b{display:block;font:800 1.12rem var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
+.wt .btn{position:relative;width:100%;padding:14px;font-size:1.05rem}
+.wt canvas.confetti{position:absolute;inset:0;pointer-events:none}
+.wtbadge{align-self:center;display:inline-flex;align-items:center;gap:8px;padding:8px 14px 8px 10px;border-radius:999px;background:linear-gradient(135deg,#ffefc2,#ffd76a);color:#5a3b00;font:800 .88rem var(--display);box-shadow:0 4px 14px rgba(240,169,43,.35)}
+.wtbadge span{font-size:1.3rem;line-height:1}
+.board .wtag{font-size:.9em;margin-inline-start:6px;vertical-align:-.05em;cursor:default}
 .oldctl{display:none!important}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* ⚙ settings: one button in the top bar; its dot is green with a username, grey for a guest */
@@ -519,6 +538,7 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
     <div class="results lbwrap" id="lbsheet" hidden></div>
     <div class="sscrim" id="sscrim" hidden></div><div class="smenu" id="smenu" role="dialog" aria-labelledby="sm-t" hidden></div>
     <div class="results" id="welcome" hidden></div>
+    <div class="results wtwrap" id="wtour" hidden></div>
     <div class="toast glass" id="toast" role="status" aria-live="polite"></div>
   </div>
   <div class="topwrap"><header class="top glass" id="top">
@@ -900,7 +920,7 @@ const T = {
     lbDown:"The leaderboard can't be reached right now. Your score is kept on this device.", lbDown2:"The leaderboard can't be reached right now.", offline:"Offline", poweredBy:"Powered by", offBoard:"You're offline. Your best is saved on this device and goes on the leaderboard when you're back online.", offUser:"You're offline. Play as a guest now and add your username when you're back online.",
     youTag:" (you)", joinName:"Add a name to join the leaderboard.", joinUser:"Add a username to save this score on the leaderboard.", joinOne:"Get at least 1 right to join the leaderboard.", noScores:"No scores yet. Be the first.",
     rank:(nb, r, n) => `${nb ? "New best! " : ""}You're <b>#${r}</b> of ${n} ${n === 1 ? "player" : "players"}.`,
-    gotIt:"Got it", settings:"Settings", guest:"Guest", onBoard:"On the leaderboard", notRanked:"Not ranked yet", changeShort:"Change", addUserShort:"Add username", addNameShort:"Add name", langLbl:"Language", themeLbl:"Theme", afterQ:"after this question", timerRuns:"The timer keeps running", lightLbl:"Light", darkLbl:"Dark", seeBoard:"Leaderboard", lbClose:"Close",
+    gotIt:"Got it", wtRound:r => `Round ${r} ✓`, wt_flags:"You've seen every flag in the world!", wt_countries:"You've found every country on the map!", wt_capitals:"You've named every capital!", wt_cities:"You've found every city in the game!", wtText:(n, u, r) => `All <b>${n}</b> ${u}, without running out of lives. The deck is reshuffled: round ${r} starts now.`, wtUnit_flags:n => "flags", wtUnit_countries:n => "countries", wtUnit_capitals:n => "capitals", wtUnit_cities:n => "cities", wtLives:"lives left", wtTime:"playing", keepGoing:"Keep going", wtBadge:n => `World tour ×${n}`, wtTag:"World tour", settings:"Settings", guest:"Guest", onBoard:"On the leaderboard", notRanked:"Not ranked yet", changeShort:"Change", addUserShort:"Add username", addNameShort:"Add name", langLbl:"Language", themeLbl:"Theme", afterQ:"after this question", timerRuns:"The timer keeps running", lightLbl:"Light", darkLbl:"Dark", seeBoard:"Leaderboard", lbClose:"Close",
     help:`<p>Your score is the number of <b>right answers</b>. Each right answer is <b>+1</b>. Each miss costs one of your <b>3 lives</b>. The game ends when you run out of lives or press <b>Stop</b>.</p>
     <p><b>Explore (compass):</b> no score, no lives. Tap any country to see its flag, capital and big cities. Good homework before you play.</p>
     <p><b>Flags · Easy:</b> pick the country from 4 names. The wrong ones are neighbours, so similar flags show up.</p>
@@ -940,7 +960,7 @@ const T = {
     lbDown:"Le classement est inaccessible pour l'instant. Ton score est gardé sur cet appareil.", lbDown2:"Le classement est inaccessible pour l'instant.", offline:"Hors ligne", poweredBy:"Propulsé par", offBoard:"Tu es hors ligne. Ton record est gardé sur cet appareil et ira au classement dès ton retour en ligne.", offUser:"Tu es hors ligne. Joue en invité et ajoute ton pseudo une fois reconnecté.",
     youTag:" (toi)", joinName:"Ajoute un nom pour entrer au classement.", joinUser:"Ajoute un pseudo pour enregistrer ce score au classement.", joinOne:"Trouve au moins 1 bonne réponse pour entrer au classement.", noScores:"Aucun score pour l'instant. Sois le premier !",
     rank:(nb, r, n) => `${nb ? "Nouveau record ! " : ""}Tu es <b>n° ${r}</b> sur ${n} ${n > 1 ? "joueurs" : "joueur"}.`,
-    gotIt:"Compris", settings:"Réglages", guest:"Invité", onBoard:"Au classement", notRanked:"Pas encore classé", changeShort:"Changer", addUserShort:"Ajouter un pseudo", addNameShort:"Ajouter un nom", langLbl:"Langue", themeLbl:"Thème", afterQ:"après cette question", timerRuns:"Le chrono continue", lightLbl:"Clair", darkLbl:"Sombre", seeBoard:"Classement", lbClose:"Fermer",
+    gotIt:"Compris", wtRound:r => `Tour ${r} ✓`, wt_flags:"Tu as vu tous les drapeaux du monde !", wt_countries:"Tu as trouvé tous les pays de la carte !", wt_capitals:"Tu as trouvé toutes les capitales !", wt_cities:"Tu as trouvé toutes les villes du jeu !", wtText:(n, u, r) => `Les <b>${n}</b> ${u}, sans perdre toutes tes vies. Les questions sont remélangées : le tour ${r} commence.`, wtUnit_flags:n => "drapeaux", wtUnit_countries:n => "pays", wtUnit_capitals:n => "capitales", wtUnit_cities:n => "villes", wtLives:"vies restantes", wtTime:"de jeu", keepGoing:"Continuer", wtBadge:n => `Tour du monde ×${n}`, wtTag:"Tour du monde", settings:"Réglages", guest:"Invité", onBoard:"Au classement", notRanked:"Pas encore classé", changeShort:"Changer", addUserShort:"Ajouter un pseudo", addNameShort:"Ajouter un nom", langLbl:"Langue", themeLbl:"Thème", afterQ:"après cette question", timerRuns:"Le chrono continue", lightLbl:"Clair", darkLbl:"Sombre", seeBoard:"Classement", lbClose:"Fermer",
     help:`<p>Ton score est le nombre de <b>bonnes réponses</b>. Chaque bonne réponse vaut <b>+1</b>. Chaque erreur te coûte une de tes <b>3 vies</b>. La partie s'arrête quand tu n'as plus de vies ou quand tu touches <b>Arrêter</b>.</p>
     <p><b>Explorer (boussole) :</b> pas de score, pas de vies. Touche un pays pour voir son drapeau, sa capitale et ses grandes villes. Parfait pour réviser avant de jouer.</p>
     <p><b>Drapeaux · Facile :</b> choisis le pays parmi 4 noms. Les mauvaises réponses sont des voisins, donc les drapeaux se ressemblent.</p>
@@ -980,7 +1000,7 @@ const T = {
     lbDown:"تعذّر الوصول إلى لوحة الترتيب الآن. نتيجتك محفوظة على هذا الجهاز.", lbDown2:"تعذّر الوصول إلى لوحة الترتيب الآن.", offline:"غير متصل", poweredBy:"برعاية", offBoard:"أنت غير متصل. أفضل نتيجة لك محفوظة على هذا الجهاز وستُضاف إلى لوحة الترتيب عند عودة الاتصال.", offUser:"أنت غير متصل. العب كضيف الآن وأضف اسم المستخدم عند عودة الاتصال.",
     youTag:" (أنت)", joinName:"أضف اسمًا لتنضم إلى لوحة الترتيب.", joinUser:"أضف اسم مستخدم لحفظ هذه النتيجة في لوحة الترتيب.", joinOne:"أجب إجابة صحيحة واحدة على الأقل لتدخل لوحة الترتيب.", noScores:"لا توجد نتائج بعد. كن الأول!",
     rank:(nb, r, n) => `${nb ? "رقم قياسي جديد! " : ""}أنت في المركز <b>${r}</b> من ${n}.`,
-    gotIt:"فهمت", settings:"الإعدادات", guest:"ضيف", onBoard:"في لوحة الترتيب", notRanked:"غير مصنّف بعد", changeShort:"تغيير", addUserShort:"أضف اسم مستخدم", addNameShort:"أضف اسمًا", langLbl:"اللغة", themeLbl:"المظهر", afterQ:"بعد هذا السؤال", timerRuns:"المؤقت مستمر", lightLbl:"فاتح", darkLbl:"داكن", seeBoard:"لوحة الترتيب", lbClose:"إغلاق",
+    gotIt:"فهمت", wtRound:r => `الجولة ${r} ✓`, wt_flags:"لقد رأيت كل أعلام العالم!", wt_countries:"لقد وجدت كل دول الخريطة!", wt_capitals:"لقد عرفت كل العواصم!", wt_cities:"لقد وجدت كل مدن اللعبة!", wtText:(n, u, r) => `كل الـ<b>${n}</b> ${u} دون أن تنفد أرواحك. أُعيد خلط الأسئلة: تبدأ الجولة ${r} الآن.`, wtUnit_flags:n => "علمًا", wtUnit_countries:n => "دولة", wtUnit_capitals:n => "عاصمة", wtUnit_cities:n => "مدينة", wtLives:"أرواح متبقية", wtTime:"مدة اللعب", keepGoing:"واصل", wtBadge:n => `جولة حول العالم ×${n}`, wtTag:"جولة حول العالم", settings:"الإعدادات", guest:"ضيف", onBoard:"في لوحة الترتيب", notRanked:"غير مصنّف بعد", changeShort:"تغيير", addUserShort:"أضف اسم مستخدم", addNameShort:"أضف اسمًا", langLbl:"اللغة", themeLbl:"المظهر", afterQ:"بعد هذا السؤال", timerRuns:"المؤقت مستمر", lightLbl:"فاتح", darkLbl:"داكن", seeBoard:"لوحة الترتيب", lbClose:"إغلاق",
     help:`<p>نتيجتك هي عدد <b>الإجابات الصحيحة</b>. كل إجابة صحيحة تساوي <b>+1</b>، وكل خطأ يكلّفك روحًا من <b>أرواحك الثلاث</b>. تنتهي اللعبة عندما تنفد أرواحك أو عندما تضغط <b>توقف</b>.</p>
     <p><b>الاستكشاف (البوصلة):</b> بدون نقاط ولا أرواح. المس أي دولة لترى علمها وعاصمتها وأكبر مدنها. مراجعة مفيدة قبل اللعب.</p>
     <p><b>الأعلام · سهل:</b> اختر الدولة من بين 4 أسماء. الخيارات الخاطئة دول مجاورة، لذا قد تتشابه الأعلام.</p>
@@ -1020,7 +1040,7 @@ const T = {
     lbDown:"Таблица лидеров сейчас недоступна. Ваш результат сохранён на этом устройстве.", lbDown2:"Таблица лидеров сейчас недоступна.", offline:"Офлайн", poweredBy:"При поддержке", offBoard:"Вы офлайн. Ваш рекорд сохранён на этом устройстве и попадёт в таблицу лидеров, когда появится связь.", offUser:"Вы офлайн. Играйте как гость, а имя пользователя добавьте, когда появится связь.",
     youTag:" (вы)", joinName:"Добавьте имя, чтобы попасть в таблицу лидеров.", joinUser:"Добавьте имя пользователя, чтобы сохранить результат в таблице лидеров.", joinOne:"Дайте хотя бы 1 верный ответ, чтобы попасть в таблицу.", noScores:"Пока нет результатов. Будьте первым!",
     rank:(nb, r, n) => `${nb ? "Новый рекорд! " : ""}Вы <b>#${r}</b> из ${n} ${ruPl(n, "игрока", "игроков", "игроков")}.`,
-    gotIt:"Понятно", settings:"Настройки", guest:"Гость", onBoard:"В рейтинге", notRanked:"Без рейтинга", changeShort:"Изменить", addUserShort:"Добавить имя", addNameShort:"Добавить имя", langLbl:"Язык", themeLbl:"Тема", afterQ:"после этого вопроса", timerRuns:"Таймер продолжает идти", lightLbl:"Светлая", darkLbl:"Тёмная", seeBoard:"Таблица лидеров", lbClose:"Закрыть",
+    gotIt:"Понятно", wtRound:r => `Круг ${r} ✓`, wt_flags:"Вы увидели все флаги мира!", wt_countries:"Вы нашли все страны на карте!", wt_capitals:"Вы назвали все столицы!", wt_cities:"Вы нашли все города игры!", wtText:(n, u, r) => `Все <b>${n}</b> ${u}, и жизни не закончились. Вопросы перемешаны: начинается круг ${r}.`, wtUnit_flags:n => ruPl(n, "флаг", "флага", "флагов"), wtUnit_countries:n => ruPl(n, "страна", "страны", "стран"), wtUnit_capitals:n => ruPl(n, "столица", "столицы", "столиц"), wtUnit_cities:n => ruPl(n, "город", "города", "городов"), wtLives:"осталось", wtTime:"в игре", keepGoing:"Продолжить", wtBadge:n => `Кругосветка ×${n}`, wtTag:"Кругосветка", settings:"Настройки", guest:"Гость", onBoard:"В рейтинге", notRanked:"Без рейтинга", changeShort:"Изменить", addUserShort:"Добавить имя", addNameShort:"Добавить имя", langLbl:"Язык", themeLbl:"Тема", afterQ:"после этого вопроса", timerRuns:"Таймер продолжает идти", lightLbl:"Светлая", darkLbl:"Тёмная", seeBoard:"Таблица лидеров", lbClose:"Закрыть",
     help:`<p>Ваши очки — это число <b>верных ответов</b>. Каждый верный ответ даёт <b>+1</b>. Каждая ошибка стоит одну из <b>3 жизней</b>. Игра заканчивается, когда жизни закончились или вы нажали <b>Стоп</b>.</p>
     <p><b>Обзор (компас):</b> без очков и без жизней. Нажмите на любую страну, чтобы увидеть её флаг, столицу и крупные города. Хорошая подготовка перед игрой.</p>
     <p><b>Флаги · Легко:</b> выберите страну из 4 названий. Неверные варианты — соседние страны, поэтому флаги бывают похожи.</p>
@@ -1051,9 +1071,12 @@ function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.
 const kmBetween = (a,b) => d3.geoDistance(a,b) * 6371;
 const pointsFor = km => Math.round(1000 * Math.exp(-km / 1800)) ;
 
+let laps = 0, lapShownAt = -1, gameStart = Date.now(); // world tours: whole list played through in this game
 function newGame(){
   queue = shuffle(pool());
   round = 0; results = []; lives = LIVES; lostAt = -1; streak = 0; gainAt = -1;
+  laps = 0; lapShownAt = -1; gameStart = Date.now();
+  $("wtour").hidden = true;
   $("results").hidden = true;
   startRound();
 }
@@ -1101,6 +1124,10 @@ function cityArea(city){
   return {country: null, shape: d3.geoCircle().center(ll).radius(2.5)(), missKm: 75};
 }
 function startRound(){
+  // the last place of the list has just been played: celebrate the world tour first, then carry on
+  if (round > 0 && round >= queue.length && lapShownAt !== round && mode !== "explore"){
+    lapShownAt = round; laps++; keepTours(); showWorldTour(); return;
+  }
   if (round >= queue.length){ // seen them all: reshuffle and keep going, never repeating the last place
     let more = shuffle(pool()); if (more[0] === queue[queue.length-1]) more.push(more.shift());
     queue = queue.concat(more);
@@ -1156,7 +1183,7 @@ function renderPrompt(){
    not when the player switches app or tab, so there is no time to look the answer up. */
 const ROUND_MS = 15000, TIMER_GRACE = 700; // a moment for the map to settle before the clock visibly moves
 let tLeft = 0, tLast = 0, tOn = false;
-const timerBlocked = () => splashOpen || !$("tour").hidden || !$("help").hidden || !$("welcome").hidden || !$("results").hidden || !$("lbsheet").hidden;
+const timerBlocked = () => splashOpen || !$("tour").hidden || !$("help").hidden || !$("welcome").hidden || !$("results").hidden || !$("lbsheet").hidden || !$("wtour").hidden;
 function paintTimer(){
   const el = $("timer"); if (!el) return;
   el.style.setProperty("--f", tOn ? Math.max(0, Math.min(1, tLeft / ROUND_MS)) : 0);
@@ -1437,8 +1464,8 @@ const BOARDS = ["flags_easy", "flags_pro", "countries", "capitals_easy", "capita
 function localBests(){
   const out = [];
   for (const b of BOARDS){
-    let v = 0; try { v = +localStorage.getItem("globedrop-right-best-" + b.replace("_", "-")) || 0; } catch(e){}
-    if (v > 0) out.push({ board: b, best: v });
+    let v = 0, w = 0; try { v = +localStorage.getItem("globedrop-right-best-" + b.replace("_", "-")) || 0; w = +localStorage.getItem("globedrop-tours-" + b) || 0; } catch(e){}
+    if (v > 0) out.push(w > 0 ? { board: b, best: v, tours: w } : { board: b, best: v });
   }
   return out;
 }
@@ -1608,7 +1635,7 @@ async function refreshBoard(total){
     const board = boardKey();
     let newBest = false, res;
     if (typeof total === "number" && total > 0 && playerName){
-      try { newBest = ((await cx("mutation", "scores:submit", { pid: lb.uid, scores: [{ board, best: total }] })).newBest || []).includes(board); } catch(e){}
+      try { newBest = ((await cx("mutation", "scores:submit", { pid: lb.uid, scores: [laps ? { board, best: total, tours: laps } : { board, best: total }] })).newBest || []).includes(board); } catch(e){}
     }
     try { res = await cx("query", "scores:board", { board, pid: lb.uid }); }
     catch(e){ await checkOnline(); if (seq === boardSeq) el.innerHTML = `<div class="note">${t(isOffline ? "offBoard" : "lbDown2")}</div>`; return; }
@@ -1618,7 +1645,7 @@ async function refreshBoard(total){
   }
   let newBest = false;
   if (typeof total === "number" && total > 0 && playerName && total > (+lb.mine?.[field] || 0)){
-    newBest = await saveMine({ [field]: total, ["t_" + boardKey()]: Date.now() });
+    newBest = await saveMine({ [field]: total, ["t_" + boardKey()]: Date.now(), ...(laps > (+lb.mine?.["w_" + boardKey()] || 0) ? { ["w_" + boardKey()]: laps } : {}) });
   }
   let docs = [];
   try { docs = (await lb.db.collection("scores").orderBy(field, "desc").limit(500).get()).docs; }
@@ -1636,9 +1663,9 @@ function drawBoard(){
   const el = $("board"); if (!el || !boardCache) return;
   if (boardCache.convex){
     const { top, me, count } = boardCache.convex;
-    const line = (name, isMe, rank, score) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rank}</span><span class="nm">${medalCell(rank)}<bdi>${esc(name || t("player"))}</bdi>${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
-    let list = top.map((r, i) => line(r.name, r.me, i + 1, r.best)).join("");
-    if (me && me.rank > top.length) list += (me.rank > top.length + 1 ? `<li class="gap">⋯</li>` : "") + line(me.name, true, me.rank, me.best);
+    const line = (name, isMe, rank, score, tours = 0) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rank}</span><span class="nm">${medalCell(rank)}<bdi>${esc(name || t("player"))}</bdi>${tourTag(tours)}${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
+    let list = top.map((r, i) => line(r.name, r.me, i + 1, r.best, r.tours)).join("");
+    if (me && me.rank > top.length) list += (me.rank > top.length + 1 ? `<li class="gap">⋯</li>` : "") + line(me.name, true, me.rank, me.best, me.tours);
     const where = !playerName ? t("joinUser") : me ? t("rank", boardCache.newBest, me.rank, count) : t("joinOne");
     document.querySelector(".sheet .best")?.setAttribute("hidden", "");
     el.innerHTML = `<div class="bh">${lbTitle()}</div>
@@ -1648,7 +1675,7 @@ function drawBoard(){
   }
   const { rows, field, newBest } = boardCache;
   const meIdx = rows.findIndex(r => r.id === lb.uid);
-  const line = (r, i) => `<li class="${r.id === lb.uid ? "me" : ""}"><span class="rk">${i + 1}</span><span class="nm">${medalCell(i + 1)}<bdi>${esc(r.name || t("player"))}</bdi>${r.id === lb.uid ? t("youTag") : ""}</span><span class="sc">${+r[field]}</span></li>`;
+  const line = (r, i) => `<li class="${r.id === lb.uid ? "me" : ""}"><span class="rk">${i + 1}</span><span class="nm">${medalCell(i + 1)}<bdi>${esc(r.name || t("player"))}</bdi>${tourTag(+r["w_" + boardKey()] || 0)}${r.id === lb.uid ? t("youTag") : ""}</span><span class="sc">${+r[field]}</span></li>`;
   const TOP = 5;
   let list = rows.slice(0, TOP).map(line).join("");
   if (meIdx >= TOP) list += (meIdx > TOP ? `<li class="gap">⋯</li>` : "") + line(rows[meIdx], meIdx);
@@ -1671,8 +1698,8 @@ async function standings(board){
   const rows = docs.map(d => ({ id: d.id, ...d.data() })).filter(r => +r[field] > 0)
     .sort((a, b) => (+b[field] - +a[field]) || ((+a[tf] || 0) - (+b[tf] || 0)));
   const i = rows.findIndex(r => r.id === lb.uid);
-  return { top: rows.slice(0, 5).map(r => ({ name: r.name, best: +r[field], me: r.id === lb.uid })),
-           me: i < 0 ? null : { rank: i + 1, best: +rows[i][field], name: rows[i].name }, count: rows.length };
+  return { top: rows.slice(0, 5).map(r => ({ name: r.name, best: +r[field], tours: +r["w_" + board] || 0, me: r.id === lb.uid })),
+           me: i < 0 ? null : { rank: i + 1, best: +rows[i][field], name: rows[i].name, tours: +rows[i]["w_" + board] || 0 }, count: rows.length };
 }
 function openBoardSheet(){
   lbView = { mode: mode === "explore" ? "flags" : mode, level: levelOf[mode === "explore" ? "flags" : mode] || "easy" };
@@ -1708,9 +1735,9 @@ async function fillBoardSheet(){
   try { st = await standings(board); }
   catch(e){ if (lb.kind === "convex") await checkOnline(); note(lb.kind === "convex" && isOffline ? "offBoard" : "lbDown2"); return; }
   if (seq !== lbSeq) return;
-  const line = (name, isMe, rank, score) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rank}</span><span class="nm">${medalCell(rank)}<bdi>${esc(name || t("player"))}</bdi>${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
-  let list = st.top.map((r, i) => line(r.name, r.me, i + 1, r.best)).join("");
-  if (st.me && st.me.rank > st.top.length) list += (st.me.rank > st.top.length + 1 ? `<li class="gap">⋯</li>` : "") + line(st.me.name, true, st.me.rank, st.me.best);
+  const line = (name, isMe, rank, score, tours = 0) => `<li class="${isMe ? "me" : ""}"><span class="rk">${rank}</span><span class="nm">${medalCell(rank)}<bdi>${esc(name || t("player"))}</bdi>${tourTag(tours)}${isMe ? t("youTag") : ""}</span><span class="sc">${+score}</span></li>`;
+  let list = st.top.map((r, i) => line(r.name, r.me, i + 1, r.best, r.tours)).join("");
+  if (st.me && st.me.rank > st.top.length) list += (st.me.rank > st.top.length + 1 ? `<li class="gap">⋯</li>` : "") + line(st.me.name, true, st.me.rank, st.me.best, st.me.tours);
   const where = st.me ? t("rank", false, st.me.rank, st.count) : !playerName ? t(USE_CONVEX ? "joinUser" : "joinName") : "";
   el.innerHTML = `${where ? `<div class="note">${where}</div>` : ""}${st.top.length ? `<ol>${list}</ol>` : `<div class="note">${t("noScores")}</div>`}`;
 }
@@ -1782,11 +1809,38 @@ paintGearDot();
 $("lbsheet").addEventListener("click", e => { if (e.target.id === "lbsheet") closeBoardSheet(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("lbsheet").hidden) closeBoardSheet(); });
 
+const toursKey = () => "globedrop-tours-" + boardKey();
+function keepTours(){ try { if (laps > (+localStorage.getItem(toursKey()) || 0)) localStorage.setItem(toursKey(), laps); } catch(e){} }
+const fmtClock = ms => { const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(x).padStart(2, "0"); };
+function showWorldTour(){
+  const items = pool(), n = items.length;
+  const cName = x => Array.isArray(x) ? x[1] : x.properties.name;
+  const strip = shuffle(items.map(cName).filter((v, i, a) => FLAGS[v] && a.indexOf(v) === i)).slice(0, 12);
+  stopTimer(); closeSettings?.();
+  const w = $("wtour");
+  w.innerHTML = `<div class="wt" role="dialog" aria-labelledby="wt-h">
+    <span class="lap">${t("wtRound", laps)}</span>
+    <div class="globe" aria-hidden="true">🌍</div>
+    <h2 id="wt-h">${t("wt_" + mode)}</h2>
+    <p>${t("wtText", fmt(n), t("wtUnit_" + mode, n), laps + 1)}</p>
+    <div class="flags" aria-hidden="true">${strip.map(c => `<img src="${FLAGS[c]}" alt="">`).join("")}</div>
+    <div class="stats"><div><b>${fmt(n)}</b>${t("wtUnit_" + mode, n)}</div><div><b>❤️ ${lives}</b>${t("wtLives")}</div><div><b>${fmtClock(Date.now() - gameStart)}</b>${t("wtTime")}</div></div>
+    <button class="btn" id="wtgo">${t("keepGoing")}</button>
+  </div>`;
+  w.hidden = false;
+  const box = w.querySelector(".wt");
+  setTimeout(() => confettiFrom(box, box.querySelector(".globe")), 250);
+  onTap($("wtgo"), () => { w.hidden = true; startRound(); });
+  setTimeout(() => $("wtgo").focus({preventScroll:true}), 50);
+}
+const tourTag = n => n > 0 ? `<span class="wtag" title="${esc(t("wtTag"))}${n > 1 ? " ×" + n : ""}" aria-label="${esc(t("wtTag"))}">🌍</span>` : "";
+
 const MEDAL_AT = 3; // right answers needed for the end-of-game medal
 /* A short confetti burst from the medal, drawn on a canvas over the results; skipped when the viewer prefers less motion. */
-function celebrate(){
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const host = $("results"), m = host.querySelector(".medal .m"); if (!m) return;
+function celebrate(){ confettiFrom($("results"), $("results").querySelector(".medal .m")); }
+function confettiFrom(host, m){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || !host || !m) return;
   host.querySelector(".confetti")?.remove();
   const cv = document.createElement("canvas"); cv.className = "confetti"; host.appendChild(cv);
   const dpr = Math.min(window.devicePixelRatio || 1, 2), W = host.clientWidth, H = host.clientHeight;
@@ -1853,7 +1907,7 @@ function showResults(outOfLives){
   const key = "globedrop-right-best-" + mode + (mode !== "countries" ? "-" + level : "");
   let best = 0;
   try { best = +localStorage.getItem(key) || 0; if (total > best) localStorage.setItem(key, total); } catch(e){}
-  lastOutcome = { outOfLives, total, best, newBest: total > best };
+  lastOutcome = { outOfLives, total, best, newBest: total > best, laps };
   a2hsShown = shouldOfferA2hs();
   boardCache = null;
   clearTimeout(toastTimer); $("toast").classList.remove("show");
@@ -1880,6 +1934,7 @@ function renderResults(){
       <div class="rnum">${total}</div>
       <div class="rlabel">${t("rightAnswers", total)}</div>
     </div>
+    ${lastOutcome.laps ? `<span class="wtbadge"><span aria-hidden="true">🌍</span>${t("wtBadge", lastOutcome.laps)}</span>` : ""}
     <div class="rsub"><b>${verdict(total)}</b><br>${outOfLives ? t("outOfLives") : t("youStopped")} · ${t("playedMissed", played, missed)}</div>
     <div class="ractions">
       <button class="btn" id="again">${t("playAgain")}</button>
