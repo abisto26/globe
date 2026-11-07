@@ -24,6 +24,18 @@ const toursOf = (r: { board: string; best: number; tours?: number }) => Math.max
 const FIRE = [25, 50]; // 🔥 On fire: silver at 25 in a row, gold at 50
 const fireOf = (streak?: number) => (streak ?? 0) >= FIRE[1] ? 2 : (streak ?? 0) >= FIRE[0] ? 1 : 0;
 const AVATAR = /^(ibnbattuta|marcopolo|columbus|zhenghe|earhart|tereshkova|nellybly|captain|fox|panda|lion|penguin|turtle|owl):[0-5]$/;
+// achievement progress sent by the game; each kept as the best value seen (languages: one bit per language, combined)
+const PROG_MAX: Record<string, number> = { bull: 1, light: 3000, explore: 200, untouch: 3000, days: 3660, langs: 15 };
+function mergeProg(old: Record<string, number> | undefined, add: Record<string, number> | undefined) {
+  const out: Record<string, number> = { ...(old ?? {}) };
+  let changed = false;
+  for (const [k, raw] of Object.entries(add ?? {})) {
+    const max = PROG_MAX[k]; if (max === undefined || !Number.isInteger(raw) || raw < 0 || raw > max) continue;
+    const next = k === "langs" ? ((out[k] ?? 0) | raw) : Math.max(out[k] ?? 0, raw);
+    if (next !== (out[k] ?? 0)) { out[k] = next; changed = true; }
+  }
+  return changed ? out : null;
+}
 const MAX_FAILS = 5;           // wrong PINs before a username is locked for a while
 const LOCK_MS = 10 * 60 * 1000;
 
@@ -80,8 +92,9 @@ export const claim = mutation({
 
 /** Save results (one finished game, or the bests a device kept while offline). Keeps the best per board. */
 export const submit = mutation({
-  args: { pid: v.string(), scores: v.array(v.object({ board: v.string(), best: v.number(), tours: v.optional(v.number()) })), streak: v.optional(v.number()) },
-  handler: async (ctx, { pid, scores, streak }) => {
+  args: { pid: v.string(), scores: v.array(v.object({ board: v.string(), best: v.number(), tours: v.optional(v.number()) })), streak: v.optional(v.number()),
+          prog: v.optional(v.record(v.string(), v.number())) },
+  handler: async (ctx, { pid, scores, streak, prog }) => {
     if (!PID.test(pid)) throw new Error("bad player id");
     if (scores.length > 10) throw new Error("too many");
     const user = await ctx.db.query("users").withIndex("by_pid", q => q.eq("pid", pid)).unique();
@@ -107,6 +120,8 @@ export const submit = mutation({
     const topScore = Math.max(0, ...scores.map(x => x.best));
     if (streak !== undefined && Number.isInteger(streak) && streak > (user.streak ?? 0) && streak <= Math.max(topScore, MAX_BEST))
       await ctx.db.patch(user._id, { streak });
+    const merged = mergeProg(user.prog, prog);
+    if (merged) await ctx.db.patch(user._id, { prog: merged });
     // 👑 #1 on any board this player is on
     let newChampion = false;
     if (!user.champion) {
@@ -176,14 +191,18 @@ export const profile = query({
     if (!user) return null;
     const rows = await ctx.db.query("bests").withIndex("by_pid_board", q => q.eq("pid", pid)).collect();
     let best = 0, bestBoard = "", tours = 0, firstOn: string[] = [];
+    const modes = new Set<string>(); let proBest = 0;
     for (const r of rows) {
+      if (r.best >= 10) modes.add(r.board.split("_")[0]);
+      if (r.board.endsWith("_pro")) proBest = Math.max(proBest, r.best);
       if (r.best > best) { best = r.best; bestBoard = r.board; }
       tours += toursOf(r);
       const first = await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", r.board)).order("desc").first();
       if (first && first.pid === pid) firstOn.push(r.board);
     }
     return { name: user.name, best, bestBoard, tours, streak: user.streak ?? 0, fire: fireOf(user.streak),
-             champion: !!user.champion || firstOn.length > 0, firstOn, avatar: user.avatar ?? "" };
+             champion: !!user.champion || firstOn.length > 0, firstOn, avatar: user.avatar ?? "",
+             prog: { ...(user.prog ?? {}), allround: modes.size, pro: proBest } };
   },
 });
 

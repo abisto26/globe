@@ -332,15 +332,19 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .pf .st b{display:block;font:800 1.2rem var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
 .pf h3{margin:2px 0 -4px;font:800 1rem var(--display);color:var(--ink);display:flex;justify-content:space-between;align-items:baseline}
 .pf h3 span{font-weight:600;color:var(--ink-soft);font-size:.85rem}
-.pf .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pf>*{flex-shrink:0}
+.pf .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 6px}
 .pf .bd{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
-.pf .bd .ic{position:relative;width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-size:1.9rem;background:var(--chip)}
+.pf .bd .ic{position:relative;width:56px;height:56px;border-radius:18px;display:grid;place-items:center;font-size:1.65rem;background:var(--chip)}
+.pf .bd .bar{width:56px;height:4px;border-radius:4px;background:color-mix(in srgb,var(--ink) 12%,transparent);overflow:hidden;margin-top:-1px}
+.pf .bd .bar i{display:block;height:100%;border-radius:4px;background:var(--target)}
 .pf .bd.gold .ic{background:linear-gradient(135deg,#ffe9a8,#f5b638);box-shadow:0 6px 14px rgba(240,169,43,.4)}
 .pf .bd.silver .ic{background:linear-gradient(135deg,#f1f4f6,#b9c4cc);box-shadow:0 6px 14px rgba(120,140,155,.35)}
 .pf .bd.locked .ic > span{filter:grayscale(1);opacity:.45}
 .pf .bd .x{position:absolute;inset-inline-end:-4px;top:-4px;min-width:20px;height:20px;border-radius:999px;background:var(--ink);color:var(--panel);font:800 .68rem/20px var(--display);padding:0 5px}
-.pf .bd b{font:700 .78rem/1.15 var(--display);color:var(--ink)}
-.pf .bd small{font:600 .66rem/1.2 var(--display);color:var(--ink-soft)}
+.pf .bd b{font:700 .72rem/1.15 var(--display);color:var(--ink);max-width:100%;overflow-wrap:anywhere;hyphens:auto}
+@media (max-width:359px){.pf .grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.pf .bd small{font:600 .6rem/1.2 var(--display);color:var(--ink-soft)}
 .pf .bd.locked b{color:var(--ink-soft)}
 .pf .gnote{margin:0;padding:10px 12px;border-radius:14px;background:var(--chip);font:600 .82rem/1.35 var(--display);color:var(--ink-soft);display:flex;align-items:center;justify-content:space-between;gap:10px}
 .pf .gnote button{flex:none}
@@ -994,7 +998,7 @@ const T = {
     lbDown:"The leaderboard can't be reached right now. Your score is kept on this device.", lbDown2:"The leaderboard can't be reached right now.", offline:"Offline", poweredBy:"Powered by", offBoard:"You're offline. Your best is saved on this device and goes on the leaderboard when you're back online.", offUser:"You're offline. Play as a guest now and add your username when you're back online.",
     youTag:" (you)", joinName:"Add a name to join the leaderboard.", joinUser:"Add a username to save this score on the leaderboard.", joinOne:"Get at least 1 right to join the leaderboard.", noScores:"No scores yet. Be the first.",
     rank:(nb, r, n) => `${nb ? "New best! " : ""}You're <b>#${r}</b> of ${n} ${n === 1 ? "player" : "players"}.`,
-    gotIt:"Got it", chooseAv:"Choose your avatar", avSub:"Famous travellers, or something fun.", avTravellers:"Famous travellers", avAnimals:"Animals", avColour:"Colour", avEdit:"Change your avatar", tv_ibnbattuta:"Ibn Battuta", tv_marcopolo:"Marco Polo", tv_columbus:"Columbus", tv_zhenghe:"Zheng He", tv_earhart:"Amelia Earhart", tv_tereshkova:"Valentina Tereshkova", tv_nellybly:"Nellie Bly", tv_captain:"Captain", profile:"Profile", stBest:"best score", stStreak:"best streak", stTours:"world tours", achievements:"Achievements", a_world:"World tour", a_fire:"On fire", a_champ:"Champion", earned:"Earned", progressOf:(x, n) => `best ${x} / ${n}`, fireGold:"50 in a row for gold", champOn:b => `#1 on ${b}`, champDesc:"Reach #1 on any leaderboard", bestOn:b => `Best game: ${b}`, unlocked:"Achievement unlocked", inARow:n => `${n} right in a row`, guestAch:"Add a username to keep your achievements on every device.", tapProfile:"See your profile", wtRound:r => `Round ${r} ✓`, wt_flags:"You've seen every flag in the world!", wt_countries:"You've found every country on the map!", wt_capitals:"You've named every capital!", wt_cities:"You've found every city in the game!", wtText:(n, u, r) => `All <b>${n}</b> ${u}, without running out of lives. The deck is reshuffled: round ${r} starts now.`, wtUnit_flags:n => "flags", wtUnit_countries:n => "countries", wtUnit_capitals:n => "capitals", wtUnit_cities:n => "cities", wtLives:"lives left", wtTime:"playing", keepGoing:"Keep going", wtBadge:n => `World tour ×${n}`, wtTag:"World tour", settings:"Settings", guest:"Guest", onBoard:"On the leaderboard", notRanked:"Not ranked yet", changeShort:"Change", addUserShort:"Add username", addNameShort:"Add name", langLbl:"Language", themeLbl:"Theme", afterQ:"after this question", timerRuns:"The timer keeps running", lightLbl:"Light", darkLbl:"Dark", seeBoard:"Leaderboard", lbClose:"Close",
+    gotIt:"Got it", a_bull:"Bullseye", a_light:"Lightning", a_explore:"Explorer", a_allround:"All-rounder", a_pro:"Pro", a_untouch:"Untouchable", a_daily:"Daily traveller", a_polyglot:"Polyglot", d_world:"A whole list, no game over", d_fire:"25 in a row · 50 for gold", d_champ:"#1 on any leaderboard", d_bull:"City pin within 10 km", d_light:"10 in a row, each under 3 s", d_explore:"Open 100 countries in Explore", d_allround:"10+ in every game", d_pro:"50 in a Pro game", d_untouch:"50 right without losing a life", d_daily:"Play 7 days in a row", d_polyglot:"Play in all 4 languages", chooseAv:"Choose your avatar", avSub:"Famous travellers, or something fun.", avTravellers:"Famous travellers", avAnimals:"Animals", avColour:"Colour", avEdit:"Change your avatar", tv_ibnbattuta:"Ibn Battuta", tv_marcopolo:"Marco Polo", tv_columbus:"Columbus", tv_zhenghe:"Zheng He", tv_earhart:"Amelia Earhart", tv_tereshkova:"Valentina Tereshkova", tv_nellybly:"Nellie Bly", tv_captain:"Captain", profile:"Profile", stBest:"best score", stStreak:"best streak", stTours:"world tours", achievements:"Achievements", a_world:"World tour", a_fire:"On fire", a_champ:"Champion", earned:"Earned", progressOf:(x, n) => `best ${x} / ${n}`, fireGold:"50 in a row for gold", champOn:b => `#1 on ${b}`, champDesc:"Reach #1 on any leaderboard", bestOn:b => `Best game: ${b}`, unlocked:"Achievement unlocked", inARow:n => `${n} right in a row`, guestAch:"Add a username to keep your achievements on every device.", tapProfile:"See your profile", wtRound:r => `Round ${r} ✓`, wt_flags:"You've seen every flag in the world!", wt_countries:"You've found every country on the map!", wt_capitals:"You've named every capital!", wt_cities:"You've found every city in the game!", wtText:(n, u, r) => `All <b>${n}</b> ${u}, without running out of lives. The deck is reshuffled: round ${r} starts now.`, wtUnit_flags:n => "flags", wtUnit_countries:n => "countries", wtUnit_capitals:n => "capitals", wtUnit_cities:n => "cities", wtLives:"lives left", wtTime:"playing", keepGoing:"Keep going", wtBadge:n => `World tour ×${n}`, wtTag:"World tour", settings:"Settings", guest:"Guest", onBoard:"On the leaderboard", notRanked:"Not ranked yet", changeShort:"Change", addUserShort:"Add username", addNameShort:"Add name", langLbl:"Language", themeLbl:"Theme", afterQ:"after this question", timerRuns:"The timer keeps running", lightLbl:"Light", darkLbl:"Dark", seeBoard:"Leaderboard", lbClose:"Close",
     help:`<p>Your score is the number of <b>right answers</b>. Each right answer is <b>+1</b>. Each miss costs one of your <b>3 lives</b>. The game ends when you run out of lives or press <b>Stop</b>.</p>
     <p><b>Explore (compass):</b> no score, no lives. Tap any country to see its flag, capital and big cities. Good homework before you play.</p>
     <p><b>Flags · Easy:</b> pick the country from 4 names. The wrong ones are neighbours, so similar flags show up.</p>
@@ -1034,7 +1038,7 @@ const T = {
     lbDown:"Le classement est inaccessible pour l'instant. Ton score est gardé sur cet appareil.", lbDown2:"Le classement est inaccessible pour l'instant.", offline:"Hors ligne", poweredBy:"Propulsé par", offBoard:"Tu es hors ligne. Ton record est gardé sur cet appareil et ira au classement dès ton retour en ligne.", offUser:"Tu es hors ligne. Joue en invité et ajoute ton pseudo une fois reconnecté.",
     youTag:" (toi)", joinName:"Ajoute un nom pour entrer au classement.", joinUser:"Ajoute un pseudo pour enregistrer ce score au classement.", joinOne:"Trouve au moins 1 bonne réponse pour entrer au classement.", noScores:"Aucun score pour l'instant. Sois le premier !",
     rank:(nb, r, n) => `${nb ? "Nouveau record ! " : ""}Tu es <b>n° ${r}</b> sur ${n} ${n > 1 ? "joueurs" : "joueur"}.`,
-    gotIt:"Compris", chooseAv:"Choisis ton avatar", avSub:"Grands voyageurs, ou quelque chose de fun.", avTravellers:"Grands voyageurs", avAnimals:"Animaux", avColour:"Couleur", avEdit:"Changer d'avatar", tv_ibnbattuta:"Ibn Battuta", tv_marcopolo:"Marco Polo", tv_columbus:"Christophe Colomb", tv_zhenghe:"Zheng He", tv_earhart:"Amelia Earhart", tv_tereshkova:"Valentina Terechkova", tv_nellybly:"Nellie Bly", tv_captain:"Commandante", profile:"Profil", stBest:"meilleur score", stStreak:"meilleure série", stTours:"tours du monde", achievements:"Succès", a_world:"Tour du monde", a_fire:"En feu", a_champ:"Champion", earned:"Obtenu", progressOf:(x, n) => `record ${x} / ${n}`, fireGold:"50 d'affilée pour l'or", champOn:b => `n°1 en ${b}`, champDesc:"Sois n°1 d'un classement", bestOn:b => `Meilleur jeu : ${b}`, unlocked:"Succès débloqué", inARow:n => `${n} bonnes réponses d'affilée`, guestAch:"Ajoute un pseudo pour garder tes succès sur tous tes appareils.", tapProfile:"Voir ton profil", wtRound:r => `Tour ${r} ✓`, wt_flags:"Tu as vu tous les drapeaux du monde !", wt_countries:"Tu as trouvé tous les pays de la carte !", wt_capitals:"Tu as trouvé toutes les capitales !", wt_cities:"Tu as trouvé toutes les villes du jeu !", wtText:(n, u, r) => `Les <b>${n}</b> ${u}, sans perdre toutes tes vies. Les questions sont remélangées : le tour ${r} commence.`, wtUnit_flags:n => "drapeaux", wtUnit_countries:n => "pays", wtUnit_capitals:n => "capitales", wtUnit_cities:n => "villes", wtLives:"vies restantes", wtTime:"de jeu", keepGoing:"Continuer", wtBadge:n => `Tour du monde ×${n}`, wtTag:"Tour du monde", settings:"Réglages", guest:"Invité", onBoard:"Au classement", notRanked:"Pas encore classé", changeShort:"Changer", addUserShort:"Ajouter un pseudo", addNameShort:"Ajouter un nom", langLbl:"Langue", themeLbl:"Thème", afterQ:"après cette question", timerRuns:"Le chrono continue", lightLbl:"Clair", darkLbl:"Sombre", seeBoard:"Classement", lbClose:"Fermer",
+    gotIt:"Compris", a_bull:"Dans le mille", a_light:"Éclair", a_explore:"Explorateur", a_allround:"Polyvalent", a_pro:"Pro", a_untouch:"Intouchable", a_daily:"Voyageur assidu", a_polyglot:"Polyglotte", d_world:"Une liste entière sans game over", d_fire:"25 d'affilée · 50 pour l'or", d_champ:"n°1 d'un classement", d_bull:"Épingle à moins de 10 km", d_light:"10 d'affilée, chacune en moins de 3 s", d_explore:"Ouvre 100 pays en mode Explorer", d_allround:"10+ dans chaque jeu", d_pro:"50 dans un jeu Pro", d_untouch:"50 bonnes réponses sans perdre de vie", d_daily:"Joue 7 jours de suite", d_polyglot:"Joue dans les 4 langues", chooseAv:"Choisis ton avatar", avSub:"Grands voyageurs, ou quelque chose de fun.", avTravellers:"Grands voyageurs", avAnimals:"Animaux", avColour:"Couleur", avEdit:"Changer d'avatar", tv_ibnbattuta:"Ibn Battuta", tv_marcopolo:"Marco Polo", tv_columbus:"Christophe Colomb", tv_zhenghe:"Zheng He", tv_earhart:"Amelia Earhart", tv_tereshkova:"Valentina Terechkova", tv_nellybly:"Nellie Bly", tv_captain:"Commandante", profile:"Profil", stBest:"meilleur score", stStreak:"meilleure série", stTours:"tours du monde", achievements:"Succès", a_world:"Tour du monde", a_fire:"En feu", a_champ:"Champion", earned:"Obtenu", progressOf:(x, n) => `record ${x} / ${n}`, fireGold:"50 d'affilée pour l'or", champOn:b => `n°1 en ${b}`, champDesc:"Sois n°1 d'un classement", bestOn:b => `Meilleur jeu : ${b}`, unlocked:"Succès débloqué", inARow:n => `${n} bonnes réponses d'affilée`, guestAch:"Ajoute un pseudo pour garder tes succès sur tous tes appareils.", tapProfile:"Voir ton profil", wtRound:r => `Tour ${r} ✓`, wt_flags:"Tu as vu tous les drapeaux du monde !", wt_countries:"Tu as trouvé tous les pays de la carte !", wt_capitals:"Tu as trouvé toutes les capitales !", wt_cities:"Tu as trouvé toutes les villes du jeu !", wtText:(n, u, r) => `Les <b>${n}</b> ${u}, sans perdre toutes tes vies. Les questions sont remélangées : le tour ${r} commence.`, wtUnit_flags:n => "drapeaux", wtUnit_countries:n => "pays", wtUnit_capitals:n => "capitales", wtUnit_cities:n => "villes", wtLives:"vies restantes", wtTime:"de jeu", keepGoing:"Continuer", wtBadge:n => `Tour du monde ×${n}`, wtTag:"Tour du monde", settings:"Réglages", guest:"Invité", onBoard:"Au classement", notRanked:"Pas encore classé", changeShort:"Changer", addUserShort:"Ajouter un pseudo", addNameShort:"Ajouter un nom", langLbl:"Langue", themeLbl:"Thème", afterQ:"après cette question", timerRuns:"Le chrono continue", lightLbl:"Clair", darkLbl:"Sombre", seeBoard:"Classement", lbClose:"Fermer",
     help:`<p>Ton score est le nombre de <b>bonnes réponses</b>. Chaque bonne réponse vaut <b>+1</b>. Chaque erreur te coûte une de tes <b>3 vies</b>. La partie s'arrête quand tu n'as plus de vies ou quand tu touches <b>Arrêter</b>.</p>
     <p><b>Explorer (boussole) :</b> pas de score, pas de vies. Touche un pays pour voir son drapeau, sa capitale et ses grandes villes. Parfait pour réviser avant de jouer.</p>
     <p><b>Drapeaux · Facile :</b> choisis le pays parmi 4 noms. Les mauvaises réponses sont des voisins, donc les drapeaux se ressemblent.</p>
@@ -1074,7 +1078,7 @@ const T = {
     lbDown:"تعذّر الوصول إلى لوحة الترتيب الآن. نتيجتك محفوظة على هذا الجهاز.", lbDown2:"تعذّر الوصول إلى لوحة الترتيب الآن.", offline:"غير متصل", poweredBy:"برعاية", offBoard:"أنت غير متصل. أفضل نتيجة لك محفوظة على هذا الجهاز وستُضاف إلى لوحة الترتيب عند عودة الاتصال.", offUser:"أنت غير متصل. العب كضيف الآن وأضف اسم المستخدم عند عودة الاتصال.",
     youTag:" (أنت)", joinName:"أضف اسمًا لتنضم إلى لوحة الترتيب.", joinUser:"أضف اسم مستخدم لحفظ هذه النتيجة في لوحة الترتيب.", joinOne:"أجب إجابة صحيحة واحدة على الأقل لتدخل لوحة الترتيب.", noScores:"لا توجد نتائج بعد. كن الأول!",
     rank:(nb, r, n) => `${nb ? "رقم قياسي جديد! " : ""}أنت في المركز <b>${r}</b> من ${n}.`,
-    gotIt:"فهمت", chooseAv:"اختر صورتك", avSub:"رحّالة مشهورون، أو شيء ممتع.", avTravellers:"رحّالة مشهورون", avAnimals:"حيوانات", avColour:"اللون", avEdit:"غيّر صورتك", tv_ibnbattuta:"ابن بطوطة", tv_marcopolo:"ماركو بولو", tv_columbus:"كولومبوس", tv_zhenghe:"تشنغ خه", tv_earhart:"أميليا إيرهارت", tv_tereshkova:"فالنتينا تيريشكوفا", tv_nellybly:"نيلي بلاي", tv_captain:"قائدة الطائرة", profile:"الملف الشخصي", stBest:"أفضل نتيجة", stStreak:"أطول سلسلة", stTours:"جولات حول العالم", achievements:"الإنجازات", a_world:"جولة حول العالم", a_fire:"مشتعل", a_champ:"البطل", earned:"تم الحصول عليه", progressOf:(x, n) => `الأفضل ${x} / ${n}`, fireGold:"50 متتالية للذهبية", champOn:b => `الأول في ${b}`, champDesc:"كن الأول في أي لوحة ترتيب", bestOn:b => `أفضل لعبة: ${b}`, unlocked:"إنجاز جديد", inARow:n => `${n} إجابات صحيحة متتالية`, guestAch:"أضف اسم مستخدم لتحتفظ بإنجازاتك على كل أجهزتك.", tapProfile:"عرض ملفك", wtRound:r => `الجولة ${r} ✓`, wt_flags:"لقد رأيت كل أعلام العالم!", wt_countries:"لقد وجدت كل دول الخريطة!", wt_capitals:"لقد عرفت كل العواصم!", wt_cities:"لقد وجدت كل مدن اللعبة!", wtText:(n, u, r) => `كل الـ<b>${n}</b> ${u} دون أن تنفد أرواحك. أُعيد خلط الأسئلة: تبدأ الجولة ${r} الآن.`, wtUnit_flags:n => "علمًا", wtUnit_countries:n => "دولة", wtUnit_capitals:n => "عاصمة", wtUnit_cities:n => "مدينة", wtLives:"أرواح متبقية", wtTime:"مدة اللعب", keepGoing:"واصل", wtBadge:n => `جولة حول العالم ×${n}`, wtTag:"جولة حول العالم", settings:"الإعدادات", guest:"ضيف", onBoard:"في لوحة الترتيب", notRanked:"غير مصنّف بعد", changeShort:"تغيير", addUserShort:"أضف اسم مستخدم", addNameShort:"أضف اسمًا", langLbl:"اللغة", themeLbl:"المظهر", afterQ:"بعد هذا السؤال", timerRuns:"المؤقت مستمر", lightLbl:"فاتح", darkLbl:"داكن", seeBoard:"لوحة الترتيب", lbClose:"إغلاق",
+    gotIt:"فهمت", a_bull:"في الصميم", a_light:"البرق", a_explore:"المستكشف", a_allround:"متعدد المواهب", a_pro:"محترف", a_untouch:"لا يُمَس", a_daily:"مسافر كل يوم", a_polyglot:"متعدد اللغات", d_world:"قائمة كاملة دون خسارة", d_fire:"25 متتالية · 50 للذهبية", d_champ:"الأول في أي لوحة ترتيب", d_bull:"دبوس على بُعد أقل من 10 كم", d_light:"10 متتالية، كل واحدة في أقل من 3 ث", d_explore:"افتح 100 دولة في الاستكشاف", d_allround:"10+ في كل لعبة", d_pro:"50 في لعبة محترف", d_untouch:"50 إجابة صحيحة دون فقدان روح", d_daily:"العب 7 أيام متتالية", d_polyglot:"العب باللغات الأربع", chooseAv:"اختر صورتك", avSub:"رحّالة مشهورون، أو شيء ممتع.", avTravellers:"رحّالة مشهورون", avAnimals:"حيوانات", avColour:"اللون", avEdit:"غيّر صورتك", tv_ibnbattuta:"ابن بطوطة", tv_marcopolo:"ماركو بولو", tv_columbus:"كولومبوس", tv_zhenghe:"تشنغ خه", tv_earhart:"أميليا إيرهارت", tv_tereshkova:"فالنتينا تيريشكوفا", tv_nellybly:"نيلي بلاي", tv_captain:"قائدة الطائرة", profile:"الملف الشخصي", stBest:"أفضل نتيجة", stStreak:"أطول سلسلة", stTours:"جولات حول العالم", achievements:"الإنجازات", a_world:"جولة حول العالم", a_fire:"مشتعل", a_champ:"البطل", earned:"تم الحصول عليه", progressOf:(x, n) => `الأفضل ${x} / ${n}`, fireGold:"50 متتالية للذهبية", champOn:b => `الأول في ${b}`, champDesc:"كن الأول في أي لوحة ترتيب", bestOn:b => `أفضل لعبة: ${b}`, unlocked:"إنجاز جديد", inARow:n => `${n} إجابات صحيحة متتالية`, guestAch:"أضف اسم مستخدم لتحتفظ بإنجازاتك على كل أجهزتك.", tapProfile:"عرض ملفك", wtRound:r => `الجولة ${r} ✓`, wt_flags:"لقد رأيت كل أعلام العالم!", wt_countries:"لقد وجدت كل دول الخريطة!", wt_capitals:"لقد عرفت كل العواصم!", wt_cities:"لقد وجدت كل مدن اللعبة!", wtText:(n, u, r) => `كل الـ<b>${n}</b> ${u} دون أن تنفد أرواحك. أُعيد خلط الأسئلة: تبدأ الجولة ${r} الآن.`, wtUnit_flags:n => "علمًا", wtUnit_countries:n => "دولة", wtUnit_capitals:n => "عاصمة", wtUnit_cities:n => "مدينة", wtLives:"أرواح متبقية", wtTime:"مدة اللعب", keepGoing:"واصل", wtBadge:n => `جولة حول العالم ×${n}`, wtTag:"جولة حول العالم", settings:"الإعدادات", guest:"ضيف", onBoard:"في لوحة الترتيب", notRanked:"غير مصنّف بعد", changeShort:"تغيير", addUserShort:"أضف اسم مستخدم", addNameShort:"أضف اسمًا", langLbl:"اللغة", themeLbl:"المظهر", afterQ:"بعد هذا السؤال", timerRuns:"المؤقت مستمر", lightLbl:"فاتح", darkLbl:"داكن", seeBoard:"لوحة الترتيب", lbClose:"إغلاق",
     help:`<p>نتيجتك هي عدد <b>الإجابات الصحيحة</b>. كل إجابة صحيحة تساوي <b>+1</b>، وكل خطأ يكلّفك روحًا من <b>أرواحك الثلاث</b>. تنتهي اللعبة عندما تنفد أرواحك أو عندما تضغط <b>توقف</b>.</p>
     <p><b>الاستكشاف (البوصلة):</b> بدون نقاط ولا أرواح. المس أي دولة لترى علمها وعاصمتها وأكبر مدنها. مراجعة مفيدة قبل اللعب.</p>
     <p><b>الأعلام · سهل:</b> اختر الدولة من بين 4 أسماء. الخيارات الخاطئة دول مجاورة، لذا قد تتشابه الأعلام.</p>
@@ -1114,7 +1118,7 @@ const T = {
     lbDown:"Таблица лидеров сейчас недоступна. Ваш результат сохранён на этом устройстве.", lbDown2:"Таблица лидеров сейчас недоступна.", offline:"Офлайн", poweredBy:"При поддержке", offBoard:"Вы офлайн. Ваш рекорд сохранён на этом устройстве и попадёт в таблицу лидеров, когда появится связь.", offUser:"Вы офлайн. Играйте как гость, а имя пользователя добавьте, когда появится связь.",
     youTag:" (вы)", joinName:"Добавьте имя, чтобы попасть в таблицу лидеров.", joinUser:"Добавьте имя пользователя, чтобы сохранить результат в таблице лидеров.", joinOne:"Дайте хотя бы 1 верный ответ, чтобы попасть в таблицу.", noScores:"Пока нет результатов. Будьте первым!",
     rank:(nb, r, n) => `${nb ? "Новый рекорд! " : ""}Вы <b>#${r}</b> из ${n} ${ruPl(n, "игрока", "игроков", "игроков")}.`,
-    gotIt:"Понятно", chooseAv:"Выберите аватар", avSub:"Знаменитые путешественники или что-то забавное.", avTravellers:"Знаменитые путешественники", avAnimals:"Животные", avColour:"Цвет", avEdit:"Сменить аватар", tv_ibnbattuta:"Ибн Баттута", tv_marcopolo:"Марко Поло", tv_columbus:"Колумб", tv_zhenghe:"Чжэн Хэ", tv_earhart:"Амелия Эрхарт", tv_tereshkova:"Валентина Терешкова", tv_nellybly:"Нелли Блай", tv_captain:"Капитан", profile:"Профиль", stBest:"лучший результат", stStreak:"лучшая серия", stTours:"кругосветки", achievements:"Достижения", a_world:"Кругосветка", a_fire:"В ударе", a_champ:"Чемпион", earned:"Получено", progressOf:(x, n) => `рекорд ${x} / ${n}`, fireGold:"50 подряд — золото", champOn:b => `№1: ${b}`, champDesc:"Станьте №1 в любой таблице", bestOn:b => `Лучшая игра: ${b}`, unlocked:"Новое достижение", inARow:n => `${n} верных подряд`, guestAch:"Добавьте имя пользователя, чтобы достижения сохранялись на всех устройствах.", tapProfile:"Открыть профиль", wtRound:r => `Круг ${r} ✓`, wt_flags:"Вы увидели все флаги мира!", wt_countries:"Вы нашли все страны на карте!", wt_capitals:"Вы назвали все столицы!", wt_cities:"Вы нашли все города игры!", wtText:(n, u, r) => `Все <b>${n}</b> ${u}, и жизни не закончились. Вопросы перемешаны: начинается круг ${r}.`, wtUnit_flags:n => ruPl(n, "флаг", "флага", "флагов"), wtUnit_countries:n => ruPl(n, "страна", "страны", "стран"), wtUnit_capitals:n => ruPl(n, "столица", "столицы", "столиц"), wtUnit_cities:n => ruPl(n, "город", "города", "городов"), wtLives:"осталось", wtTime:"в игре", keepGoing:"Продолжить", wtBadge:n => `Кругосветка ×${n}`, wtTag:"Кругосветка", settings:"Настройки", guest:"Гость", onBoard:"В рейтинге", notRanked:"Без рейтинга", changeShort:"Изменить", addUserShort:"Добавить имя", addNameShort:"Добавить имя", langLbl:"Язык", themeLbl:"Тема", afterQ:"после этого вопроса", timerRuns:"Таймер продолжает идти", lightLbl:"Светлая", darkLbl:"Тёмная", seeBoard:"Таблица лидеров", lbClose:"Закрыть",
+    gotIt:"Понятно", a_bull:"В яблочко", a_light:"Молния", a_explore:"Исследователь", a_allround:"Универсал", a_pro:"Профи", a_untouch:"Неуязвимый", a_daily:"Каждый день", a_polyglot:"Полиглот", d_world:"Весь список без проигрыша", d_fire:"25 подряд · 50 — золото", d_champ:"№1 в любой таблице", d_bull:"Метка ближе 10 км", d_light:"10 подряд, каждый быстрее 3 с", d_explore:"Откройте 100 стран в обзоре", d_allround:"10+ в каждой игре", d_pro:"50 в игре «Профи»", d_untouch:"50 верных без потери жизни", d_daily:"Играйте 7 дней подряд", d_polyglot:"Играйте на всех 4 языках", chooseAv:"Выберите аватар", avSub:"Знаменитые путешественники или что-то забавное.", avTravellers:"Знаменитые путешественники", avAnimals:"Животные", avColour:"Цвет", avEdit:"Сменить аватар", tv_ibnbattuta:"Ибн Баттута", tv_marcopolo:"Марко Поло", tv_columbus:"Колумб", tv_zhenghe:"Чжэн Хэ", tv_earhart:"Амелия Эрхарт", tv_tereshkova:"Валентина Терешкова", tv_nellybly:"Нелли Блай", tv_captain:"Капитан", profile:"Профиль", stBest:"лучший результат", stStreak:"лучшая серия", stTours:"кругосветки", achievements:"Достижения", a_world:"Кругосветка", a_fire:"В ударе", a_champ:"Чемпион", earned:"Получено", progressOf:(x, n) => `рекорд ${x} / ${n}`, fireGold:"50 подряд — золото", champOn:b => `№1: ${b}`, champDesc:"Станьте №1 в любой таблице", bestOn:b => `Лучшая игра: ${b}`, unlocked:"Новое достижение", inARow:n => `${n} верных подряд`, guestAch:"Добавьте имя пользователя, чтобы достижения сохранялись на всех устройствах.", tapProfile:"Открыть профиль", wtRound:r => `Круг ${r} ✓`, wt_flags:"Вы увидели все флаги мира!", wt_countries:"Вы нашли все страны на карте!", wt_capitals:"Вы назвали все столицы!", wt_cities:"Вы нашли все города игры!", wtText:(n, u, r) => `Все <b>${n}</b> ${u}, и жизни не закончились. Вопросы перемешаны: начинается круг ${r}.`, wtUnit_flags:n => ruPl(n, "флаг", "флага", "флагов"), wtUnit_countries:n => ruPl(n, "страна", "страны", "стран"), wtUnit_capitals:n => ruPl(n, "столица", "столицы", "столиц"), wtUnit_cities:n => ruPl(n, "город", "города", "городов"), wtLives:"осталось", wtTime:"в игре", keepGoing:"Продолжить", wtBadge:n => `Кругосветка ×${n}`, wtTag:"Кругосветка", settings:"Настройки", guest:"Гость", onBoard:"В рейтинге", notRanked:"Без рейтинга", changeShort:"Изменить", addUserShort:"Добавить имя", addNameShort:"Добавить имя", langLbl:"Язык", themeLbl:"Тема", afterQ:"после этого вопроса", timerRuns:"Таймер продолжает идти", lightLbl:"Светлая", darkLbl:"Тёмная", seeBoard:"Таблица лидеров", lbClose:"Закрыть",
     help:`<p>Ваши очки — это число <b>верных ответов</b>. Каждый верный ответ даёт <b>+1</b>. Каждая ошибка стоит одну из <b>3 жизней</b>. Игра заканчивается, когда жизни закончились или вы нажали <b>Стоп</b>.</p>
     <p><b>Обзор (компас):</b> без очков и без жизней. Нажмите на любую страну, чтобы увидеть её флаг, столицу и крупные города. Хорошая подготовка перед игрой.</p>
     <p><b>Флаги · Легко:</b> выберите страну из 4 названий. Неверные варианты — соседние страны, поэтому флаги бывают похожи.</p>
@@ -1149,7 +1153,7 @@ let laps = 0, lapShownAt = -1, gameStart = Date.now(), gameStreak = 0; // world 
 function newGame(){
   queue = shuffle(pool());
   round = 0; results = []; lives = LIVES; lostAt = -1; streak = 0; gainAt = -1;
-  laps = 0; lapShownAt = -1; gameStart = Date.now(); gameStreak = 0;
+  laps = 0; lapShownAt = -1; gameStart = Date.now(); gameStreak = 0; fastRun = 0; untouchedRun = 0; lostAny = false;
   $("wtour").hidden = true;
   $("results").hidden = true;
   startRound();
@@ -1298,7 +1302,10 @@ function timeUp(){
 const STREAK_FOR_LIFE = 10;
 let streak = 0, gainAt = -1, toastTimer = 0;
 function afterAnswer(miss){
-  if (miss){ lives--; lostAt = lives; streak = 0; return; }
+  const took = ROUND_MS - tLeft; // ms from the clock starting to the answer
+  if (miss){ lives--; lostAt = lives; streak = 0; fastRun = 0; lostAny = true; return; }
+  fastRun = took < 3000 ? fastRun + 1 : 0; if (fastRun) bumpProg("light", fastRun);
+  if (!lostAny){ untouchedRun++; bumpProg("untouch", untouchedRun); }
   streak++;
   if (streak > gameStreak){ gameStreak = streak; noteStreak(streak); }
   if (streak % STREAK_FOR_LIFE === 0 && lives < LIVES){
@@ -1437,6 +1444,7 @@ function reveal(){
   answerLL = [current[3], current[2]];
   const km = kmBetween(guess, answerLL);
   const miss = km > missKm;
+  if (km <= 10) bumpProg("bull", 1);
   results.push({kind:"place", key: current[0], km, miss, dist: true});
   afterAnswer(miss);
   revealed = true; redrawMarks(); renderTop(); renderCard();
@@ -1556,7 +1564,7 @@ function localBests(){
 async function syncLocalBests(){
   if (lb.kind !== "convex" || !playerName) return;
   const scores = localBests(); if (!scores.length) return;
-  try { await cx("mutation", "scores:submit", { pid: lb.uid, scores, streak: localStreak() || undefined }); } catch(e){}
+  try { await cx("mutation", "scores:submit", { pid: lb.uid, scores, streak: localStreak() || undefined, prog: progToSend() }); } catch(e){}
 }
 /* Create, rename or sign in to a username. Returns an error message, or "" when done. */
 async function claimUsername(raw, pin){
@@ -1613,7 +1621,7 @@ const cleanName = s => String(s || "").replace(/[^\p{L}\p{N} _.\-]/gu, "").repla
       // check the username this device thinks it has; names from the first version (no PIN) need setting again
       try {
         const me = await cx("query", "scores:me", { pid });
-        if (me){ if (me.name !== playerName){ playerName = me.name; try { localStorage.setItem(NAME_KEY, me.name); } catch(e){} } syncLocalBests(); cx("query", "scores:profile", { pid }).then(p => { if (!p) return; knownStreak = p.streak || 0;
+        if (me){ if (me.name !== playerName){ playerName = me.name; try { localStorage.setItem(NAME_KEY, me.name); } catch(e){} } syncLocalBests(); cx("query", "scores:profile", { pid }).then(p => { if (!p) return; knownStreak = p.streak || 0; knownProg = p.prog || {};
           if (avOk(p.avatar)) setMyAvatar(p.avatar, false); else if (myAvatar) setMyAvatar(myAvatar); }).catch(() => {}); }
         else if (playerName){ playerName = ""; if (splashOpen){ splashAsk = true; renderSplash(); } }
       } catch(e){}
@@ -1722,7 +1730,7 @@ async function refreshBoard(total){
     let newBest = false, res;
     if (typeof total === "number" && total > 0 && playerName){
       try {
-        const res = await cx("mutation", "scores:submit", { pid: lb.uid, scores: [laps ? { board, best: total, tours: laps } : { board, best: total }], streak: gameStreak });
+        const res = await cx("mutation", "scores:submit", { pid: lb.uid, scores: [laps ? { board, best: total, tours: laps } : { board, best: total }], streak: gameStreak, prog: progToSend() });
         newBest = (res.newBest || []).includes(board);
         if (res.newChampion) setTimeout(() => achPop("👑", t("a_champ"), t("champOn", boardTitle()), "gold"), 600);
       } catch(e){}
@@ -1980,6 +1988,50 @@ function noteStreak(n){
   if (n > localStreak()) try { localStorage.setItem(STREAK_KEY, n); } catch(e){}
   for (const [i, goal] of FIRE.entries()) if (n === goal && before < goal) achPop("🔥", t("a_fire"), t("inARow", goal), i ? "gold" : "silver");
 }
+/* progress for the other achievements: kept on the device, sent with each game, the leaderboard keeps the best */
+const PROG_KEY = "globedrop-prog", EXPLORED_KEY = "globedrop-explored";
+const readJSON = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || "null") ?? d; } catch(e){ return d; } };
+let knownProg = {}; // what the leaderboard knows (other devices), so a pop-up only shows the first time
+const getProg = () => readJSON(PROG_KEY, {});
+const GOALS = { bull: 1, light: 10, explore: 100, untouch: 50, days: 7, langs: 4, allround: 4, pro: 50 };
+const LANG_BIT = { en: 1, fr: 2, ar: 4, ru: 8 };
+const bitCount = n => [1, 2, 4, 8].filter(b => n & b).length;
+const progVal = (p, k) => k === "langs" ? bitCount(p.langs || 0) : (p[k] || 0);
+const ACH_ICON = { bull: "🎯", light: "⚡", explore: "🧭", allround: "🗺️", pro: "🎖️", untouch: "❤️", days: "📅", langs: "🌐" };
+const ACH_KEY = { bull: "bull", light: "light", explore: "explore", allround: "allround", pro: "pro", untouch: "untouch", days: "daily", langs: "polyglot" };
+// raise a progress value (languages: add a bit); pop up the first time its goal is reached
+function bumpProg(k, v){
+  const p = getProg(), before = Math.max(progVal(p, k), progVal(knownProg, k));
+  const next = k === "langs" ? ((p.langs || 0) | v) : Math.max(p[k] || 0, v);
+  if (next === (p[k] || 0)) return;
+  p[k] = next; try { localStorage.setItem(PROG_KEY, JSON.stringify(p)); } catch(e){}
+  const now = progVal(p, k);
+  if (before < GOALS[k] && now >= GOALS[k]) achPop(ACH_ICON[k], t("a_" + ACH_KEY[k]), t("d_" + ACH_KEY[k]), "gold");
+}
+// computed from the bests kept on this device: games with 10+, best Pro score
+function bestsProg(){
+  const modes = new Set(), lbs = localBests(); let pro = 0;
+  for (const { board, best } of lbs){ if (best >= 10) modes.add(board.split("_")[0]); if (board.endsWith("_pro")) pro = Math.max(pro, best); }
+  return { allround: modes.size, pro };
+}
+function noteBests(before){
+  const after = bestsProg(), known = knownProg;
+  for (const k of ["allround", "pro"]) if (Math.max(before[k], known[k] || 0) < GOALS[k] && after[k] >= GOALS[k]) achPop(ACH_ICON[k], t("a_" + ACH_KEY[k]), t("d_" + ACH_KEY[k]), "gold");
+}
+// a finished game counts for the day streak and the language
+function noteGamePlayed(){
+  const p = getProg(), day = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD, local time
+  if (p.lastDay !== day){
+    const y = new Date(Date.now() - 864e5).toLocaleDateString("en-CA");
+    p.run = p.lastDay === y ? (p.run || 0) + 1 : 1; p.lastDay = day;
+    try { localStorage.setItem(PROG_KEY, JSON.stringify(p)); } catch(e){}
+    bumpProg("days", p.run);
+  }
+  bumpProg("langs", LANG_BIT[LANG] || 0);
+}
+const progToSend = () => { const p = getProg(), o = {}; for (const k of ["bull", "light", "explore", "untouch", "days", "langs"]) if (p[k]) o[k] = p[k]; return o; };
+let fastRun = 0, untouchedRun = 0, lostAny = false;
+
 const badgeTags = (b = {}) => {
   const out = [];
   if (b.tours > 0) out.push(`<span title="${esc(t("a_world"))}${b.tours > 1 ? " ×" + b.tours : ""}">🌍</span>`);
@@ -2004,7 +2056,7 @@ function localProfile(){
     tours += Math.max(w || 0, Math.floor(b / listSize(board)));
   }
   const streak = localStreak();
-  return { name: playerName, best, bestBoard, tours, streak, fire: streak >= FIRE[1] ? 2 : streak >= FIRE[0] ? 1 : 0, champion: false, firstOn: [] };
+  return { name: playerName, best, bestBoard, tours, streak, fire: streak >= FIRE[1] ? 2 : streak >= FIRE[0] ? 1 : 0, champion: false, firstOn: [], prog: { ...getProg(), ...bestsProg() } };
 }
 async function openProfile(){
   let pf = localProfile();
@@ -2017,8 +2069,11 @@ async function openProfile(){
         // the leaderboard knows every device; keep whichever is higher
         knownStreak = Math.max(knownStreak, sp.streak || 0);
         const streak = Math.max(sp.streak || 0, pf.streak);
+        knownProg = sp.prog || {};
+        const lp = pf.prog, prog = {};
+        for (const k of Object.keys(GOALS)) prog[k] = k === "langs" ? ((lp.langs || 0) | (knownProg.langs || 0)) : Math.max(lp[k] || 0, knownProg[k] || 0);
         pf = { ...sp, best: Math.max(sp.best, pf.best), bestBoard: sp.best >= pf.best ? sp.bestBoard : pf.bestBoard, tours: Math.max(sp.tours, pf.tours),
-               streak, fire: streak >= FIRE[1] ? 2 : streak >= FIRE[0] ? 1 : 0 };
+               streak, fire: streak >= FIRE[1] ? 2 : streak >= FIRE[0] ? 1 : 0, prog };
         renderProfile(pf, false);
       }
     } catch(e){}
@@ -2027,13 +2082,18 @@ async function openProfile(){
 function renderProfile(pf, first){
   const isUser = !!playerName;
   const bestList = localBests().reduce((m, x) => { const r = x.best / listSize(x.board); return r > m.r ? { r, x } : m; }, { r: 0, x: null }).x;
-  const world = { icon: "🌍", name: t("a_world"), on: pf.tours > 0, tier: "gold", x: pf.tours,
-    sub: pf.tours > 0 ? t("earned") : bestList ? t("progressOf", bestList.best, listSize(bestList.board)) : t("progressOf", 0, listSize("cities_easy")) };
+  const world = { icon: "🌍", name: t("a_world"), on: pf.tours > 0, tier: "gold", x: pf.tours, sub: t("d_world"),
+    frac: bestList ? bestList.best / listSize(bestList.board) : 0 };
   const fire = { icon: "🔥", name: t("a_fire"), on: pf.fire > 0, tier: pf.fire === 2 ? "gold" : "silver",
-    sub: pf.fire === 2 ? t("earned") : pf.fire === 1 ? t("fireGold") : t("progressOf", pf.streak, FIRE[0]) };
+    sub: pf.fire === 1 ? t("fireGold") : t("d_fire"), frac: pf.streak / FIRE[0] };
   const champ = { icon: "👑", name: t("a_champ"), on: pf.champion, tier: "gold",
-    sub: pf.firstOn?.length ? t("champOn", boardLabel(pf.firstOn[0])) : pf.champion ? t("earned") : t("champDesc") };
-  const list = [world, fire, champ], earned = list.filter(a => a.on).length;
+    sub: pf.firstOn?.length ? t("champOn", boardLabel(pf.firstOn[0])) : t("d_champ"), frac: 0 };
+  const pr = pf.prog || {};
+  const more = ["bull", "light", "explore", "allround", "pro", "untouch", "days", "langs"].map(k => {
+    const v = progVal(pr, k), goal = GOALS[k];
+    return { icon: ACH_ICON[k], name: t("a_" + ACH_KEY[k]), on: v >= goal, tier: "gold", sub: t("d_" + ACH_KEY[k]), frac: goal > 1 ? v / goal : 0, count: goal > 1 ? `${Math.min(v, goal)}/${goal}` : "" };
+  });
+  const list = [world, fire, champ, ...more], earned = list.filter(a => a.on).length;
   const topIcon = champ.on ? "👑" : world.on ? "🌍" : fire.on ? "🔥" : "";
   const sub = pf.firstOn?.length ? t("champOn", boardLabel(pf.firstOn[0])) : pf.bestBoard ? t("bestOn", boardLabel(pf.bestBoard)) : "";
   const el = $("profile");
@@ -2044,7 +2104,7 @@ function renderProfile(pf, first){
     <div class="st"><div><b>${fmt(pf.best)}</b>${t("stBest")}</div><div><b>${fmt(pf.streak)}</b>${t("stStreak")}</div><div><b>${fmt(pf.tours)}</b>${t("stTours")}</div></div>
     ${isUser ? "" : `<p class="gnote"><span>${t("guestAch")}</span><button class="btn" id="pfadd">${t(USE_CONVEX ? "addUserShort" : "addNameShort")}</button></p>`}
     <h3>${t("achievements")} <span>${earned} / ${list.length}</span></h3>
-    <div class="grid">${list.map(a => `<div class="bd ${a.on ? a.tier : "locked"}"><div class="ic"><span aria-hidden="true">${a.icon}</span>${a.on && a.x > 1 ? `<span class="x">×${a.x}</span>` : ""}</div><b>${a.name}</b><small>${esc(a.sub)}</small></div>`).join("")}</div>
+    <div class="grid">${list.map(a => `<div class="bd ${a.on ? a.tier : "locked"}"><div class="ic"><span aria-hidden="true">${a.icon}</span>${a.on && a.x > 1 ? `<span class="x">×${a.x}</span>` : ""}</div>${!a.on && a.frac > 0 ? `<span class="bar" title="${a.count || ""}"><i style="width:${Math.round(Math.min(1, a.frac) * 100)}%"></i></span>` : ""}<b>${a.name}</b><small>${esc(a.sub)}</small></div>`).join("")}</div>
     <button class="btn2 pfclose" id="pfclose">${t("lbClose")}</button>
   </div>`;
   if (first) el.hidden = false;
@@ -2126,8 +2186,9 @@ let lastOutcome = null; // {outOfLives, total, best, newBest}
 function showResults(outOfLives){
   const total = results.filter(r => !r.miss).length;
   const key = "globedrop-right-best-" + mode + (mode !== "countries" ? "-" + level : "");
-  let best = 0;
+  let best = 0; const bpBefore = bestsProg();
   try { best = +localStorage.getItem(key) || 0; if (total > best) localStorage.setItem(key, total); } catch(e){}
+  if (results.length) { noteGamePlayed(); noteBests(bpBefore); }
   lastOutcome = { outOfLives, total, best, newBest: total > best, laps };
   a2hsShown = shouldOfferA2hs();
   boardCache = null;
@@ -2228,6 +2289,7 @@ function enterExplore(){
 }
 function exploreCountry(f){
   if (f.properties.name === "Antarctica") return;
+  { const seen = new Set(readJSON(EXPLORED_KEY, [])); if (!seen.has(f.properties.name)){ seen.add(f.properties.name); try { localStorage.setItem(EXPLORED_KEY, JSON.stringify([...seen])); } catch(e){} bumpProg("explore", seen.size); } }
   current = f; revealed = true;
   answerLL = exploreFacts(f.properties.name).ll;
   paintCountries(); renderPrompt(); redrawMarks(); renderCard();

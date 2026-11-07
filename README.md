@@ -49,7 +49,7 @@ Pick a game at the top, answer, and see how far you can go.
   - **Android:** in Chrome, open the ⋮ menu, then *Add to Home screen*.
 - **Leaderboard** for each game and level.
 - **Avatars:** pick a famous traveller (Ibn Battuta, Marco Polo, Amelia Earhart, Valentina Tereshkova…) or an animal, shown on the leaderboard.
-- **Achievements** on your profile (tap your name in ⚙︎): 🌍 World tour for playing a whole list, 🔥 On fire for 25 or 50 right in a row, 👑 Champion for reaching #1.
+- **11 achievements** on your profile (tap your name in ⚙︎): 🌍 World tour, 🔥 On fire, 👑 Champion, 🎯 Bullseye, ⚡ Lightning, 🧭 Explorer, 🗺️ All-rounder, 🎖️ Pro, ❤️ Untouchable, 📅 Daily traveller and 🌐 Polyglot.
 
 ## Leaderboard and your data
 
