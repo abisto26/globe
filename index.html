@@ -2077,11 +2077,9 @@ function noteGamePlayed(){
 const progToSend = () => { const p = getProg(), o = {}; for (const k of ["bull", "light", "explore", "untouch", "days", "langs"]) if (p[k]) o[k] = p[k]; return o; };
 let fastRun = 0, untouchedRun = 0, lostAny = false;
 
-const badgeTags = (b = {}) => {
+const badgeTags = (b = {}) => { // leaderboard rows show only the top badge, World tour; the rest live on the profile
   const out = [];
   if (b.tours > 0) out.push(`<span title="${esc(t("a_world"))}${b.tours > 1 ? " ×" + b.tours : ""}">🌍</span>`);
-  if (b.fire > 0) out.push(`<span title="${esc(t("a_fire"))}">🔥</span>`);
-  if (b.champ) out.push(`<span title="${esc(t("a_champ"))}">👑</span>`);
   return out.length ? `<span class="bdg">${out.join("")}</span>` : "";
 };
 let achTimer = 0;
