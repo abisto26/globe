@@ -15,6 +15,7 @@ export default defineSchema({
     lastSubmit: v.number(),
     streak: v.optional(v.number()),     // most right answers in a row, any game (🔥 On fire)
     champion: v.optional(v.boolean()),  // has been #1 on a leaderboard (👑 Champion)
+    avatar: v.optional(v.string()),     // chosen picture, "ibnbattuta:1" (picture:colour)
   })
     .index("by_pid", ["pid"])
     .index("by_key", ["key"]),

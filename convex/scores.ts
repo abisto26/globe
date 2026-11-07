@@ -23,6 +23,7 @@ const LIST_SIZE: Record<string, number> = { flags_easy: 171, flags_pro: 134, cou
 const toursOf = (r: { board: string; best: number; tours?: number }) => Math.max(r.tours ?? 0, Math.floor(r.best / (LIST_SIZE[r.board] ?? 1e9)));
 const FIRE = [25, 50]; // 🔥 On fire: silver at 25 in a row, gold at 50
 const fireOf = (streak?: number) => (streak ?? 0) >= FIRE[1] ? 2 : (streak ?? 0) >= FIRE[0] ? 1 : 0;
+const AVATAR = /^(ibnbattuta|marcopolo|columbus|zhenghe|earhart|tereshkova|nellybly|captain|fox|panda|lion|penguin|turtle|owl):[0-5]$/;
 const MAX_FAILS = 5;           // wrong PINs before a username is locked for a while
 const LOCK_MS = 10 * 60 * 1000;
 
@@ -153,14 +154,14 @@ export const board = query({
     const userOf = async (p: string) => ctx.db.query("users").withIndex("by_pid", q => q.eq("pid", p)).unique();
     const badges = async (r: { pid: string; board: string; best: number; tours?: number }, isFirst: boolean) => {
       const u = await userOf(r.pid);
-      return { tours: toursOf(r), fire: fireOf(u?.streak), champ: !!u?.champion || isFirst };
+      return { tours: toursOf(r), fire: fireOf(u?.streak), champ: !!u?.champion || isFirst, avatar: u?.avatar ?? "" };
     };
     const rows = [];
     for (const [i, r] of shown.entries()) rows.push({ name: r.name, best: r.best, me: r.pid === pid, ...(await badges(r, i === 0)) });
     let meOut = null;
     if (me && pid) {
       const mine = await ctx.db.query("bests").withIndex("by_pid_board", q => q.eq("pid", pid).eq("board", board)).unique();
-      meOut = { ...me, ...(mine ? await badges(mine, me.rank === 1) : { tours: 0, fire: 0, champ: false }) };
+      meOut = { ...me, ...(mine ? await badges(mine, me.rank === 1) : { tours: 0, fire: 0, champ: false, avatar: "" }) };
     }
     return { top: rows, me: meOut, count };
   },
@@ -182,6 +183,17 @@ export const profile = query({
       if (first && first.pid === pid) firstOn.push(r.board);
     }
     return { name: user.name, best, bestBoard, tours, streak: user.streak ?? 0, fire: fireOf(user.streak),
-             champion: !!user.champion || firstOn.length > 0, firstOn };
+             champion: !!user.champion || firstOn.length > 0, firstOn, avatar: user.avatar ?? "" };
+  },
+});
+
+/** Save the player's avatar (picture and background colour). */
+export const setAvatar = mutation({
+  args: { pid: v.string(), avatar: v.string() },
+  handler: async (ctx, { pid, avatar }) => {
+    if (!PID.test(pid) || !AVATAR.test(avatar)) throw new Error("bad avatar");
+    const user = await ctx.db.query("users").withIndex("by_pid", q => q.eq("pid", pid)).unique();
+    if (user) await ctx.db.patch(user._id, { avatar });
+    return !!user;
   },
 });
