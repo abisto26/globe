@@ -448,7 +448,8 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .lbtabs.lv.off{visibility:hidden}
 .lbsheet>*{flex-shrink:0}
 .lbsheet .board{text-align:start;min-height:min(252px,36vh);flex-shrink:1;overflow:auto;overscroll-behavior:contain}
-.lbsheet .board li.gap + li.me{position:sticky;bottom:-12px;background:color-mix(in srgb,var(--gold) 22%,var(--chip))}
+.lbsheet .board li.me{position:sticky;top:-12px;bottom:-12px;z-index:1;background:color-mix(in srgb,var(--gold) 22%,var(--chip))}
+.lbsheet .board li{grid-template-columns:3.4ch 1fr auto}
 .lbsheet .board > .note{text-align:center}
 .splb{display:inline-flex;align-items:center;gap:6px}
 /* "Powered by" sponsor: a small pill under the answers and at the foot of the start screen */
@@ -1792,14 +1793,14 @@ let lbView = { mode: "flags", level: "easy" }, lbSeq = 0;
 const lbKeyOf = v => v.mode === "countries" ? "countries" : v.mode + "_" + v.level;
 async function standings(board){
   // { top:[{name,best,me}], me:{rank,best,name}|null, count } from whichever leaderboard this copy uses
-  if (lb.kind === "convex") return cx("query", "scores:board", { board, pid: lb.uid, limit: 10 });
+  if (lb.kind === "convex") return cx("query", "scores:board", { board, pid: lb.uid, limit: 100 });
   const field = "b_" + board, tf = "t_" + board;
   const docs = (await lb.db.collection("scores").orderBy(field, "desc").limit(500).get()).docs;
   const rows = docs.map(d => ({ id: d.id, ...d.data() })).filter(r => +r[field] > 0)
     .sort((a, b) => (+b[field] - +a[field]) || ((+a[tf] || 0) - (+b[tf] || 0)));
   const i = rows.findIndex(r => r.id === lb.uid);
   const tr = r => Math.max(+r["w_" + board] || 0, Math.floor(+r[field] / listSize(board)));
-  return { top: rows.slice(0, 10).map((r, k) => ({ name: r.name, best: +r[field], tours: tr(r), champ: k === 0, avatar: r.av || "", me: r.id === lb.uid })),
+  return { top: rows.slice(0, 100).map((r, k) => ({ name: r.name, best: +r[field], tours: tr(r), champ: k === 0, avatar: r.av || "", me: r.id === lb.uid })),
            me: i < 0 ? null : { rank: i + 1, best: +rows[i][field], name: rows[i].name, tours: tr(rows[i]), champ: i === 0, avatar: rows[i].av || "" }, count: rows.length };
 }
 function openBoardSheet(){
