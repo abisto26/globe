@@ -203,7 +203,7 @@ body{background:var(--ocean);color:var(--ink);font-family:var(--display);overflo
 .helpa2hs{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--panel-edge);padding-top:10px}
 #help .sheet{gap:12px}
 @media (max-width:360px){.hgames{grid-template-columns:1fr}.hgames dt{padding-bottom:2px}.hgames dd{border-top:0;padding-top:0;padding-inline-start:0}}
-#help #help-ok{position:sticky;bottom:0;box-shadow:0 -8px 16px var(--panel)}
+#help #help-ok{position:sticky;bottom:0}
 .helpa2hs summary{cursor:pointer;font:700 .88rem var(--display);color:var(--ink);list-style-position:inside}
 .helpa2hs p{margin:6px 0 0;font-size:.86rem}
 .helpa2hs p svg{width:15px;height:15px;vertical-align:-2px;margin:0 2px}
@@ -505,6 +505,17 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 :root[data-theme="dark"] .smenu .tick{color:#ffae6b}
 @media (prefers-reduced-motion: reduce){.smenu,.sscrim{animation:none}.gearbtn svg{transition:none}}
 .lbwrap{position:fixed;z-index:70}
+/* How to play and the leaderboard: the same frosted bottom sheet as Edit profile and Achievements */
+#help,#lbsheet{position:fixed;inset:0;z-index:69;align-items:flex-end;background:rgba(10,25,35,.22);-webkit-backdrop-filter:blur(10px) saturate(120%);backdrop-filter:blur(10px) saturate(120%);animation:fadein .2s ease;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+#lbsheet{z-index:70}
+#help > .sheet,#lbsheet.opening > .sheet{animation:pfup .32s cubic-bezier(.2,1,.3,1)}
+#help > .sheet,#lbsheet > .sheet{max-width:520px;max-height:100%;border-radius:26px;padding:10px 16px 16px;
+  background:color-mix(in srgb,var(--panel) 72%,transparent);border:1px solid var(--glass-edge);box-shadow:var(--glass-shadow),0 24px 60px rgba(10,30,45,.22);
+  -webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
+#help .grab,#lbsheet .grab{width:40px;height:5px;flex:none;border-radius:9px;background:var(--chip);align-self:center;border:0;padding:0;cursor:pointer}
+#lbsheet .board,#lbsheet .seg,#help .helpa2hs{background-color:color-mix(in srgb,var(--panel) 55%,transparent)}
+#help .helpa2hs{background:none}
 .lbsheet{gap:12px;text-align:center}
 .lbsheet h3{margin:0;display:flex;align-items:center;justify-content:center;gap:8px}
 .lbtabs{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:var(--chip);align-self:center;max-width:100%}
@@ -1969,19 +1980,21 @@ async function standings(board){
 }
 function openBoardSheet(){
   lbView = { mode: mode === "explore" ? "flags" : mode, level: levelOf[mode === "explore" ? "flags" : mode] || "easy" };
-  $("lbsheet").hidden = false; renderBoardSheet();
+  $("lbsheet").hidden = false; $("lbsheet").classList.add("opening"); setTimeout(() => $("lbsheet").classList.remove("opening"), 400); renderBoardSheet();
   setTimeout(() => $("lbsheet").querySelector("[aria-pressed=true]")?.focus({preventScroll:true}), 50);
 }
 function closeBoardSheet(){ $("lbsheet").hidden = true; lbSeq++; }
 function renderBoardSheet(){
   const v = lbView;
   $("lbsheet").innerHTML = `<div class="sheet lbsheet" role="dialog" aria-labelledby="lb-t">
+    <button class="grab" id="lbgrab" aria-label="${esc(t("lbClose"))}"></button>
     <h3 id="lb-t"><span aria-hidden="true">🏆</span>${t("leaderboard")}</h3>
     <div class="lbtabs" role="group">${LB_MODES.map(m => `<button data-m="${m}" aria-pressed="${v.mode === m}">${t("m_" + m)}</button>`).join("")}</div>
     <div class="lbtabs lv${v.mode === "countries" ? " off" : ""}" role="group" aria-label="${esc(t("level"))}">${["easy", "pro"].map(l => `<button data-l="${l}" aria-pressed="${v.level === l}">${t(l)}</button>`).join("")}</div>
     <div class="board" id="lbboard"></div>
-    <button class="btn" id="lbclose">${t("lbClose")}</button>
+    <button class="btn2 pfclose" id="lbclose">${t("lbClose")}</button>
   </div>`;
+  onTap($("lbgrab"), closeBoardSheet);
   $("lbsheet").querySelectorAll("[data-m]").forEach(b => onTap(b, () => { lbView.mode = b.dataset.m; renderBoardSheet(); }));
   $("lbsheet").querySelectorAll("[data-l]").forEach(b => onTap(b, () => { lbView.level = b.dataset.l; renderBoardSheet(); }));
   onTap($("lbclose"), closeBoardSheet);
@@ -2622,6 +2635,7 @@ document.addEventListener("keydown", e => { if (!$("tour").hidden && e.key === "
 /* ---------- how to play ---------- */
 function showHelp(){
   $("help").innerHTML = `<div class="sheet" role="dialog" aria-labelledby="help-t">
+    <button class="grab" id="helpgrab" aria-label="${esc(t("lbClose"))}"></button>
     <h3 id="help-t">${t("howToPlay")}</h3>
     <h4 class="hh">${t("hRules")}</h4>
     <ul class="hrules">${["r_score", "r_lives", "r_time", "r_back"].map(k => `<li>${t(k)}</li>`).join("")}</ul>
@@ -2632,7 +2646,7 @@ function showHelp(){
     <button class="linkbtn" id="help-tour">${t("tourAgain")}</button>
   </div>`;
   $("help").hidden = false;
-  $("help-ok").onclick = closeHelp;
+  $("help-ok").onclick = closeHelp; onTap($("helpgrab"), closeHelp);
   $("help-tour").onclick = () => { closeHelp(); $("results").hidden = true; if (mode === "explore") setMode("flags"); startTour(); };
   $("help-ok").focus({preventScroll:true});
 }
