@@ -47,14 +47,14 @@ const fontCSS = [
 // sponsor: { name, url, logo } in site.config.json; the logo file is embedded so it also shows offline
 function sponsorJSON(){
   const sp = config.sponsor;
-  if (!sp || !sp.url || !sp.logo) return 'null';
+  if (!sp || !sp.logo) return 'null'; // url is optional: without one, the badge shows but isn't a link
   const embed = f => {
     const mime = { svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' }[f.split('.').pop().toLowerCase()];
     if (!mime) throw new Error('sponsor logo must be svg, png, jpg or webp');
     return `data:${mime};base64,` + fs.readFileSync(f).toString('base64');
   };
   // logoDark (optional): a light-on-dark version for dark mode
-  return JSON.stringify({ name: sp.name || '', url: sp.url, logo: embed(sp.logo), logoDark: sp.logoDark ? embed(sp.logoDark) : '' }).replace(/</g, '\\u003c');
+  return JSON.stringify({ name: sp.name || '', url: sp.url || '', logo: embed(sp.logo), logoDark: sp.logoDark ? embed(sp.logoDark) : '' }).replace(/</g, '\\u003c');
 }
 const logo = 'data:image/webp;base64,' + fs.readFileSync('src/logo/big.webp').toString('base64');
 let body = rd('src/game.src.html')

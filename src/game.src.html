@@ -541,6 +541,7 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .lbsheet .board > .note{text-align:center}
 .splb{display:inline-flex;align-items:center;gap:6px}
 /* "Powered by" sponsor: a small pill under the answers and at the foot of the start screen */
+.sponsor.nolink{cursor:default}
 .sponsor{pointer-events:auto;display:inline-flex;align-items:center;gap:8px;padding:5px 8px 5px 12px;border-radius:999px;text-decoration:none;
   background:var(--sp-bg);border:1px solid var(--sp-edge);box-shadow:0 2px 10px rgba(10,30,40,.14);color:var(--sp-ink);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);font:600 .72rem/1 var(--display);letter-spacing:.01em;white-space:nowrap;transition:transform .15s ease}
 .sponsor:active{transform:scale(.96)}
@@ -1900,8 +1901,10 @@ const CONVEX_URL = "__CONVEX_URL__";
 /* Sponsor shown as "Powered by <logo>" (set in site.config.json; empty = nothing shown) */
 const SPONSOR = __SPONSOR__;
 document.querySelectorAll("[data-sponsor]").forEach(a => {
-  if (!SPONSOR || !SPONSOR.url || !SPONSOR.logo) return;
-  a.href = SPONSOR.url; a.title = SPONSOR.name || ""; a.setAttribute("aria-label", "Sponsor: " + (SPONSOR.name || SPONSOR.url));
+  if (!SPONSOR || !SPONSOR.logo) return;
+  if (SPONSOR.url){ a.href = SPONSOR.url; a.setAttribute("aria-label", "Sponsor: " + (SPONSOR.name || SPONSOR.url)); }
+  else { a.removeAttribute("target"); a.classList.add("nolink"); a.setAttribute("aria-label", "Sponsor: " + (SPONSOR.name || "")); } // no link: just the badge
+  a.title = SPONSOR.name || "";
   a.querySelector("img.lt").src = SPONSOR.logo;
   a.querySelector("img.dk").src = SPONSOR.logoDark || SPONSOR.logo; // dark mode uses the light-on-dark logo if there is one
   a.hidden = false;
