@@ -864,7 +864,7 @@ if (FRESH) { try { Object.keys(localStorage).filter(k => k.startsWith("globedrop
 const PLACES_I18N = __PLACES_I18N__;     // English place name → [French, Arabic, Russian]; empty French = same as English
 const COUNTRIES_I18N = __COUNTRIES_I18N__; // country name on the map → [French, Arabic, Russian]
 const LIDX = { fr: 0, ar: 1, ru: 2 }; // position of each language in those lists
-const LANGS = { en: "English", fr: "Français", ar: "العربية", ru: "Русский" };
+const LANGS = { en: "English", fr: "Français", ru: "Русский", ar: "العربية" }; // shown in this order, left to right, Arabic always last
 let LANG = "en";
 try { LANG = localStorage.getItem("globedrop-lang") || ""; } catch(e){}
 if (!LANGS[LANG]) { const nl = (navigator.language || "en").slice(0, 2).toLowerCase(); LANG = LANGS[nl] ? nl : "en"; }
@@ -1734,8 +1734,8 @@ function renderSettings(){
       <button class="act" id="sm-user">${t(isUser ? "changeShort" : (USE_CONVEX ? "addUserShort" : "addNameShort"))}</button>
     </div>
     <div class="rowq">
-      <div class="tile"><span class="tl">${t("langLbl")}</span><div class="seg" role="group" aria-label="${esc(t("langLbl"))}">
-        ${[["en", "EN"], ["fr", "FR"], ["ar", "ع"], ["ru", "RU"]].map(([l, x]) => `<button data-lang="${l}" lang="${l}" aria-pressed="${LANG === l}">${x}</button>`).join("")}</div></div>
+      <div class="tile"><span class="tl">${t("langLbl")}</span><div class="seg" dir="ltr" role="group" aria-label="${esc(t("langLbl"))}">
+        ${[["en", "EN"], ["fr", "FR"], ["ru", "RU"], ["ar", "ع"]].map(([l, x]) => `<button data-lang="${l}" lang="${l}" aria-pressed="${LANG === l}">${x}</button>`).join("")}</div></div>
       <div class="tile"><span class="tl">${t("themeLbl")}</span><div class="seg" role="group" aria-label="${esc(t("themeLbl"))}">
         <button data-th="light" aria-pressed="${!dark}" aria-label="${esc(t("lightLbl"))}">${SUN}</button><button data-th="dark" aria-pressed="${dark}" aria-label="${esc(t("darkLbl"))}">${MOON}</button></div></div>
     </div>
