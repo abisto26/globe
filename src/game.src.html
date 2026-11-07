@@ -54,10 +54,10 @@ body{background:var(--ocean);color:var(--ink);font-family:var(--display);overflo
 .controls .theme{width:24px;height:24px}
 .controls .theme svg{width:13px;height:13px}
 .brand{justify-self:start;min-width:0;font-weight:800;font-size:1.1rem;letter-spacing:-.02em;display:flex;align-items:center;gap:6px}
-.brand svg{width:20px;height:20px;flex:none}
-.brand span{white-space:nowrap}
-.brand .bshort{display:none}
-.brand.tight .bshort,.brand.tight .bfull{display:none!important}
+.brand .bword{display:block;height:32px;width:auto;max-width:none;filter:drop-shadow(0 2px 3px rgba(10,40,90,.18));user-select:none;-webkit-user-drag:none}
+.brand.s1 .bword{height:26px}
+.brand.s2 .bword{height:21px}
+.brand.tight .bword{display:none}
 /* loading splash: the logo, big and centred, pulsing softly until the game is ready, then fading out */
 .splash{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(120% 90% at 50% 40%,color-mix(in srgb,var(--ocean) 70%,#fff) 0%,var(--ocean) 70%);transition:opacity .45s ease,visibility .45s}
 .splash .spin{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px;text-align:center}
@@ -595,8 +595,6 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .scale .pts{text-align:right;font-weight:600;min-width:4ch}
 
 @media (max-width:480px){
-  .brand .bfull{display:none}
-  .brand .bshort{display:inline}
   .card .big{font-size:1.25rem}
   .meta{gap:10px}
   .modes button{padding:6px 7px;font-size:.78rem}
@@ -660,7 +658,7 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
   </div>
   <div class="topwrap"><header class="top glass" id="top">
     <div class="headrow">
-      <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="var(--pin)"/><circle cx="12" cy="9" r="2.6" fill="var(--panel)"/></svg><span class="bfull" data-i18n="appName">Globe by Abisto</span><span class="bshort" data-i18n="appShort">Globe</span></div>
+      <div class="brand"><img class="bword" id="bword" alt="Globe by Abisto" src="__WORD_EN__"></div>
       <div class="modes" role="group" data-i18n-aria="gameMode" aria-label="Game mode">
         <button id="m-explore" class="m-explore" aria-pressed="false" data-i18n-aria="m_explore" aria-label="Explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg></button>
         <button id="m-flags" aria-pressed="true" data-i18n="m_flags">Flags</button>
@@ -2627,13 +2625,20 @@ $("help").addEventListener("click", e => { if (e.target.id === "help") closeHelp
 document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("help").hidden) closeHelp(); closeLangMenu(); } });
 
 /* ---------- language switch ---------- */
+/* the game's name as a logo: Arabic, Russian, or "Globe" for the other languages */
+const WORDMARK = { en: "__WORD_EN__", ar: "__WORD_AR__", ru: "__WORD_RU__" };
+/* as big as the header allows: full size, then two smaller steps, then hidden if the tabs need the room */
 function fitBrand(){
-  const b = document.querySelector(".brand"); if (!b) return;
-  b.classList.remove("tight");
-  const m = document.querySelector(".headrow .modes"), r = b.getBoundingClientRect(), mr = m.getBoundingClientRect();
+  const b = document.querySelector(".brand"), m = document.querySelector(".headrow .modes"); if (!b || !m) return;
   const rtl = document.documentElement.dir === "rtl";
-  if (b.scrollWidth > b.clientWidth + 1 || m.scrollWidth > m.clientWidth + 1 || (rtl ? r.left < mr.right + 4 : r.right > mr.left - 4)) b.classList.add("tight");
+  const fits = () => { const r = b.getBoundingClientRect(), mr = m.getBoundingClientRect();
+    return m.scrollWidth <= m.clientWidth + 1 && (rtl ? r.left >= mr.right + 6 : r.right <= mr.left - 6); };
+  for (const c of ["", "s1", "s2", "tight"]){
+    b.classList.remove("s1", "s2", "tight"); if (c) b.classList.add(c);
+    if (c === "tight" || fits()) return;
+  }
 }
+$("bword").addEventListener("load", () => fitBrand());
 addEventListener("resize", () => requestAnimationFrame(fitBrand));
 function applyStatic(){
   document.documentElement.lang = LANG;
@@ -2641,6 +2646,7 @@ function applyStatic(){
   document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
   document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
   $("langbtn").querySelector("span").textContent = LANG.toUpperCase();
+  { const w = $("bword"), src = WORDMARK[LANG] || WORDMARK.en; if (w.getAttribute("src") !== src) w.src = src; w.alt = t("appName"); }
   requestAnimationFrame(fitBrand);
   $("langmenu").innerHTML = Object.entries(LANGS).map(([k, v]) => `<button type="button" role="menuitemradio" aria-checked="${k === LANG}" data-lang="${k}" lang="${k}">${v}</button>`).join("");
   wireLangPills($("langmenu"));

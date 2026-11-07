@@ -67,6 +67,7 @@ let body = rd('src/game.src.html')
   .replace('__PLACES_I18N__', () => rd('src/data/places_i18n.json'))
   .replace('__COUNTRIES_I18N__', () => rd('src/data/countries_i18n.json'))
   .replace(/__LOGO_(BIG|SMALL)__/g, () => logo)
+  .replace(/__WORD_(EN|AR|RU)__/g, (_, l) => 'data:image/webp;base64,' + fs.readFileSync('src/logo/word-' + l.toLowerCase() + '.webp').toString('base64'))
   .replace('__CONVEX_URL__', () => (process.env.CONVEX_URL || config.convexUrl || '').trim())
   .replace('__SPONSOR__', () => sponsorJSON())
   // bundle the two libraries so the game also works offline from the home screen
