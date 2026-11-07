@@ -9,7 +9,7 @@
   No sign-up and nothing to install. Open it and you're playing.
 </p>
 
-<p align="center"><b><a href="https://abistoufisbot.github.io/Globe-by-Abisto/">▶ Play now</a></b></p>
+<p align="center"><b><a href="https://abisto26.com/globe/">▶ Play now</a></b></p>
 
 <p align="center">
   Follow <b>@abisto26</b>:

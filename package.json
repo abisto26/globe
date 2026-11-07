@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abistoufisbot/globe-by-abisto.git"
+    "url": "git+https://github.com/abisto26/globe.git"
   },
   "bugs": {
-    "url": "https://github.com/abistoufisbot/globe-by-abisto/issues"
+    "url": "https://github.com/abisto26/globe/issues"
   },
-  "homepage": "https://github.com/abistoufisbot/globe-by-abisto#readme",
+  "homepage": "https://github.com/abisto26/globe#readme",
   "dependencies": {
     "convex": "^1.49.0"
   },
