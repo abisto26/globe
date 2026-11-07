@@ -1300,6 +1300,12 @@ function choiceButtons(){
 /* iPhone Safari can drop the "click" that follows a tap, notably right after a tap on the map.
    onTap reacts to the finger lifting off the button itself (ignoring swipes), and still accepts a normal click
    from a mouse or keyboard. A tap handled this way cancels the browser's own click, so nothing fires twice. */
+/* After a button reacts to a finger, some phones still send a "click" a moment later to whatever is now under
+   that finger (e.g. the "Powered by" link once a sheet has closed). Swallow those stray clicks for a short moment. */
+let tapGuard = { until: 0, el: null };
+document.addEventListener("click", e => {
+  if (performance.now() < tapGuard.until && !(tapGuard.el && tapGuard.el.contains(e.target))){ e.preventDefault(); e.stopPropagation(); }
+}, true);
 function onTap(el, fn){
   if (!el) return;
   let sx = 0, sy = 0, live = false;
@@ -1309,7 +1315,7 @@ function onTap(el, fn){
     if (!live) return; live = false;
     const t = e.changedTouches[0];
     if (Math.hypot(t.clientX - sx, t.clientY - sy) > 12 || el.disabled) return;
-    e.preventDefault(); fn(e);
+    e.preventDefault(); tapGuard = { until: performance.now() + 500, el }; fn(e);
   }, { passive: false });
   el.addEventListener("click", e => { if (!el.disabled) fn(e); });
 }
