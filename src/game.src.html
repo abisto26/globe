@@ -2244,7 +2244,7 @@ const badgeTags = (b = {}) => { // leaderboard rows show only the top badge, Wor
 };
 let achTimer = 0;
 function achPop(icon, name, sub, tier){
-  { const k = { "🔥": "fire", "🌍": "world" }[icon] || Object.keys(ACH_ICON).find(x => ACH_ICON[x] === icon); if (BADGE_IMG[k]) { icon = `<img src="${BADGE_IMG[k]}" alt="">`; tier = (tier || "") + " img"; } }
+  { const k = { "🔥": "fire", "🌍": "world", "👑": "champ" }[icon] || Object.keys(ACH_ICON).find(x => ACH_ICON[x] === icon); if (BADGE_IMG[k]) { icon = `<img src="${BADGE_IMG[k]}" alt="">`; tier = (tier || "") + " img"; } }
   sfx("badge", [20, 40, 20]);
   const el = $("achtoast");
   el.style.setProperty("--achTop", ($("top").getBoundingClientRect().bottom + 12) + "px");
@@ -2668,7 +2668,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("he
 /* the game's name as a logo: Arabic, Russian, or "Globe" for the other languages */
 const BADGE_WORLD = "__BADGE_WORLD__";
 /* Abisto's badge artwork; achievements without one yet keep their emoji */
-const BADGE_IMG = { world: BADGE_WORLD, fire: "__BADGE_FIRE__", allround: "__BADGE_ALLROUND__", days: "__BADGE_DAILY__", light: "__BADGE_LIGHT__", bull: "__BADGE_BULL__", explore: "__BADGE_EXPLORE__" };
+const BADGE_IMG = { world: BADGE_WORLD, fire: "__BADGE_FIRE__", allround: "__BADGE_ALLROUND__", days: "__BADGE_DAILY__", light: "__BADGE_LIGHT__", bull: "__BADGE_BULL__", explore: "__BADGE_EXPLORE__", champ: "__BADGE_CHAMP__", pro: "__BADGE_PRO__", cont: "__BADGE_CONT__" };
 const WORDMARK = { en: "__WORD_EN__", ar: "__WORD_AR__", ru: "__WORD_RU__" };
 /* as big as the header allows: full size, then two smaller steps, then hidden if the tabs need the room */
 function fitBrand(){
