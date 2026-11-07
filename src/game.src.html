@@ -1778,7 +1778,13 @@ async function claimUsername(raw, pin){
   try { localStorage.setItem(PID_KEY, res.pid); localStorage.setItem(NAME_KEY, res.name); } catch(e){}
   boardCache = null;
   await syncLocalBests();
-  if (myAvatar) cx("mutation", "scores:setAvatar", { pid: lb.uid, avatar: myAvatar }).catch(() => {});
+  // the account's avatar wins (signing in on a new phone brings it back); a brand-new username takes this phone's avatar
+  try {
+    const p = await cx("query", "scores:profile", { pid: lb.uid });
+    if (p){ knownStreak = p.streak || 0; knownProg = p.prog || {}; }
+    if (p && avOk(p.avatar)) setMyAvatar(p.avatar, false);
+    else if (myAvatar) setMyAvatar(myAvatar);
+  } catch(e){ if (myAvatar) cx("mutation", "scores:setAvatar", { pid: lb.uid, avatar: myAvatar }).catch(() => {}); }
   return "";
 }
 const idFields = (pre, typed) => `<div class="idrow">
@@ -2145,6 +2151,7 @@ function avatarHTML(av, size, name){
 function setMyAvatar(av, send = true){
   if (!avOk(av)) return;
   myAvatar = av; try { localStorage.setItem(AV_KEY, av); } catch(e){}
+  if (typeof settingsOpen === "function" && settingsOpen()) renderSettings();
   if (send && lb.kind === "convex" && playerName && !isOffline) cx("mutation", "scores:setAvatar", { pid: lb.uid, avatar: av }).catch(() => {});
   if (send && lb.kind === "claude" && lb.ready && lb.mine) saveMine({ av });
 }
