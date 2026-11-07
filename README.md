@@ -45,7 +45,7 @@ Pick a game at the top, answer, and see how far you can go.
 
 - **4 languages:** English, French, Arabic and Russian.
 - **Light and dark mode.**
-- **Sound and vibration**, which you can turn off in ⚙︎ (vibration works on Android only).
+- **Sound and vibration**, off by default; turn them on in ⚙︎ (vibration works on Android only).
 - **Works offline.** Once you've opened it, the game plays without a connection, even in airplane mode. Scores you make offline go on the leaderboard when you're back online.
 - **Works on any phone.** Add it to your home screen and it opens like an app:
   - **iPhone:** in Safari, tap Share, then *Add to Home Screen*.

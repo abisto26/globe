@@ -1672,7 +1672,7 @@ async function openShareCard(){
 /* ---------- sound and vibration ----------
    Short tones made on the fly (no sound files). Vibration exists only on Android; iPhones don't let websites vibrate. */
 const SND_KEY = "globedrop-sound", VIB_KEY = "globedrop-vibrate";
-const readOn = (k) => { try { return localStorage.getItem(k) !== "0"; } catch(e){ return true; } };
+const readOn = (k) => { try { return localStorage.getItem(k) === "1"; } catch(e){ return false; } }; // off until the player turns it on in Settings
 let soundOn = readOn(SND_KEY), vibOn = readOn(VIB_KEY), actx = null;
 const canVibrate = typeof navigator.vibrate === "function";
 function audio(){
