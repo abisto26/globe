@@ -277,6 +277,10 @@ body{background:var(--ocean);color:var(--ink);font-family:var(--display);overflo
 /* Map */
 .mapwrap{position:absolute;inset:0}
 svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
+/* while the map is zooming or panning: no live blur behind the glass (it is the costly part on big screens) */
+.zooming .glass,.zooming .top,.zooming .card,.zooming .zoom button,.zooming .sponsor{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.zooming .glass,.zooming .top,.zooming .card{background:color-mix(in srgb,var(--panel) 88%,transparent)!important}
+.zooming .country,.zooming .graticule{shape-rendering:optimizeSpeed}
 .graticule{fill:none;stroke:var(--ocean-line);stroke-width:.6;vector-effect:non-scaling-stroke}
 .country{fill:var(--land);stroke:var(--land-edge);stroke-width:.5;vector-effect:non-scaling-stroke}
 .countries-mode .country{cursor:pointer}
@@ -969,7 +973,15 @@ const path = d3.geoPath(projection);
 let k = 1;
 
 const zoom = d3.zoom().scaleExtent([1, 40]).clickDistance(6)
-  .on("zoom", e => { k = e.transform.k; gZoom.attr("transform", e.transform); sizeMarks(); });
+  .on("zoom", e => {
+    // computers send many wheel/trackpad events per screen refresh: apply only the latest one, once per frame
+    pendingT = e.transform; k = e.transform.k;
+    if (!zoomRaf) zoomRaf = requestAnimationFrame(() => { zoomRaf = 0; gZoom.attr("transform", pendingT); sizeMarks(); });
+    // the frosted glass has to re-blur the moving map on every frame; pause the blur while the map moves
+    if (!zoomingNow){ zoomingNow = true; document.documentElement.classList.add("zooming"); }
+    clearTimeout(zoomEnd); zoomEnd = setTimeout(() => { zoomingNow = false; document.documentElement.classList.remove("zooming"); }, 180);
+  });
+let pendingT = null, zoomRaf = 0, zoomEnd = 0, zoomingNow = false;
 svg.call(zoom).on("dblclick.zoom", null);
 
 function layout(){
