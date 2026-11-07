@@ -2301,7 +2301,7 @@ function renderProfile(pf, first){
   world.k = "world"; fire.k = "fire"; champ.k = "champ";
   const list = [world, fire, champ, ...more], earned = list.filter(a => a.on).length;
   for (const a of list) if (BADGE_IMG[a.k]) { a.img = true; a.icon = `<img class="bimg" src="${BADGE_IMG[a.k]}" alt="">`; }
-  const topIcon = champ.on ? "👑" : world.on ? `<img class="wtimg" src="${BADGE_WORLD}" alt="">` : fire.on ? "🔥" : "";
+  const topIcon = (k => k ? `<img class="wtimg" src="${BADGE_IMG[k]}" alt="">` : "")(champ.on ? "champ" : world.on ? "world" : fire.on ? "fire" : "");
   const sub = pf.firstOn?.length ? t("champOn", boardLabel(pf.firstOn[0])) : pf.bestBoard ? t("bestOn", boardLabel(pf.bestBoard)) : "";
   const el = $("profile");
   el.innerHTML = `<div class="pf" role="dialog" aria-labelledby="pf-t">
@@ -2668,7 +2668,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("he
 /* the game's name as a logo: Arabic, Russian, or "Globe" for the other languages */
 const BADGE_WORLD = "__BADGE_WORLD__";
 /* Abisto's badge artwork; achievements without one yet keep their emoji */
-const BADGE_IMG = { world: BADGE_WORLD, fire: "__BADGE_FIRE__", allround: "__BADGE_ALLROUND__", days: "__BADGE_DAILY__", light: "__BADGE_LIGHT__", bull: "__BADGE_BULL__", explore: "__BADGE_EXPLORE__", champ: "__BADGE_CHAMP__", pro: "__BADGE_PRO__", cont: "__BADGE_CONT__" };
+const BADGE_IMG = { world: BADGE_WORLD, fire: "__BADGE_FIRE__", allround: "__BADGE_ALLROUND__", days: "__BADGE_DAILY__", light: "__BADGE_LIGHT__", bull: "__BADGE_BULL__", explore: "__BADGE_EXPLORE__", champ: "__BADGE_CHAMP__", pro: "__BADGE_PRO__", cont: "__BADGE_CONT__", langs: "__BADGE_LANGS__", untouch: "__BADGE_UNTOUCH__" };
 const WORDMARK = { en: "__WORD_EN__", ar: "__WORD_AR__", ru: "__WORD_RU__" };
 /* as big as the header allows: full size, then two smaller steps, then hidden if the tabs need the room */
 function fitBrand(){
