@@ -39,10 +39,13 @@ Pick a game at the top, answer, and see how far you can go.
 
 **Explore** (🧭) is for learning: tap any country to see its flag, capital and biggest cities.
 
+**Regions** (🌐 next to Easy/Pro): play one continent at a time, Africa, Europe, Asia, the Americas or Oceania. Region games are for practice, so they don't count for the leaderboard or achievements.
+
 ## Features
 
 - **4 languages:** English, French, Arabic and Russian.
 - **Light and dark mode.**
+- **Sound and vibration**, which you can turn off in ⚙︎ (vibration works on Android only).
 - **Works offline.** Once you've opened it, the game plays without a connection, even in airplane mode. Scores you make offline go on the leaderboard when you're back online.
 - **Works on any phone.** Add it to your home screen and it opens like an app:
   - **iPhone:** in Safari, tap Share, then *Add to Home Screen*.

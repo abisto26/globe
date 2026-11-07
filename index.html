@@ -272,6 +272,27 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .levels button{border:0;background:transparent;color:var(--ink-soft);font:600 .72rem var(--display);padding:3px 10px;border-radius:999px;cursor:pointer}
 .levels button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .levels button:focus-visible{outline:3px solid var(--pin);outline-offset:2px}
+/* region chip (Whole world / Africa / ...) and its picker */
+.regbtn{display:inline-flex;align-items:center;gap:4px;flex:none;border:0;border-radius:999px;padding:4px 9px;font:600 .72rem var(--display);color:var(--ink-soft);background:color-mix(in srgb,var(--chip) 55%,transparent);cursor:pointer;touch-action:manipulation;white-space:nowrap}
+.regbtn .ri{font-size:.95rem;line-height:1}
+.regbtn .rc{font-size:.6rem;opacity:.7}
+.regbtn.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12),0 0 0 1.5px var(--target)}
+.exploring .regbtn{display:none}
+.regbtn:focus-visible{outline:3px solid var(--pin);outline-offset:2px}
+.country.outside{opacity:.28;pointer-events:none}
+.pf.rg h3{display:block;margin:4px 0 0;text-align:center;font:800 1.1rem var(--display);color:var(--ink)}
+.pf.rg .sub{margin:-8px 0 0;text-align:center;font:600 .8rem var(--display);color:var(--ink-soft)}
+.pf.rg .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rg .tl{position:relative;border:0;border-radius:18px;padding:10px 12px;text-align:start;color:var(--ink);font:800 .95rem var(--display);display:flex;flex-direction:column;gap:2px;cursor:pointer;touch-action:manipulation;background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.rg .tl svg{width:100%;height:54px;margin-bottom:4px;display:block}
+.rg .tl svg path{fill:var(--target);opacity:.75}
+.rg .tl small{font:600 .72rem var(--display);color:var(--ink-soft)}
+.rg .tl[aria-pressed="true"]{box-shadow:inset 0 0 0 2.5px var(--target);background:color-mix(in srgb,var(--target) 14%,var(--panel))}
+.rg .tl:active:not(:disabled){transform:scale(.97)}
+.rg .tl:disabled{cursor:default;opacity:.5}
+.pf.rg .note{text-align:center;font:600 .74rem/1.35 var(--display);color:var(--ink-soft)}
+.pf.rg .tick{align-self:center;font:700 .74rem var(--display);color:#c2410c;background:color-mix(in srgb,#f97316 16%,transparent);padding:4px 10px;border-radius:999px}
+.smenu .rowq.one{grid-template-columns:1fr}
 .country.correct{fill:var(--target);fill-opacity:.75}
 .guessline{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 4;fill:none;vector-effect:non-scaling-stroke}
 .zoomctl{align-self:flex-end;pointer-events:auto;display:flex;flex-direction:column;gap:8px}
@@ -615,8 +636,10 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
   .scorebox b::before{content:"✓ ";color:var(--target);font-weight:700}
   .levels button{padding:3px 7px}
   .controls{gap:4px}
+  .regbtn{padding:4px 6px}
 }
 @media (max-width:430px){
+  .regbtn .rn{display:none}
   .stats{gap:8px}
   .controls{gap:5px}
   .lives svg{width:15px;height:15px}
@@ -659,6 +682,7 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
     <div class="results" id="welcome" hidden></div>
     <div class="results wtwrap" id="wtour" hidden></div>
     <div class="pfscrim" id="profile" hidden></div>
+    <div class="pfscrim" id="regpick" hidden></div>
     <div class="achtoast" id="achtoast" role="status" aria-live="polite"></div>
     <div class="toast glass" id="toast" role="status" aria-live="polite"></div>
   </div>
@@ -675,7 +699,7 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
     </div>
     <div class="statusrow">
       <div class="stats"><div class="lives" id="lives"></div><span class="scorebox"><span data-i18n="score">Score</span> <b id="score">0</b></span></div>
-      <div class="controls"><span class="levels" id="levels" role="group" data-i18n-aria="level" aria-label="Level">
+      <div class="controls"><button class="regbtn" id="regbtn" aria-haspopup="dialog"></button><span class="levels" id="levels" role="group" data-i18n-aria="level" aria-label="Level">
           <button id="l-easy" aria-pressed="true" data-i18n="easy">Easy</button>
           <button id="l-pro" aria-pressed="false" data-i18n="pro">Pro</button>
         </span><button class="gearbtn" id="gear" aria-haspopup="dialog" aria-expanded="false" data-i18n-aria="settings" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><rect x="10.3" y="1.6" width="3.4" height="4.6" rx="1.1" transform="rotate(0 12 12)"/><rect x="10.3" y="1.6" width="3.4" height="4.6" rx="1.1" transform="rotate(45 12 12)"/><rect x="10.3" y="1.6" width="3.4" height="4.6" rx="1.1" transform="rotate(90 12 12)"/><rect x="10.3" y="1.6" width="3.4" height="4.6" rx="1.1" transform="rotate(135 12 12)"/><rect x="10.3" y="1.6" width="3.4" height="4.6" rx="1.1" transform="rotate(180 12 12)"/><rect x="10.3" y="1.6" width="3.4" height="4.6" rx="1.1" transform="rotate(225 12 12)"/><rect x="10.3" y="1.6" width="3.4" height="4.6" rx="1.1" transform="rotate(270 12 12)"/><rect x="10.3" y="1.6" width="3.4" height="4.6" rx="1.1" transform="rotate(315 12 12)"/></g><circle cx="12" cy="12" r="6.4" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="12" cy="12" r="2.1" fill="currentColor"/></svg><span class="gdot" id="gdot"></span></button><button class="how lbbtn oldctl" id="lbbtn" data-i18n-aria="leaderboard" aria-label="Leaderboard"><span aria-hidden="true">🏆</span></button><button class="how oldctl" id="how" data-i18n-aria="howToPlay" aria-label="How to play">?</button><span class="langwrap oldctl"><button class="langbtn" id="langbtn" data-i18n-aria="language" aria-label="Language" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>EN</span></button><span class="langmenu glass" id="langmenu" role="menu" hidden></span></span><button class="theme oldctl" id="theme" aria-label="Switch to dark mode"></button></div>
@@ -904,7 +928,7 @@ function layout(){
   // the projection changed, so the old zoom no longer points at the same place
   if (mode === "explore" && current) focusBounds(safeBounds(mainShape(current)), 20, 0.6, 0);
   else if (current && area && (!revealed || mode === "capitals")) focusBounds(safeBounds(area.shape), 30, 0.8, 0);
-  else svg.call(zoom.transform, d3.zoomIdentity);
+  else goHome(0);
 }
 /* Bounds on the flat map. A few countries cross the 180° line (Russia's Chukotka, Fiji, the Aleutians), and the
    piece past it is drawn at the opposite edge, which would make the shape look as wide as the world.
@@ -947,13 +971,14 @@ function paintCountries(){
     .style("fill", f => showFlag && f === current ? "url(#flagfill)" : null)
     .classed("focus", f => !!area && f === area.country)
     .classed("picked", f => f === pickedF)
+    .classed("outside", f => practice() && !inRegion(f))
     .classed("correct", f => (mode === "countries" || mode === "flags" || mode === "explore") && revealed && f === current);
 }
 d3.select("#zin").on("click", () => svg.transition().duration(250).call(zoom.scaleBy, 1.8));
 d3.select("#zout").on("click", () => svg.transition().duration(250).call(zoom.scaleBy, 1/1.8));
 d3.select("#zreset").on("click", () => {
   if (area && (!revealed || mode === "capitals")) focusBounds(safeBounds(area.shape), 30, 0.8);
-  else svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+  else goHome(300);
 });
 
 svg.on("click", e => {
@@ -1046,7 +1071,7 @@ const T = {
     lbDown:"The leaderboard can't be reached right now. Your score is kept on this device.", lbDown2:"The leaderboard can't be reached right now.", offline:"Offline", poweredBy:"Powered by", offBoard:"You're offline. Your best is saved on this device and goes on the leaderboard when you're back online.", offUser:"You're offline. Play as a guest now and add your username when you're back online.",
     youTag:" (you)", joinName:"Add a name to join the leaderboard.", joinUser:"Add a username to save this score on the leaderboard.", joinOne:"Get at least 1 right to join the leaderboard.", noScores:"No scores yet. Be the first.",
     rank:(nb, r, n) => `${nb ? "New best! " : ""}You're <b>#${r}</b> of ${n} ${n === 1 ? "player" : "players"}.`,
-    gotIt:"Got it", a_bull:"Bullseye", a_light:"Lightning", a_explore:"Explorer", a_allround:"All-rounder", a_pro:"Pro", a_untouch:"Untouchable", a_daily:"Daily traveller", a_polyglot:"Polyglot", d_world:"A whole list, no game over", d_fire:"25 in a row · 50 for gold", d_champ:"#1 on any leaderboard", d_bull:"City pin within 10 km", d_light:"10 in a row, each under 3 s", d_explore:"Open 100 countries in Explore", d_allround:"10+ in every game", d_pro:"50 in a Pro game", d_untouch:"50 right without losing a life", d_daily:"Play 7 days in a row", d_polyglot:"Play in all 4 languages", chooseAv:"Choose your avatar", avSub:"Famous travellers, or something fun.", avTravellers:"Famous travellers", avAnimals:"Animals", avColour:"Colour", avEdit:"Change your avatar", tv_ibnbattuta:"Ibn Battuta", tv_marcopolo:"Marco Polo", tv_columbus:"Columbus", tv_zhenghe:"Zheng He", tv_earhart:"Amelia Earhart", tv_tereshkova:"Valentina Tereshkova", tv_nellybly:"Nellie Bly", tv_captain:"Captain", profile:"Profile", stBest:"best score", stStreak:"best streak", stTours:"world tours", achievements:"Achievements", a_world:"World tour", a_fire:"On fire", a_champ:"Champion", earned:"Earned", progressOf:(x, n) => `best ${x} / ${n}`, fireGold:"50 in a row for gold", champOn:b => `#1 on ${b}`, champDesc:"Reach #1 on any leaderboard", bestOn:b => `Best game: ${b}`, unlocked:"Achievement unlocked", inARow:n => `${n} right in a row`, guestAch:"Add a username to keep your achievements on every device.", tapProfile:"See your profile", wtRound:r => `Round ${r} ✓`, wt_flags:"You've seen every flag in the world!", wt_countries:"You've found every country on the map!", wt_capitals:"You've named every capital!", wt_cities:"You've found every city in the game!", wtText:(n, u, r) => `All <b>${n}</b> ${u}, without running out of lives. The deck is reshuffled: round ${r} starts now.`, wtUnit_flags:n => "flags", wtUnit_countries:n => "countries", wtUnit_capitals:n => "capitals", wtUnit_cities:n => "cities", wtLives:"lives left", wtTime:"playing", keepGoing:"Keep going", wtBadge:n => `World tour ×${n}`, wtTag:"World tour", settings:"Settings", guest:"Guest", onBoard:"On the leaderboard", notRanked:"Not ranked yet", changeShort:"Change", addUserShort:"Add username", addNameShort:"Add name", langLbl:"Language", themeLbl:"Theme", afterQ:"after this question", timerRuns:"The timer keeps running", lightLbl:"Light", darkLbl:"Dark", seeBoard:"Leaderboard", lbClose:"Close",
+    gotIt:"Got it", a_bull:"Bullseye", a_light:"Lightning", a_explore:"Explorer", a_allround:"All-rounder", a_pro:"Pro", a_untouch:"Untouchable", a_daily:"Daily traveller", a_polyglot:"Polyglot", d_world:"A whole list, no game over", d_fire:"25 in a row · 50 for gold", d_champ:"#1 on any leaderboard", d_bull:"City pin within 10 km", d_light:"10 in a row, each under 3 s", d_explore:"Open 100 countries in Explore", d_allround:"10+ in every game", d_pro:"50 in a Pro game", d_untouch:"50 right without losing a life", d_daily:"Play 7 days in a row", d_polyglot:"Play in all 4 languages", chooseAv:"Choose your avatar", avSub:"Famous travellers, or something fun.", avTravellers:"Famous travellers", avAnimals:"Animals", avColour:"Colour", avEdit:"Change your avatar", tv_ibnbattuta:"Ibn Battuta", tv_marcopolo:"Marco Polo", tv_columbus:"Columbus", tv_zhenghe:"Zheng He", tv_earhart:"Amelia Earhart", tv_tereshkova:"Valentina Tereshkova", tv_nellybly:"Nellie Bly", tv_captain:"Captain", profile:"Profile", stBest:"best score", stStreak:"best streak", stTours:"world tours", achievements:"Achievements", a_world:"World tour", a_fire:"On fire", a_champ:"Champion", earned:"Earned", progressOf:(x, n) => `best ${x} / ${n}`, fireGold:"50 in a row for gold", champOn:b => `#1 on ${b}`, champDesc:"Reach #1 on any leaderboard", bestOn:b => `Best game: ${b}`, unlocked:"Achievement unlocked", inARow:n => `${n} right in a row`, guestAch:"Add a username to keep your achievements on every device.", tapProfile:"See your profile", wtRound:r => `Round ${r} ✓`, wt_flags:"You've seen every flag in the world!", wt_countries:"You've found every country on the map!", wt_capitals:"You've named every capital!", wt_cities:"You've found every city in the game!", wtText:(n, u, r) => `All <b>${n}</b> ${u}, without running out of lives. The deck is reshuffled: round ${r} starts now.`, wtUnit_flags:n => "flags", wtUnit_countries:n => "countries", wtUnit_capitals:n => "capitals", wtUnit_cities:n => "cities", wtLives:"lives left", wtTime:"playing", keepGoing:"Keep going", wtBadge:n => `World tour ×${n}`, wtTag:"World tour", settings:"Settings", guest:"Guest", onBoard:"On the leaderboard", notRanked:"Not ranked yet", changeShort:"Change", addUserShort:"Add username", addNameShort:"Add name", langLbl:"Language", themeLbl:"Theme", afterQ:"after this question", timerRuns:"The timer keeps running", lightLbl:"Light", darkLbl:"Dark", seeBoard:"Leaderboard", lbClose:"Close", soundLbl:"Sound", vibLbl:"Vibration", onLbl:"On", offLbl:"Off", regionLbl:"Region", regTitle:"Where do you want to play?", rg_world:"Whole world", rg_af:"Africa", rg_eu:"Europe", rg_as:"Asia", rg_am:"Americas", rg_oc:"Oceania", practiceInfo:"Regions are for practice: they don't count for the leaderboard or achievements.", practiceNote:"Practice: this score doesn't go on the leaderboard.", notHere:"Not in this game",
     help:`<p>Your score is the number of <b>right answers</b>. Each right answer is <b>+1</b>. Each miss costs one of your <b>3 lives</b>. The game ends when you run out of lives or press <b>Stop</b>.</p>
     <p><b>Explore (compass):</b> no score, no lives. Tap any country to see its flag, capital and big cities. Good homework before you play.</p>
     <p><b>Flags · Easy:</b> pick the country from 4 names. The wrong ones are neighbours, so similar flags show up.</p>
@@ -1086,7 +1111,7 @@ const T = {
     lbDown:"Le classement est inaccessible pour l'instant. Ton score est gardé sur cet appareil.", lbDown2:"Le classement est inaccessible pour l'instant.", offline:"Hors ligne", poweredBy:"Propulsé par", offBoard:"Tu es hors ligne. Ton record est gardé sur cet appareil et ira au classement dès ton retour en ligne.", offUser:"Tu es hors ligne. Joue en invité et ajoute ton pseudo une fois reconnecté.",
     youTag:" (toi)", joinName:"Ajoute un nom pour entrer au classement.", joinUser:"Ajoute un pseudo pour enregistrer ce score au classement.", joinOne:"Trouve au moins 1 bonne réponse pour entrer au classement.", noScores:"Aucun score pour l'instant. Sois le premier !",
     rank:(nb, r, n) => `${nb ? "Nouveau record ! " : ""}Tu es <b>n° ${r}</b> sur ${n} ${n > 1 ? "joueurs" : "joueur"}.`,
-    gotIt:"Compris", a_bull:"Dans le mille", a_light:"Éclair", a_explore:"Explorateur", a_allround:"Polyvalent", a_pro:"Pro", a_untouch:"Intouchable", a_daily:"Voyageur assidu", a_polyglot:"Polyglotte", d_world:"Une liste entière sans game over", d_fire:"25 d'affilée · 50 pour l'or", d_champ:"n°1 d'un classement", d_bull:"Épingle à moins de 10 km", d_light:"10 d'affilée, chacune en moins de 3 s", d_explore:"Ouvre 100 pays en mode Explorer", d_allround:"10+ dans chaque jeu", d_pro:"50 dans un jeu Pro", d_untouch:"50 bonnes réponses sans perdre de vie", d_daily:"Joue 7 jours de suite", d_polyglot:"Joue dans les 4 langues", chooseAv:"Choisis ton avatar", avSub:"Grands voyageurs, ou quelque chose de fun.", avTravellers:"Grands voyageurs", avAnimals:"Animaux", avColour:"Couleur", avEdit:"Changer d'avatar", tv_ibnbattuta:"Ibn Battuta", tv_marcopolo:"Marco Polo", tv_columbus:"Christophe Colomb", tv_zhenghe:"Zheng He", tv_earhart:"Amelia Earhart", tv_tereshkova:"Valentina Terechkova", tv_nellybly:"Nellie Bly", tv_captain:"Commandante", profile:"Profil", stBest:"meilleur score", stStreak:"meilleure série", stTours:"tours du monde", achievements:"Succès", a_world:"Tour du monde", a_fire:"En feu", a_champ:"Champion", earned:"Obtenu", progressOf:(x, n) => `record ${x} / ${n}`, fireGold:"50 d'affilée pour l'or", champOn:b => `n°1 en ${b}`, champDesc:"Sois n°1 d'un classement", bestOn:b => `Meilleur jeu : ${b}`, unlocked:"Succès débloqué", inARow:n => `${n} bonnes réponses d'affilée`, guestAch:"Ajoute un pseudo pour garder tes succès sur tous tes appareils.", tapProfile:"Voir ton profil", wtRound:r => `Tour ${r} ✓`, wt_flags:"Tu as vu tous les drapeaux du monde !", wt_countries:"Tu as trouvé tous les pays de la carte !", wt_capitals:"Tu as trouvé toutes les capitales !", wt_cities:"Tu as trouvé toutes les villes du jeu !", wtText:(n, u, r) => `Les <b>${n}</b> ${u}, sans perdre toutes tes vies. Les questions sont remélangées : le tour ${r} commence.`, wtUnit_flags:n => "drapeaux", wtUnit_countries:n => "pays", wtUnit_capitals:n => "capitales", wtUnit_cities:n => "villes", wtLives:"vies restantes", wtTime:"de jeu", keepGoing:"Continuer", wtBadge:n => `Tour du monde ×${n}`, wtTag:"Tour du monde", settings:"Réglages", guest:"Invité", onBoard:"Au classement", notRanked:"Pas encore classé", changeShort:"Changer", addUserShort:"Ajouter un pseudo", addNameShort:"Ajouter un nom", langLbl:"Langue", themeLbl:"Thème", afterQ:"après cette question", timerRuns:"Le chrono continue", lightLbl:"Clair", darkLbl:"Sombre", seeBoard:"Classement", lbClose:"Fermer",
+    gotIt:"Compris", a_bull:"Dans le mille", a_light:"Éclair", a_explore:"Explorateur", a_allround:"Polyvalent", a_pro:"Pro", a_untouch:"Intouchable", a_daily:"Voyageur assidu", a_polyglot:"Polyglotte", d_world:"Une liste entière sans game over", d_fire:"25 d'affilée · 50 pour l'or", d_champ:"n°1 d'un classement", d_bull:"Épingle à moins de 10 km", d_light:"10 d'affilée, chacune en moins de 3 s", d_explore:"Ouvre 100 pays en mode Explorer", d_allround:"10+ dans chaque jeu", d_pro:"50 dans un jeu Pro", d_untouch:"50 bonnes réponses sans perdre de vie", d_daily:"Joue 7 jours de suite", d_polyglot:"Joue dans les 4 langues", chooseAv:"Choisis ton avatar", avSub:"Grands voyageurs, ou quelque chose de fun.", avTravellers:"Grands voyageurs", avAnimals:"Animaux", avColour:"Couleur", avEdit:"Changer d'avatar", tv_ibnbattuta:"Ibn Battuta", tv_marcopolo:"Marco Polo", tv_columbus:"Christophe Colomb", tv_zhenghe:"Zheng He", tv_earhart:"Amelia Earhart", tv_tereshkova:"Valentina Terechkova", tv_nellybly:"Nellie Bly", tv_captain:"Commandante", profile:"Profil", stBest:"meilleur score", stStreak:"meilleure série", stTours:"tours du monde", achievements:"Succès", a_world:"Tour du monde", a_fire:"En feu", a_champ:"Champion", earned:"Obtenu", progressOf:(x, n) => `record ${x} / ${n}`, fireGold:"50 d'affilée pour l'or", champOn:b => `n°1 en ${b}`, champDesc:"Sois n°1 d'un classement", bestOn:b => `Meilleur jeu : ${b}`, unlocked:"Succès débloqué", inARow:n => `${n} bonnes réponses d'affilée`, guestAch:"Ajoute un pseudo pour garder tes succès sur tous tes appareils.", tapProfile:"Voir ton profil", wtRound:r => `Tour ${r} ✓`, wt_flags:"Tu as vu tous les drapeaux du monde !", wt_countries:"Tu as trouvé tous les pays de la carte !", wt_capitals:"Tu as trouvé toutes les capitales !", wt_cities:"Tu as trouvé toutes les villes du jeu !", wtText:(n, u, r) => `Les <b>${n}</b> ${u}, sans perdre toutes tes vies. Les questions sont remélangées : le tour ${r} commence.`, wtUnit_flags:n => "drapeaux", wtUnit_countries:n => "pays", wtUnit_capitals:n => "capitales", wtUnit_cities:n => "villes", wtLives:"vies restantes", wtTime:"de jeu", keepGoing:"Continuer", wtBadge:n => `Tour du monde ×${n}`, wtTag:"Tour du monde", settings:"Réglages", guest:"Invité", onBoard:"Au classement", notRanked:"Pas encore classé", changeShort:"Changer", addUserShort:"Ajouter un pseudo", addNameShort:"Ajouter un nom", langLbl:"Langue", themeLbl:"Thème", afterQ:"après cette question", timerRuns:"Le chrono continue", lightLbl:"Clair", darkLbl:"Sombre", seeBoard:"Classement", lbClose:"Fermer", soundLbl:"Son", vibLbl:"Vibration", onLbl:"Oui", offLbl:"Non", regionLbl:"Région", regTitle:"Où veux-tu jouer ?", rg_world:"Monde entier", rg_af:"Afrique", rg_eu:"Europe", rg_as:"Asie", rg_am:"Amériques", rg_oc:"Océanie", practiceInfo:"Les régions servent à s'entraîner : elles ne comptent ni pour le classement ni pour les succès.", practiceNote:"Entraînement : ce score ne va pas au classement.", notHere:"Pas dans ce jeu",
     help:`<p>Ton score est le nombre de <b>bonnes réponses</b>. Chaque bonne réponse vaut <b>+1</b>. Chaque erreur te coûte une de tes <b>3 vies</b>. La partie s'arrête quand tu n'as plus de vies ou quand tu touches <b>Arrêter</b>.</p>
     <p><b>Explorer (boussole) :</b> pas de score, pas de vies. Touche un pays pour voir son drapeau, sa capitale et ses grandes villes. Parfait pour réviser avant de jouer.</p>
     <p><b>Drapeaux · Facile :</b> choisis le pays parmi 4 noms. Les mauvaises réponses sont des voisins, donc les drapeaux se ressemblent.</p>
@@ -1126,7 +1151,7 @@ const T = {
     lbDown:"تعذّر الوصول إلى لوحة الترتيب الآن. نتيجتك محفوظة على هذا الجهاز.", lbDown2:"تعذّر الوصول إلى لوحة الترتيب الآن.", offline:"غير متصل", poweredBy:"برعاية", offBoard:"أنت غير متصل. أفضل نتيجة لك محفوظة على هذا الجهاز وستُضاف إلى لوحة الترتيب عند عودة الاتصال.", offUser:"أنت غير متصل. العب كضيف الآن وأضف اسم المستخدم عند عودة الاتصال.",
     youTag:" (أنت)", joinName:"أضف اسمًا لتنضم إلى لوحة الترتيب.", joinUser:"أضف اسم مستخدم لحفظ هذه النتيجة في لوحة الترتيب.", joinOne:"أجب إجابة صحيحة واحدة على الأقل لتدخل لوحة الترتيب.", noScores:"لا توجد نتائج بعد. كن الأول!",
     rank:(nb, r, n) => `${nb ? "رقم قياسي جديد! " : ""}أنت في المركز <b>${r}</b> من ${n}.`,
-    gotIt:"فهمت", a_bull:"في الصميم", a_light:"البرق", a_explore:"المستكشف", a_allround:"متعدد المواهب", a_pro:"محترف", a_untouch:"لا يُمَس", a_daily:"مسافر كل يوم", a_polyglot:"متعدد اللغات", d_world:"قائمة كاملة دون خسارة", d_fire:"25 متتالية · 50 للذهبية", d_champ:"الأول في أي لوحة ترتيب", d_bull:"دبوس على بُعد أقل من 10 كم", d_light:"10 متتالية، كل واحدة في أقل من 3 ث", d_explore:"افتح 100 دولة في الاستكشاف", d_allround:"10+ في كل لعبة", d_pro:"50 في لعبة محترف", d_untouch:"50 إجابة صحيحة دون فقدان روح", d_daily:"العب 7 أيام متتالية", d_polyglot:"العب باللغات الأربع", chooseAv:"اختر صورتك", avSub:"رحّالة مشهورون، أو شيء ممتع.", avTravellers:"رحّالة مشهورون", avAnimals:"حيوانات", avColour:"اللون", avEdit:"غيّر صورتك", tv_ibnbattuta:"ابن بطوطة", tv_marcopolo:"ماركو بولو", tv_columbus:"كولومبوس", tv_zhenghe:"تشنغ خه", tv_earhart:"أميليا إيرهارت", tv_tereshkova:"فالنتينا تيريشكوفا", tv_nellybly:"نيلي بلاي", tv_captain:"قائدة الطائرة", profile:"الملف الشخصي", stBest:"أفضل نتيجة", stStreak:"أطول سلسلة", stTours:"جولات حول العالم", achievements:"الإنجازات", a_world:"جولة حول العالم", a_fire:"مشتعل", a_champ:"البطل", earned:"تم الحصول عليه", progressOf:(x, n) => `الأفضل ${x} / ${n}`, fireGold:"50 متتالية للذهبية", champOn:b => `الأول في ${b}`, champDesc:"كن الأول في أي لوحة ترتيب", bestOn:b => `أفضل لعبة: ${b}`, unlocked:"إنجاز جديد", inARow:n => `${n} إجابات صحيحة متتالية`, guestAch:"أضف اسم مستخدم لتحتفظ بإنجازاتك على كل أجهزتك.", tapProfile:"عرض ملفك", wtRound:r => `الجولة ${r} ✓`, wt_flags:"لقد رأيت كل أعلام العالم!", wt_countries:"لقد وجدت كل دول الخريطة!", wt_capitals:"لقد عرفت كل العواصم!", wt_cities:"لقد وجدت كل مدن اللعبة!", wtText:(n, u, r) => `كل الـ<b>${n}</b> ${u} دون أن تنفد أرواحك. أُعيد خلط الأسئلة: تبدأ الجولة ${r} الآن.`, wtUnit_flags:n => "علمًا", wtUnit_countries:n => "دولة", wtUnit_capitals:n => "عاصمة", wtUnit_cities:n => "مدينة", wtLives:"أرواح متبقية", wtTime:"مدة اللعب", keepGoing:"واصل", wtBadge:n => `جولة حول العالم ×${n}`, wtTag:"جولة حول العالم", settings:"الإعدادات", guest:"ضيف", onBoard:"في لوحة الترتيب", notRanked:"غير مصنّف بعد", changeShort:"تغيير", addUserShort:"أضف اسم مستخدم", addNameShort:"أضف اسمًا", langLbl:"اللغة", themeLbl:"المظهر", afterQ:"بعد هذا السؤال", timerRuns:"المؤقت مستمر", lightLbl:"فاتح", darkLbl:"داكن", seeBoard:"لوحة الترتيب", lbClose:"إغلاق",
+    gotIt:"فهمت", a_bull:"في الصميم", a_light:"البرق", a_explore:"المستكشف", a_allround:"متعدد المواهب", a_pro:"محترف", a_untouch:"لا يُمَس", a_daily:"مسافر كل يوم", a_polyglot:"متعدد اللغات", d_world:"قائمة كاملة دون خسارة", d_fire:"25 متتالية · 50 للذهبية", d_champ:"الأول في أي لوحة ترتيب", d_bull:"دبوس على بُعد أقل من 10 كم", d_light:"10 متتالية، كل واحدة في أقل من 3 ث", d_explore:"افتح 100 دولة في الاستكشاف", d_allround:"10+ في كل لعبة", d_pro:"50 في لعبة محترف", d_untouch:"50 إجابة صحيحة دون فقدان روح", d_daily:"العب 7 أيام متتالية", d_polyglot:"العب باللغات الأربع", chooseAv:"اختر صورتك", avSub:"رحّالة مشهورون، أو شيء ممتع.", avTravellers:"رحّالة مشهورون", avAnimals:"حيوانات", avColour:"اللون", avEdit:"غيّر صورتك", tv_ibnbattuta:"ابن بطوطة", tv_marcopolo:"ماركو بولو", tv_columbus:"كولومبوس", tv_zhenghe:"تشنغ خه", tv_earhart:"أميليا إيرهارت", tv_tereshkova:"فالنتينا تيريشكوفا", tv_nellybly:"نيلي بلاي", tv_captain:"قائدة الطائرة", profile:"الملف الشخصي", stBest:"أفضل نتيجة", stStreak:"أطول سلسلة", stTours:"جولات حول العالم", achievements:"الإنجازات", a_world:"جولة حول العالم", a_fire:"مشتعل", a_champ:"البطل", earned:"تم الحصول عليه", progressOf:(x, n) => `الأفضل ${x} / ${n}`, fireGold:"50 متتالية للذهبية", champOn:b => `الأول في ${b}`, champDesc:"كن الأول في أي لوحة ترتيب", bestOn:b => `أفضل لعبة: ${b}`, unlocked:"إنجاز جديد", inARow:n => `${n} إجابات صحيحة متتالية`, guestAch:"أضف اسم مستخدم لتحتفظ بإنجازاتك على كل أجهزتك.", tapProfile:"عرض ملفك", wtRound:r => `الجولة ${r} ✓`, wt_flags:"لقد رأيت كل أعلام العالم!", wt_countries:"لقد وجدت كل دول الخريطة!", wt_capitals:"لقد عرفت كل العواصم!", wt_cities:"لقد وجدت كل مدن اللعبة!", wtText:(n, u, r) => `كل الـ<b>${n}</b> ${u} دون أن تنفد أرواحك. أُعيد خلط الأسئلة: تبدأ الجولة ${r} الآن.`, wtUnit_flags:n => "علمًا", wtUnit_countries:n => "دولة", wtUnit_capitals:n => "عاصمة", wtUnit_cities:n => "مدينة", wtLives:"أرواح متبقية", wtTime:"مدة اللعب", keepGoing:"واصل", wtBadge:n => `جولة حول العالم ×${n}`, wtTag:"جولة حول العالم", settings:"الإعدادات", guest:"ضيف", onBoard:"في لوحة الترتيب", notRanked:"غير مصنّف بعد", changeShort:"تغيير", addUserShort:"أضف اسم مستخدم", addNameShort:"أضف اسمًا", langLbl:"اللغة", themeLbl:"المظهر", afterQ:"بعد هذا السؤال", timerRuns:"المؤقت مستمر", lightLbl:"فاتح", darkLbl:"داكن", seeBoard:"لوحة الترتيب", lbClose:"إغلاق", soundLbl:"الصوت", vibLbl:"الاهتزاز", onLbl:"تشغيل", offLbl:"إيقاف", regionLbl:"المنطقة", regTitle:"أين تريد أن تلعب؟", rg_world:"العالم كله", rg_af:"أفريقيا", rg_eu:"أوروبا", rg_as:"آسيا", rg_am:"الأمريكتان", rg_oc:"أوقيانوسيا", practiceInfo:"المناطق للتدريب: لا تُحتسب في لوحة الترتيب ولا في الإنجازات.", practiceNote:"تدريب: هذه النتيجة لا تُضاف إلى لوحة الترتيب.", notHere:"غير متاح في هذه اللعبة",
     help:`<p>نتيجتك هي عدد <b>الإجابات الصحيحة</b>. كل إجابة صحيحة تساوي <b>+1</b>، وكل خطأ يكلّفك روحًا من <b>أرواحك الثلاث</b>. تنتهي اللعبة عندما تنفد أرواحك أو عندما تضغط <b>توقف</b>.</p>
     <p><b>الاستكشاف (البوصلة):</b> بدون نقاط ولا أرواح. المس أي دولة لترى علمها وعاصمتها وأكبر مدنها. مراجعة مفيدة قبل اللعب.</p>
     <p><b>الأعلام · سهل:</b> اختر الدولة من بين 4 أسماء. الخيارات الخاطئة دول مجاورة، لذا قد تتشابه الأعلام.</p>
@@ -1166,7 +1191,7 @@ const T = {
     lbDown:"Таблица лидеров сейчас недоступна. Ваш результат сохранён на этом устройстве.", lbDown2:"Таблица лидеров сейчас недоступна.", offline:"Офлайн", poweredBy:"При поддержке", offBoard:"Вы офлайн. Ваш рекорд сохранён на этом устройстве и попадёт в таблицу лидеров, когда появится связь.", offUser:"Вы офлайн. Играйте как гость, а имя пользователя добавьте, когда появится связь.",
     youTag:" (вы)", joinName:"Добавьте имя, чтобы попасть в таблицу лидеров.", joinUser:"Добавьте имя пользователя, чтобы сохранить результат в таблице лидеров.", joinOne:"Дайте хотя бы 1 верный ответ, чтобы попасть в таблицу.", noScores:"Пока нет результатов. Будьте первым!",
     rank:(nb, r, n) => `${nb ? "Новый рекорд! " : ""}Вы <b>#${r}</b> из ${n} ${ruPl(n, "игрока", "игроков", "игроков")}.`,
-    gotIt:"Понятно", a_bull:"В яблочко", a_light:"Молния", a_explore:"Исследователь", a_allround:"Универсал", a_pro:"Профи", a_untouch:"Неуязвимый", a_daily:"Каждый день", a_polyglot:"Полиглот", d_world:"Весь список без проигрыша", d_fire:"25 подряд · 50 — золото", d_champ:"№1 в любой таблице", d_bull:"Метка ближе 10 км", d_light:"10 подряд, каждый быстрее 3 с", d_explore:"Откройте 100 стран в обзоре", d_allround:"10+ в каждой игре", d_pro:"50 в игре «Профи»", d_untouch:"50 верных без потери жизни", d_daily:"Играйте 7 дней подряд", d_polyglot:"Играйте на всех 4 языках", chooseAv:"Выберите аватар", avSub:"Знаменитые путешественники или что-то забавное.", avTravellers:"Знаменитые путешественники", avAnimals:"Животные", avColour:"Цвет", avEdit:"Сменить аватар", tv_ibnbattuta:"Ибн Баттута", tv_marcopolo:"Марко Поло", tv_columbus:"Колумб", tv_zhenghe:"Чжэн Хэ", tv_earhart:"Амелия Эрхарт", tv_tereshkova:"Валентина Терешкова", tv_nellybly:"Нелли Блай", tv_captain:"Капитан", profile:"Профиль", stBest:"лучший результат", stStreak:"лучшая серия", stTours:"кругосветки", achievements:"Достижения", a_world:"Кругосветка", a_fire:"В ударе", a_champ:"Чемпион", earned:"Получено", progressOf:(x, n) => `рекорд ${x} / ${n}`, fireGold:"50 подряд — золото", champOn:b => `№1: ${b}`, champDesc:"Станьте №1 в любой таблице", bestOn:b => `Лучшая игра: ${b}`, unlocked:"Новое достижение", inARow:n => `${n} верных подряд`, guestAch:"Добавьте имя пользователя, чтобы достижения сохранялись на всех устройствах.", tapProfile:"Открыть профиль", wtRound:r => `Круг ${r} ✓`, wt_flags:"Вы увидели все флаги мира!", wt_countries:"Вы нашли все страны на карте!", wt_capitals:"Вы назвали все столицы!", wt_cities:"Вы нашли все города игры!", wtText:(n, u, r) => `Все <b>${n}</b> ${u}, и жизни не закончились. Вопросы перемешаны: начинается круг ${r}.`, wtUnit_flags:n => ruPl(n, "флаг", "флага", "флагов"), wtUnit_countries:n => ruPl(n, "страна", "страны", "стран"), wtUnit_capitals:n => ruPl(n, "столица", "столицы", "столиц"), wtUnit_cities:n => ruPl(n, "город", "города", "городов"), wtLives:"осталось", wtTime:"в игре", keepGoing:"Продолжить", wtBadge:n => `Кругосветка ×${n}`, wtTag:"Кругосветка", settings:"Настройки", guest:"Гость", onBoard:"В рейтинге", notRanked:"Без рейтинга", changeShort:"Изменить", addUserShort:"Добавить имя", addNameShort:"Добавить имя", langLbl:"Язык", themeLbl:"Тема", afterQ:"после этого вопроса", timerRuns:"Таймер продолжает идти", lightLbl:"Светлая", darkLbl:"Тёмная", seeBoard:"Таблица лидеров", lbClose:"Закрыть",
+    gotIt:"Понятно", a_bull:"В яблочко", a_light:"Молния", a_explore:"Исследователь", a_allround:"Универсал", a_pro:"Профи", a_untouch:"Неуязвимый", a_daily:"Каждый день", a_polyglot:"Полиглот", d_world:"Весь список без проигрыша", d_fire:"25 подряд · 50 — золото", d_champ:"№1 в любой таблице", d_bull:"Метка ближе 10 км", d_light:"10 подряд, каждый быстрее 3 с", d_explore:"Откройте 100 стран в обзоре", d_allround:"10+ в каждой игре", d_pro:"50 в игре «Профи»", d_untouch:"50 верных без потери жизни", d_daily:"Играйте 7 дней подряд", d_polyglot:"Играйте на всех 4 языках", chooseAv:"Выберите аватар", avSub:"Знаменитые путешественники или что-то забавное.", avTravellers:"Знаменитые путешественники", avAnimals:"Животные", avColour:"Цвет", avEdit:"Сменить аватар", tv_ibnbattuta:"Ибн Баттута", tv_marcopolo:"Марко Поло", tv_columbus:"Колумб", tv_zhenghe:"Чжэн Хэ", tv_earhart:"Амелия Эрхарт", tv_tereshkova:"Валентина Терешкова", tv_nellybly:"Нелли Блай", tv_captain:"Капитан", profile:"Профиль", stBest:"лучший результат", stStreak:"лучшая серия", stTours:"кругосветки", achievements:"Достижения", a_world:"Кругосветка", a_fire:"В ударе", a_champ:"Чемпион", earned:"Получено", progressOf:(x, n) => `рекорд ${x} / ${n}`, fireGold:"50 подряд — золото", champOn:b => `№1: ${b}`, champDesc:"Станьте №1 в любой таблице", bestOn:b => `Лучшая игра: ${b}`, unlocked:"Новое достижение", inARow:n => `${n} верных подряд`, guestAch:"Добавьте имя пользователя, чтобы достижения сохранялись на всех устройствах.", tapProfile:"Открыть профиль", wtRound:r => `Круг ${r} ✓`, wt_flags:"Вы увидели все флаги мира!", wt_countries:"Вы нашли все страны на карте!", wt_capitals:"Вы назвали все столицы!", wt_cities:"Вы нашли все города игры!", wtText:(n, u, r) => `Все <b>${n}</b> ${u}, и жизни не закончились. Вопросы перемешаны: начинается круг ${r}.`, wtUnit_flags:n => ruPl(n, "флаг", "флага", "флагов"), wtUnit_countries:n => ruPl(n, "страна", "страны", "стран"), wtUnit_capitals:n => ruPl(n, "столица", "столицы", "столиц"), wtUnit_cities:n => ruPl(n, "город", "города", "городов"), wtLives:"осталось", wtTime:"в игре", keepGoing:"Продолжить", wtBadge:n => `Кругосветка ×${n}`, wtTag:"Кругосветка", settings:"Настройки", guest:"Гость", onBoard:"В рейтинге", notRanked:"Без рейтинга", changeShort:"Изменить", addUserShort:"Добавить имя", addNameShort:"Добавить имя", langLbl:"Язык", themeLbl:"Тема", afterQ:"после этого вопроса", timerRuns:"Таймер продолжает идти", lightLbl:"Светлая", darkLbl:"Тёмная", seeBoard:"Таблица лидеров", lbClose:"Закрыть", soundLbl:"Звук", vibLbl:"Вибрация", onLbl:"Вкл", offLbl:"Выкл", regionLbl:"Регион", regTitle:"Где будем играть?", rg_world:"Весь мир", rg_af:"Африка", rg_eu:"Европа", rg_as:"Азия", rg_am:"Америка", rg_oc:"Океания", practiceInfo:"Регионы — для тренировки: они не идут в рейтинг и достижения.", practiceNote:"Тренировка: этот результат не идёт в рейтинг.", notHere:"Нет в этой игре",
     help:`<p>Ваши очки — это число <b>верных ответов</b>. Каждый верный ответ даёт <b>+1</b>. Каждая ошибка стоит одну из <b>3 жизней</b>. Игра заканчивается, когда жизни закончились или вы нажали <b>Стоп</b>.</p>
     <p><b>Обзор (компас):</b> без очков и без жизней. Нажмите на любую страну, чтобы увидеть её флаг, столицу и крупные города. Хорошая подготовка перед игрой.</p>
     <p><b>Флаги · Легко:</b> выберите страну из 4 названий. Неверные варианты — соседние страны, поэтому флаги бывают похожи.</p>
@@ -1195,10 +1220,105 @@ const countryName = n => { const k = TOPO_NAME[n] || n; return LANG === "en" ? p
 
 function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 const kmBetween = (a,b) => d3.geoDistance(a,b) * 6371;
+
+/* ---------- regions: play one continent at a time (practice: no leaderboard, no achievements) ---------- */
+const REGIONS = ["world", "af", "eu", "as", "am", "oc"];
+const REGION_ICON = { world: "🌐", af: "🌍", eu: "🌍", as: "🌏", am: "🌎", oc: "🌏" };
+const REGION_OF = (() => { const o = {}, add = (r, list) => list.split("|").forEach(n => o[n] = r);
+  add("af", "Algeria|Angola|Benin|Botswana|Burkina Faso|Burundi|Cameroon|Central African Rep.|Chad|Congo|Côte d'Ivoire|Dem. Rep. Congo|Djibouti|Egypt|Eq. Guinea|Eritrea|Ethiopia|Gabon|Gambia|Ghana|Guinea|Guinea-Bissau|Kenya|Lesotho|Liberia|Libya|Madagascar|Malawi|Mali|Mauritania|Morocco|Mozambique|Namibia|Niger|Nigeria|Rwanda|S. Sudan|Senegal|Sierra Leone|Somalia|Somaliland|South Africa|Sudan|Tanzania|Togo|Tunisia|Uganda|W. Sahara|Zambia|Zimbabwe|eSwatini");
+  add("eu", "Albania|Austria|Belarus|Belgium|Bosnia and Herz.|Bulgaria|Croatia|Cyprus|N. Cyprus|Czechia|Denmark|Estonia|Finland|France|Germany|Greece|Hungary|Iceland|Ireland|Italy|Kosovo|Latvia|Lithuania|Luxembourg|Macedonia|Moldova|Montenegro|Netherlands|Norway|Poland|Portugal|Romania|Russia|Serbia|Slovakia|Slovenia|Spain|Sweden|Switzerland|Ukraine|United Kingdom");
+  add("as", "Afghanistan|Armenia|Azerbaijan|Bangladesh|Bhutan|Brunei|Cambodia|China|Georgia|India|Indonesia|Iran|Iraq|Israel|Japan|Jordan|Kazakhstan|Kuwait|Kyrgyzstan|Laos|Lebanon|Malaysia|Mongolia|Myanmar|Nepal|North Korea|Oman|Pakistan|Palestine|Philippines|Qatar|Saudi Arabia|South Korea|Sri Lanka|Syria|Taiwan|Tajikistan|Thailand|Timor-Leste|Turkey|Turkmenistan|United Arab Emirates|Uzbekistan|Vietnam|Yemen");
+  add("am", "Argentina|Bahamas|Belize|Bolivia|Brazil|Canada|Chile|Colombia|Costa Rica|Cuba|Dominican Rep.|Ecuador|El Salvador|Falkland Is.|Greenland|Guatemala|Guyana|Haiti|Honduras|Jamaica|Mexico|Nicaragua|Panama|Paraguay|Peru|Puerto Rico|Suriname|Trinidad and Tobago|United States of America|Uruguay|Venezuela");
+  add("oc", "Australia|Fiji|New Caledonia|New Zealand|Papua New Guinea|Solomon Is.|Vanuatu");
+  return o; })();
+/* what each region's map view frames: [west, south, east, north] */
+const REGION_BOX = { af: [-19, -36, 53, 38], eu: [-25, 34, 42, 71], as: [26, -11, 146, 56], am: [-170, -56, -34, 74], oc: [112, -48, 180, -1] };
+const REGION_KEY = "globedrop-region";
+let region = (() => { try { const r = localStorage.getItem(REGION_KEY); return REGIONS.includes(r) ? r : "world"; } catch(e){ return "world"; } })();
+/* a region too small for the current game (e.g. Oceania has only 3 countries big enough to tap) plays the whole world */
+const regionSize = (r) => r === "world" ? Infinity : basePool().filter(x => inRegion(x, r)).length;
+let effCache = "";
+const curRegion = () => {
+  if (region === "world" || mode === "explore") return "world";
+  const k = mode + level + region; if (effCache.startsWith(k + ":")) return effCache.slice(k.length + 1);
+  const r = regionSize(region) >= 4 ? region : "world"; effCache = k + ":" + r; return r;
+};
+const practice = () => curRegion() !== "world";
+/* places not on the map (small islands, city-states) fall back to where they are */
+function geoRegion(lon, lat){
+  if (lon < -25) return "am";
+  if ((lat < 0 && lon > 112) || lon > 150) return "oc";
+  if (lat > 35 && lon < 45) return "eu";
+  if (lat <= 37 && lon >= -25 && lon < 52 && !(lat > 12 && lon > 34)) return "af";
+  return "as";
+}
+const regionOfItem = x => Array.isArray(x) ? (REGION_OF[TOPO_NAME[x[1]] || x[1]] || geoRegion(x[3], x[2])) : REGION_OF[x.properties.name];
+const inRegion = (x, r = curRegion()) => r === "world" || regionOfItem(x) === r;
+/* a list cut down to the region (never fewer than 4, so there are always enough answers to choose from) */
+const regionPool = (p, r = curRegion()) => { if (r === "world") return p; const q = p.filter(x => inRegion(x, r)); return q.length >= 4 ? q : p; };
+function boxSamples(r){
+  const [w, s, e, n] = REGION_BOX[r], pts = [];
+  for (let i = 0; i <= 12; i++){ const x = w + (e - w) * i / 12, y = s + (n - s) * i / 12; pts.push([x, s], [x, n], [w, y], [e, y]); }
+  return pts;
+}
+function regionBounds(){
+  const xy = boxSamples(curRegion()).map(p => projection(p)).filter(Boolean);
+  return [[d3.min(xy, q => q[0]), d3.min(xy, q => q[1])], [d3.max(xy, q => q[0]), d3.max(xy, q => q[1])]];
+}
+/* the map's resting view: the whole world, or the chosen region */
+function goHome(ms = 0){
+  if (practice()) return focusBounds(regionBounds(), 8, 0.96, ms);
+  if (ms) svg.transition().duration(ms).call(zoom.transform, d3.zoomIdentity); else svg.interrupt().call(zoom.transform, d3.zoomIdentity);
+}
+function paintRegionBtn(){
+  const b = $("regbtn"); if (!b) return;
+  const r = curRegion();
+  b.classList.toggle("on", r !== "world");
+  b.innerHTML = `<span class="ri" aria-hidden="true">${REGION_ICON[r]}</span><span class="rn">${esc(t("rg_" + r))}</span><span class="rc" aria-hidden="true">▾</span>`;
+  b.setAttribute("aria-label", t("regionLbl") + ": " + t("rg_" + r));
+}
+const regionSil = {};
+function regionShape(r){
+  if (regionSil[r]) return regionSil[r];
+  const W = 150, H = 54;
+  const fs = countries.filter(f => r === "world" || REGION_OF[f.properties.name] === r).map(mainShape).filter(f => d3.geoArea(f) > 2e-5);
+  const pr = d3.geoNaturalEarth1();
+  if (r === "world") pr.fitSize([W, H], {type: "Sphere"}); else pr.fitSize([W, H], {type: "MultiPoint", coordinates: boxSamples(r)});
+  pr.clipExtent([[0, 0], [W, H]]);
+  const g = d3.geoPath(pr);
+  return regionSil[r] = `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><path d="${fs.map(f => g(f) || "").join("")}"/></svg>`;
+}
+function openRegions(){
+  if (mode === "explore") return;
+  closeSettings?.();
+  const live = questionLive(), base = basePool(), cur = curRegion();
+  const unit = n => t("wtUnit_" + mode, n);
+  const el = $("regpick");
+  el.innerHTML = `<div class="pf rg" role="dialog" aria-labelledby="rg-t">
+    <h3 id="rg-t">${t("regTitle")}</h3>
+    <p class="sub">${esc(boardLabel(boardKey()))}</p>
+    <div class="grid">${REGIONS.map(r => { const n = r === "world" ? base.length : base.filter(x => inRegion(x, r)).length, ok = n >= 4;
+      return `<button class="tl" data-r="${r}" aria-pressed="${r === cur}"${ok ? "" : " disabled"}>${regionShape(r)}${esc(t("rg_" + r))}<small>${ok ? n + " " + esc(unit(n)) : esc(t("notHere"))}</small></button>`; }).join("")}</div>
+    <div class="note">${t("practiceInfo")}</div>
+    ${live ? `<span class="tick">⏱ ${t("timerRuns")}</span>` : ""}
+  </div>`;
+  el.hidden = false;
+  el.querySelectorAll("[data-r]:not([disabled])").forEach(b => onTap(b, () => setRegion(b.dataset.r)));
+}
+function closeRegions(){ $("regpick").hidden = true; }
+function setRegion(r){
+  closeRegions();
+  if (r === curRegion() && $("results").hidden) return;
+  region = r; effCache = "";
+  try { localStorage.setItem(REGION_KEY, r); } catch(e){}
+  paintRegionBtn();
+  newGame();
+}
 const pointsFor = km => Math.round(1000 * Math.exp(-km / 1800)) ;
 
 let laps = 0, lapShownAt = -1, gameStart = Date.now(), gameStreak = 0; // world tours: whole list played through in this game
 function newGame(){
+  paintRegionBtn();
   queue = shuffle(pool());
   round = 0; results = []; lives = LIVES; lostAt = -1; streak = 0; gainAt = -1;
   laps = 0; lapShownAt = -1; gameStart = Date.now(); gameStreak = 0; fastRun = 0; untouchedRun = 0; lostAny = false;
@@ -1211,11 +1331,12 @@ const CAPITALS_PRO_POOL = CAPITALS_POOL.filter(c => OTHER_CITIES[c[1]]?.length =
 /* Easy can use every flag, even tiny countries. Pro needs a country big enough to tap. */
 const FLAG_POOL = countries.filter(f => FLAGS[f.properties.name] && !/^(Falkland Is\.|Fr\. S\. Antarctic Lands)$/.test(f.properties.name));
 const FLAG_PRO_POOL = COUNTRY_POOL.filter(f => FLAGS[f.properties.name]);
-const pool = () => mode === "cities" ? CITIES : mode === "capitals" ? (level === "pro" ? CAPITALS_PRO_POOL : CAPITALS_POOL) : mode === "flags" ? (level === "pro" ? FLAG_PRO_POOL : FLAG_POOL) : COUNTRY_POOL;
+const pool = () => regionPool(basePool());
+const basePool = () => mode === "cities" ? CITIES : mode === "capitals" ? (level === "pro" ? CAPITALS_PRO_POOL : CAPITALS_POOL) : mode === "flags" ? (level === "pro" ? FLAG_PRO_POOL : FLAG_POOL) : COUNTRY_POOL;
 /* Flags · Easy: the 3 wrong answers are neighbours, which often have look-alike flags. Choices are map names; shown translated. */
 function flagChoices(f){
   const c = d3.geoCentroid(f);
-  const near = FLAG_POOL.filter(x => x !== f).sort((a, b) => d3.geoDistance(d3.geoCentroid(a), c) - d3.geoDistance(d3.geoCentroid(b), c)).slice(0, 3);
+  const near = regionPool(FLAG_POOL).filter(x => x !== f).sort((a, b) => d3.geoDistance(d3.geoCentroid(a), c) - d3.geoDistance(d3.geoCentroid(b), c)).slice(0, 3);
   return shuffle([f, ...near]).map(x => x.properties.name);
 }
 const isChoiceRound = () => mode === "capitals" || (mode === "flags" && level === "easy");
@@ -1226,7 +1347,7 @@ const choiceLabel = k => mode === "capitals" ? placeName(k) : countryName(k);
 function capitalChoices(c){
   if (level === "pro") return shuffle([c[0], ...OTHER_CITIES[c[1]]]);
   const ll = [c[3], c[2]];
-  const near = CAPITALS_POOL.filter(x => x !== c).sort((a, b) => kmBetween([a[3],a[2]], ll) - kmBetween([b[3],b[2]], ll)).slice(0, 3);
+  const near = regionPool(CAPITALS_POOL).filter(x => x !== c).sort((a, b) => kmBetween([a[3],a[2]], ll) - kmBetween([b[3],b[2]], ll)).slice(0, 3);
   return shuffle([c, ...near]).map(x => x[0]);
 }
 
@@ -1251,7 +1372,7 @@ function cityArea(city){
 }
 function startRound(){
   // the last place of the list has just been played: celebrate the world tour first, then carry on
-  if (round > 0 && round >= queue.length && lapShownAt !== round && mode !== "explore"){
+  if (round > 0 && round >= queue.length && lapShownAt !== round && mode !== "explore" && !practice()){
     lapShownAt = round; laps++; keepTours(); showWorldTour(); return;
   }
   if (round >= queue.length){ // seen them all: reshuffle and keep going, never repeating the last place
@@ -1273,7 +1394,7 @@ function startRound(){
   startTimer();
   // frame after the card is drawn, so the country sits in the space that is actually free
   if (lit) focusBounds(safeBounds(area.shape), 30, 0.8);
-  else svg.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
+  else goHome(400);
 }
 function fitPlace(){ const el = $("p-place"); el.classList.toggle("long", !el.querySelector("img") && el.textContent.length > 15); }
 function renderPrompt(){
@@ -1315,13 +1436,14 @@ function paintTimer(){
   el.style.setProperty("--f", tOn ? Math.max(0, Math.min(1, tLeft / ROUND_MS)) : 0);
   el.classList.toggle("on", tOn); el.classList.toggle("low", tOn && tLeft <= 3000);
 }
-function startTimer(){ tLeft = ROUND_MS + TIMER_GRACE; tLast = performance.now(); tOn = mode !== "explore"; paintTimer(); }
+let lastTick = 0;
+function startTimer(){ lastTick = 4; tLeft = ROUND_MS + TIMER_GRACE; tLast = performance.now(); tOn = mode !== "explore"; paintTimer(); }
 function stopTimer(){ tOn = false; paintTimer(); }
 setInterval(() => {
   const now = performance.now(), dt = now - tLast; tLast = now;
   if (!tOn || revealed || timerBlocked()) return;
   tLeft -= dt;
-  if (tLeft <= 0){ stopTimer(); timeUp(); } else paintTimer();
+  if (tLeft <= 0){ stopTimer(); timeUp(); } else { paintTimer(); const sec = Math.ceil(tLeft / 1000); if (sec <= 3 && sec < lastTick){ lastTick = sec; sfx("tick"); } }
 }, 100);
 /* Time ran out: counts as a miss and shows the answer (in Cities, a pin already placed is locked in instead). */
 function timeUp(){
@@ -1346,18 +1468,51 @@ function timeUp(){
   revealed = true; paintCountries(); redrawMarks(); renderTop(); renderCard();
   if (mode === "capitals") focusBounds(safeBounds(area.shape), 30, 0.8); else focusFeatures(current);
 }
+/* ---------- sound and vibration ----------
+   Short tones made on the fly (no sound files). Vibration exists only on Android; iPhones don't let websites vibrate. */
+const SND_KEY = "globedrop-sound", VIB_KEY = "globedrop-vibrate";
+const readOn = (k) => { try { return localStorage.getItem(k) !== "0"; } catch(e){ return true; } };
+let soundOn = readOn(SND_KEY), vibOn = readOn(VIB_KEY), actx = null;
+const canVibrate = typeof navigator.vibrate === "function";
+function audio(){
+  if (!soundOn) return null;
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch(e){ return null; }
+  return actx;
+}
+// phones only allow sound after the player has touched the page once
+for (const ev of ["touchend", "click", "keydown"]) document.addEventListener(ev, () => { if (soundOn && !actx) audio(); }, { capture: true, passive: true });
+function tone(f, at, dur, type = "sine", vol = .16, f2 = 0){
+  const c = audio(); if (!c) return;
+  const t0 = c.currentTime + at + .01, o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t0); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+  g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + .015); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0 + dur + .03);
+}
+const SFX = {
+  right(){ tone(880, 0, .14); tone(1318.5, .08, .3); },
+  wrong(){ tone(196, 0, .3, "square", .045, 130); tone(98, 0, .32, "sine", .14, 80); },
+  tick(){ tone(1500, 0, .045, "triangle", .07); },
+  life(){ [784, 988, 1175].forEach((f, i) => tone(f, .2 + i * .07, .2, "sine", .12)); },
+  fanfare(){ [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * .11, i === 3 ? .55 : .2, "triangle", .13)); },
+  badge(){ [1046.5, 1318.5, 1568].forEach((f, i) => tone(f, i * .08, .32, "sine", .11)); }
+};
+function sfx(name, buzz){
+  try { SFX[name](); } catch(e){}
+  if (buzz && vibOn && canVibrate) try { navigator.vibrate(buzz); } catch(e){}
+}
 /* Lives and streaks: a miss costs a life and resets the streak; every 10 right in a row gives back a lost life. */
 const STREAK_FOR_LIFE = 10;
 let streak = 0, gainAt = -1, toastTimer = 0;
 function afterAnswer(miss){
   const took = ROUND_MS - tLeft; // ms from the clock starting to the answer
-  if (miss){ lives--; lostAt = lives; streak = 0; fastRun = 0; lostAny = true; return; }
-  fastRun = took < 3000 ? fastRun + 1 : 0; if (fastRun) bumpProg("light", fastRun);
-  if (!lostAny){ untouchedRun++; bumpProg("untouch", untouchedRun); }
+  if (miss){ sfx("wrong", [70, 50, 70]); lives--; lostAt = lives; streak = 0; fastRun = 0; lostAny = true; return; }
+  sfx("right", 15);
+  fastRun = took < 3000 ? fastRun + 1 : 0; if (fastRun && !practice()) bumpProg("light", fastRun);
+  if (!lostAny){ untouchedRun++; if (!practice()) bumpProg("untouch", untouchedRun); }
   streak++;
-  if (streak > gameStreak){ gameStreak = streak; noteStreak(streak); }
+  if (streak > gameStreak){ gameStreak = streak; if (!practice()) noteStreak(streak); }
   if (streak % STREAK_FOR_LIFE === 0 && lives < LIVES){
-    gainAt = lives; lives++;
+    gainAt = lives; lives++; sfx("life", [20, 40, 20]);
     showToast(t("streakUp", streak), t("lifeBack"));
   }
 }
@@ -1492,7 +1647,7 @@ function reveal(){
   answerLL = [current[3], current[2]];
   const km = kmBetween(guess, answerLL);
   const miss = km > missKm;
-  if (km <= 10) bumpProg("bull", 1);
+  if (km <= 10 && !practice()) bumpProg("bull", 1);
   results.push({kind:"place", key: current[0], km, miss, dist: true});
   afterAnswer(miss);
   revealed = true; redrawMarks(); renderTop(); renderCard();
@@ -1897,6 +2052,9 @@ const PERSON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
 const questionLive = () => mode !== "explore" && !!current && !revealed && tOn;
 function paintGearDot(){ $("gdot")?.classList.toggle("on", !!playerName); }
 function settingsOpen(){ return !$("smenu").hidden; }
+const SPK = '<path d="M4 9.5h3.6L12.5 5.6v12.8L7.6 14.5H4z" fill="currentColor"/>';
+const SPK_ON = `<svg viewBox="0 0 24 24" aria-hidden="true">${SPK}<path d="M15.6 9a4.2 4.2 0 0 1 0 6M18.2 6.6a8 8 0 0 1 0 10.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`;
+const SPK_OFF = `<svg viewBox="0 0 24 24" aria-hidden="true">${SPK}<path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`;
 function renderSettings(){
   const m = $("smenu"), live = questionLive(), dark = currentTheme() === "dark";
   const isUser = !!playerName;
@@ -1913,6 +2071,12 @@ function renderSettings(){
       <div class="tile"><span class="tl">${t("themeLbl")}</span><div class="seg" role="group" aria-label="${esc(t("themeLbl"))}">
         <button data-th="light" aria-pressed="${!dark}" aria-label="${esc(t("lightLbl"))}">${SUN}</button><button data-th="dark" aria-pressed="${dark}" aria-label="${esc(t("darkLbl"))}">${MOON}</button></div></div>
     </div>
+    <div class="rowq${canVibrate ? "" : " one"}">
+      <div class="tile"><span class="tl">${t("soundLbl")}</span><div class="seg" role="group" aria-label="${esc(t("soundLbl"))}">
+        <button data-snd="1" aria-pressed="${soundOn}" aria-label="${esc(t("onLbl"))}">${SPK_ON}</button><button data-snd="0" aria-pressed="${!soundOn}" aria-label="${esc(t("offLbl"))}">${SPK_OFF}</button></div></div>
+      ${canVibrate ? `<div class="tile"><span class="tl">${t("vibLbl")}</span><div class="seg" role="group" aria-label="${esc(t("vibLbl"))}">
+        <button data-vib="1" aria-pressed="${vibOn}">${t("onLbl")}</button><button data-vib="0" aria-pressed="${!vibOn}">${t("offLbl")}</button></div></div>` : ""}
+    </div>
     <div class="list">
       <button class="item" id="sm-lb"${live ? " disabled" : ""}><span class="ic gold" aria-hidden="true">🏆</span>${t("leaderboard")}${live ? `<span class="lockhint">${t("afterQ")}</span>` : `<span class="chev" aria-hidden="true">›</span>`}</button>
       <button class="item" id="sm-how"><span class="ic blue" aria-hidden="true">?</span>${t("howToPlay")}<span class="chev" aria-hidden="true">›</span></button>
@@ -1923,6 +2087,14 @@ function renderSettings(){
     document.documentElement.dataset.theme = b.dataset.th;
     try { localStorage.setItem("globedrop-theme", b.dataset.th); } catch(e){}
     paintThemeBtn(); renderSettings();
+  }));
+  m.querySelectorAll("[data-snd]").forEach(b => onTap(b, () => {
+    soundOn = b.dataset.snd === "1"; try { localStorage.setItem(SND_KEY, soundOn ? "1" : "0"); } catch(e){}
+    if (soundOn) sfx("right"); renderSettings();
+  }));
+  m.querySelectorAll("[data-vib]").forEach(b => onTap(b, () => {
+    vibOn = b.dataset.vib === "1"; try { localStorage.setItem(VIB_KEY, vibOn ? "1" : "0"); } catch(e){}
+    if (vibOn) sfx("none", 40); renderSettings();
   }));
   onTap($("sm-user"), () => { closeSettings(); askName(false); });
   m.querySelectorAll(".prof .avbig, .prof .who").forEach(x => onTap(x, () => { closeSettings(); openProfile(); }));
@@ -2006,7 +2178,7 @@ function showWorldTour(){
   const items = pool(), n = items.length;
   const cName = x => Array.isArray(x) ? x[1] : x.properties.name;
   const strip = shuffle(items.map(cName).filter((v, i, a) => FLAGS[v] && a.indexOf(v) === i)).slice(0, 12);
-  stopTimer(); closeSettings?.();
+  stopTimer(); closeSettings?.(); sfx("fanfare", [30, 60, 30, 60, 80]);
   const w = $("wtour");
   w.innerHTML = `<div class="wt" role="dialog" aria-labelledby="wt-h">
     <span class="lap">${t("wtRound", laps)}</span>
@@ -2087,6 +2259,7 @@ const badgeTags = (b = {}) => { // leaderboard rows show only the top badge, Wor
 };
 let achTimer = 0;
 function achPop(icon, name, sub, tier){
+  sfx("badge", [20, 40, 20]);
   const el = $("achtoast");
   el.style.setProperty("--achTop", ($("top").getBoundingClientRect().bottom + 12) + "px");
   el.innerHTML = `<span class="ic ${tier || ""}" aria-hidden="true">${icon}</span><span><small>${t("unlocked")}</small><b>${esc(name)}</b><span class="sub">${esc(sub)}</span></span>`;
@@ -2165,7 +2338,7 @@ const tourTag = n => n > 0 ? `<span class="wtag" title="${esc(t("wtTag"))}${n > 
 
 const MEDAL_AT = 3; // right answers needed for the end-of-game medal
 /* A short confetti burst from the medal, drawn on a canvas over the results; skipped when the viewer prefers less motion. */
-function celebrate(){ confettiFrom($("results"), $("results").querySelector(".medal .m")); }
+function celebrate(){ sfx("fanfare", [30, 60, 30, 60, 80]); confettiFrom($("results"), $("results").querySelector(".medal .m")); }
 function confettiFrom(host, m){
   if (matchMedia("(prefers-reduced-motion: reduce)").matches || !host || !m) return;
   host.querySelector(".confetti")?.remove();
@@ -2233,14 +2406,15 @@ function showResults(outOfLives){
   const total = results.filter(r => !r.miss).length;
   const key = "globedrop-right-best-" + mode + (mode !== "countries" ? "-" + level : "");
   let best = 0; const bpBefore = bestsProg();
-  try { best = +localStorage.getItem(key) || 0; if (total > best) localStorage.setItem(key, total); } catch(e){}
+  try { best = +localStorage.getItem(key) || 0; if (total > best && !practice()) localStorage.setItem(key, total); } catch(e){}
+  if (practice()) best = Infinity; // practice never counts as a new best
   if (results.length) { noteGamePlayed(); noteBests(bpBefore); }
   lastOutcome = { outOfLives, total, best, newBest: total > best, laps };
   a2hsShown = shouldOfferA2hs();
   boardCache = null;
   clearTimeout(toastTimer); $("toast").classList.remove("show");
   renderResults();
-  refreshBoard(total);
+  if (!practice()) refreshBoard(total);
   if (total >= MEDAL_AT) celebrate();
   $("again").focus({preventScroll:true});
 }
@@ -2256,7 +2430,7 @@ function renderResults(){
   const { outOfLives, total } = lastOutcome;
   const played = results.length, missed = played - total;
   $("results").innerHTML = `<div class="sheet rsheet" role="dialog" aria-label="${esc(t("seeResults"))}">
-    <span class="rchip">${esc(boardTitle())}</span>
+    <span class="rchip">${esc(boardTitle())}${practice() ? " · " + REGION_ICON[region] + " " + esc(t("rg_" + region)) : ""}</span>
     <div class="rhero">
       ${total >= MEDAL_AT ? `<div class="medal" role="img" aria-label="${esc(t("medal"))}"><div class="m">🏅</div></div>` : ""}
       <div class="rnum">${total}</div>
@@ -2268,7 +2442,7 @@ function renderResults(){
       <button class="btn" id="again">${t("playAgain")}</button>
       ${total < STUDY_BELOW ? `<button class="btn2" id="study"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg>${t("studyBtn2")}</button>` : ""}
     </div>
-    <div class="board" id="board"></div>
+    ${practice() ? `<div class="board"><div class="note">${t("practiceNote")}</div></div>` : `<div class="board" id="board"></div>`}
     ${played ? `<details class="answers"><summary>${t("yourAnswers", played)}</summary>
       <ul class="list">${results.map(r=>`<li class="${r.miss ? "miss" : ""}"><span>${r.flag ? flagImg(r.flag, "miniflag") : ""}${esc(resultName(r))}</span><span class="d">${esc(resultDetail(r))}</span><span class="p ${r.miss ? "no" : "ok"}">${r.miss ? "✕" : "✓"}</span></li>`).join("")}</ul>
     </details>` : ""}
@@ -2387,6 +2561,10 @@ function setLevel(l){
 for (const k of ["explore", "flags", "countries", "capitals", "cities"]) $("m-" + k).onclick = () => setMode(k);
 $("l-easy").onclick = () => setLevel("easy");
 $("l-pro").onclick = () => setLevel("pro");
+onTap($("regbtn"), openRegions);
+$("regpick").addEventListener("click", e => { if (e.target.id === "regpick") closeRegions(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("regpick").hidden) closeRegions(); });
+paintRegionBtn();
 
 document.addEventListener("keydown", e => {
   if (!$("welcome").hidden) return;
@@ -2492,6 +2670,7 @@ function setLang(l){
   if (!$("help").hidden) showHelp();
   if (!$("welcome").hidden) askName(welcomeFirst);
   if (!$("tour").hidden) renderTourStep();
+  paintRegionBtn(); if (!$("regpick").hidden) openRegions();
 }
 function closeLangMenu(){ $("langmenu").hidden = true; $("langbtn").setAttribute("aria-expanded", "false"); }
 $("langbtn").onclick = e => {
