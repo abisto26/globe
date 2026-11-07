@@ -48,6 +48,7 @@ Pick a game at the top, answer, and see how far you can go.
   - **iPhone:** in Safari, tap Share, then *Add to Home Screen*.
   - **Android:** in Chrome, open the ⋮ menu, then *Add to Home screen*.
 - **Leaderboard** for each game and level.
+- **Achievements** on your profile (tap your name in ⚙︎): 🌍 World tour for playing a whole list, 🔥 On fire for 25 or 50 right in a row, 👑 Champion for reaching #1.
 
 ## Leaderboard and your data
 

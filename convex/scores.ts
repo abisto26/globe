@@ -18,6 +18,11 @@ const PID = /^[a-z0-9]{20,40}$/;
 const PIN = /^\d{4}$/;
 const MAX_BEST = 3000;         // sanity cap: with 15 s per question this is over 12 hours of play without a miss
 const MIN_GAP_MS = 1500;       // at most one save every 1.5 seconds per player
+// how many places each game's list has: a best score this high means the whole list was played (🌍 World tour)
+const LIST_SIZE: Record<string, number> = { flags_easy: 171, flags_pro: 134, countries: 134, capitals_easy: 164, capitals_pro: 164, cities_easy: 72, cities_pro: 72 };
+const toursOf = (r: { board: string; best: number; tours?: number }) => Math.max(r.tours ?? 0, Math.floor(r.best / (LIST_SIZE[r.board] ?? 1e9)));
+const FIRE = [25, 50]; // 🔥 On fire: silver at 25 in a row, gold at 50
+const fireOf = (streak?: number) => (streak ?? 0) >= FIRE[1] ? 2 : (streak ?? 0) >= FIRE[0] ? 1 : 0;
 const MAX_FAILS = 5;           // wrong PINs before a username is locked for a while
 const LOCK_MS = 10 * 60 * 1000;
 
@@ -74,14 +79,14 @@ export const claim = mutation({
 
 /** Save results (one finished game, or the bests a device kept while offline). Keeps the best per board. */
 export const submit = mutation({
-  args: { pid: v.string(), scores: v.array(v.object({ board: v.string(), best: v.number(), tours: v.optional(v.number()) })) },
-  handler: async (ctx, { pid, scores }) => {
+  args: { pid: v.string(), scores: v.array(v.object({ board: v.string(), best: v.number(), tours: v.optional(v.number()) })), streak: v.optional(v.number()) },
+  handler: async (ctx, { pid, scores, streak }) => {
     if (!PID.test(pid)) throw new Error("bad player id");
     if (scores.length > 10) throw new Error("too many");
     const user = await ctx.db.query("users").withIndex("by_pid", q => q.eq("pid", pid)).unique();
-    if (!user) return { newBest: [] as string[], noUser: true };
+    if (!user) return { newBest: [] as string[], newChampion: false, noUser: true };
     const now = Date.now();
-    if (now - user.lastSubmit < MIN_GAP_MS) return { newBest: [] as string[], throttled: true };
+    if (now - user.lastSubmit < MIN_GAP_MS) return { newBest: [] as string[], newChampion: false, throttled: true };
     await ctx.db.patch(user._id, { lastSubmit: now });
 
     const newBest: string[] = [];
@@ -97,7 +102,20 @@ export const submit = mutation({
       if (tours > (row.tours ?? 0)) patch.tours = tours;
       if (Object.keys(patch).length) await ctx.db.patch(row._id, patch);
     }
-    return { newBest };
+    // 🔥 best run of right answers (can't be more than a whole game's score)
+    const topScore = Math.max(0, ...scores.map(x => x.best));
+    if (streak !== undefined && Number.isInteger(streak) && streak > (user.streak ?? 0) && streak <= Math.max(topScore, MAX_BEST))
+      await ctx.db.patch(user._id, { streak });
+    // 👑 #1 on any board this player is on
+    let newChampion = false;
+    if (!user.champion) {
+      for (const { board } of scores) {
+        if (!BOARD.test(board)) continue;
+        const first = await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board)).order("desc").first();
+        if (first && first.pid === pid) { await ctx.db.patch(user._id, { champion: true }); newChampion = true; break; }
+      }
+    }
+    return { newBest, newChampion };
   },
 });
 
@@ -119,17 +137,51 @@ export const board = query({
     const top = await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board)).order("desc").take(50);
     top.sort((a, b) => b.best - a.best || a.at - b.at);
 
-    let me: { rank: number; best: number; name: string; tours: number } | null = null;
+    let me: { rank: number; best: number; name: string } | null = null;
     if (pid && PID.test(pid)) {
       const mine = await ctx.db.query("bests").withIndex("by_pid_board", q => q.eq("pid", pid).eq("board", board)).unique();
       if (mine) {
         // everyone with a higher score, plus those who reached the same score earlier
         const higher = await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board).gt("best", mine.best)).collect();
         const tied = await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board).eq("best", mine.best)).collect();
-        me = { rank: higher.length + tied.filter(r => r.at < mine.at).length + 1, best: mine.best, name: mine.name, tours: mine.tours ?? 0 };
+        me = { rank: higher.length + tied.filter(r => r.at < mine.at).length + 1, best: mine.best, name: mine.name };
       }
     }
     const count = (await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board)).collect()).length;
-    return { top: top.slice(0, 5).map(r => ({ name: r.name, best: r.best, tours: r.tours ?? 0, me: r.pid === pid })), me, count };
+    const shown = top.slice(0, 5);
+    // badges next to names: 🌍 world tours on this board, 🔥 best streak, 👑 champion
+    const userOf = async (p: string) => ctx.db.query("users").withIndex("by_pid", q => q.eq("pid", p)).unique();
+    const badges = async (r: { pid: string; board: string; best: number; tours?: number }, isFirst: boolean) => {
+      const u = await userOf(r.pid);
+      return { tours: toursOf(r), fire: fireOf(u?.streak), champ: !!u?.champion || isFirst };
+    };
+    const rows = [];
+    for (const [i, r] of shown.entries()) rows.push({ name: r.name, best: r.best, me: r.pid === pid, ...(await badges(r, i === 0)) });
+    let meOut = null;
+    if (me && pid) {
+      const mine = await ctx.db.query("bests").withIndex("by_pid_board", q => q.eq("pid", pid).eq("board", board)).unique();
+      meOut = { ...me, ...(mine ? await badges(mine, me.rank === 1) : { tours: 0, fire: 0, champ: false }) };
+    }
+    return { top: rows, me: meOut, count };
+  },
+});
+
+/** A player's profile: best score, best streak, world tours and achievements. */
+export const profile = query({
+  args: { pid: v.string() },
+  handler: async (ctx, { pid }) => {
+    if (!PID.test(pid)) return null;
+    const user = await ctx.db.query("users").withIndex("by_pid", q => q.eq("pid", pid)).unique();
+    if (!user) return null;
+    const rows = await ctx.db.query("bests").withIndex("by_pid_board", q => q.eq("pid", pid)).collect();
+    let best = 0, bestBoard = "", tours = 0, firstOn: string[] = [];
+    for (const r of rows) {
+      if (r.best > best) { best = r.best; bestBoard = r.board; }
+      tours += toursOf(r);
+      const first = await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", r.board)).order("desc").first();
+      if (first && first.pid === pid) firstOn.push(r.board);
+    }
+    return { name: user.name, best, bestBoard, tours, streak: user.streak ?? 0, fire: fireOf(user.streak),
+             champion: !!user.champion || firstOn.length > 0, firstOn };
   },
 });
