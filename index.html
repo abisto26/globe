@@ -95,6 +95,9 @@ body{background:var(--ocean);color:var(--ink);font-family:var(--display);overflo
 .controls .theme svg{width:13px;height:13px}
 .brand{justify-self:start;min-width:0;font-weight:800;font-size:1.1rem;letter-spacing:-.02em;display:flex;align-items:center;gap:6px}
 .brand svg{width:20px;height:20px;flex:none}
+.brand span{white-space:nowrap}
+.brand .bshort{display:none}
+.brand.tight .bshort,.brand.tight .bfull{display:none!important}
 /* loading splash: the logo, big and centred, pulsing softly until the game is ready, then fading out */
 .splash{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(120% 90% at 50% 40%,color-mix(in srgb,var(--ocean) 70%,#fff) 0%,var(--ocean) 70%);transition:opacity .45s ease,visibility .45s}
 .splash .spin{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px;text-align:center}
@@ -632,7 +635,8 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .scale .pts{text-align:right;font-weight:600;min-width:4ch}
 
 @media (max-width:480px){
-  .brand span{display:none}
+  .brand .bfull{display:none}
+  .brand .bshort{display:inline}
   .card .big{font-size:1.25rem}
   .meta{gap:10px}
   .modes button{padding:6px 7px;font-size:.78rem}
@@ -696,7 +700,7 @@ button:active:not(:disabled){transform:scale(.92);transition-duration:.06s}
   </div>
   <div class="topwrap"><header class="top glass" id="top">
     <div class="headrow">
-      <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="var(--pin)"/><circle cx="12" cy="9" r="2.6" fill="var(--panel)"/></svg><span data-i18n="appName">Globe by Abisto</span></div>
+      <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="var(--pin)"/><circle cx="12" cy="9" r="2.6" fill="var(--panel)"/></svg><span class="bfull" data-i18n="appName">Globe by Abisto</span><span class="bshort" data-i18n="appShort">Globe</span></div>
       <div class="modes" role="group" data-i18n-aria="gameMode" aria-label="Game mode">
         <button id="m-explore" class="m-explore" aria-pressed="false" data-i18n-aria="m_explore" aria-label="Explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor"/></svg></button>
         <button id="m-flags" aria-pressed="true" data-i18n="m_flags">Flags</button>
@@ -1072,7 +1076,7 @@ const T = {
     you:n => `you: ${n}`, spotOn:"spot on", kmOff:km => `${km} km off`,
     bestNew:n => `New personal best on this device: ${n}`, bestDevice:n => `Your best on this device: ${n}`,
     playAgain:"Play again", playingAs:n => `Playing as <b>${n}</b>`, changeName:"Change name", addName:"Add a player name",
-    appName:"Globe by Abisto", spTag:"Learn the world: flags, countries, capitals and cities.", spGo:"Play", spExplore:"Explore the map first", studyHint:"Want to study first?", studyBtn:"Explore the map", studyBtn2:"Study on the map first", yourAnswers:n => `Your answers (${n})`, spHi:n => `Welcome back, ${n}!`, spNameHint:"Optional. Shown on the leaderboard.", spNotYou:"Not you? Change name", welcomeTitle:"Welcome to Globe by Abisto", welcomeText:"Pick a player name. Your best score in each mode goes on the leaderboard, so you can see where you stand.",
+    appName:"Globe by Abisto", appShort:"Globe", spTag:"Learn the world: flags, countries, capitals and cities.", spGo:"Play", spExplore:"Explore the map first", studyHint:"Want to study first?", studyBtn:"Explore the map", studyBtn2:"Study on the map first", yourAnswers:n => `Your answers (${n})`, spHi:n => `Welcome back, ${n}!`, spNameHint:"Optional. Shown on the leaderboard.", spNotYou:"Not you? Change name", welcomeTitle:"Welcome to Globe by Abisto", welcomeText:"Pick a player name. Your best score in each mode goes on the leaderboard, so you can see where you stand.",
     renameTitle:"Change your name", renameText:"This is the name other players see on the leaderboard.",
     playerName:"Player name", placeholder:"e.g. MapMaster", startPlaying:"Start playing", saveName:"Save name", playNoName:"Play without a name", cancel:"Cancel",
     nameErr:"Use 2 to 16 letters or numbers.", player:"Player", userLabel:"Username", userPh:"e.g. MapMaster", pinLabel:"PIN", userErr:"Use 3 to 16 letters or numbers (no spaces).", pinErr:"Choose a 4-digit PIN.", wrongPin:"That username is taken. If it's yours, check the PIN; if not, pick another.", lockedErr:m => `Too many wrong PINs. Try again in ${m} min.`, netErr:"Can't reach the leaderboard. Check your connection.", checking:"Checking…", userHint:"Optional. Saves your scores. Already have one? Enter it with your PIN.", userRenameTitle:"Your username", userRenameText:"Pick a new username, or sign in to the one you use on another device. Remember your PIN: you need it on other devices.", saveUser:"Save", changeUser:"Change username", addUser:"Add a username", spNotYouU:"Not you? Use another username",
@@ -1112,7 +1116,7 @@ const T = {
     you:n => `toi : ${n}`, spotOn:"pile dessus", kmOff:km => `à ${km} km`,
     bestNew:n => `Nouveau record sur cet appareil : ${n}`, bestDevice:n => `Ton record sur cet appareil : ${n}`,
     playAgain:"Rejouer", playingAs:n => `Tu joues en tant que <b>${n}</b>`, changeName:"Changer de nom", addName:"Ajouter un nom de joueur",
-    appName:"Globe by Abisto", spTag:"Découvre le monde : drapeaux, pays, capitales et villes.", spGo:"Jouer", spExplore:"Explorer la carte d'abord", studyHint:"Envie de réviser d'abord ?", studyBtn:"Explorer la carte", studyBtn2:"Réviser sur la carte d'abord", yourAnswers:n => `Tes réponses (${n})`, spHi:n => `Bon retour, ${n} !`, spNameHint:"Facultatif. Affiché au classement.", spNotYou:"Ce n'est pas toi ? Changer de nom", welcomeTitle:"Bienvenue sur Globe by Abisto", welcomeText:"Choisis un nom de joueur. Ton meilleur score dans chaque mode apparaît au classement, pour voir où tu te situes.",
+    appName:"Globe by Abisto", appShort:"Globe", spTag:"Découvre le monde : drapeaux, pays, capitales et villes.", spGo:"Jouer", spExplore:"Explorer la carte d'abord", studyHint:"Envie de réviser d'abord ?", studyBtn:"Explorer la carte", studyBtn2:"Réviser sur la carte d'abord", yourAnswers:n => `Tes réponses (${n})`, spHi:n => `Bon retour, ${n} !`, spNameHint:"Facultatif. Affiché au classement.", spNotYou:"Ce n'est pas toi ? Changer de nom", welcomeTitle:"Bienvenue sur Globe by Abisto", welcomeText:"Choisis un nom de joueur. Ton meilleur score dans chaque mode apparaît au classement, pour voir où tu te situes.",
     renameTitle:"Changer ton nom", renameText:"C'est le nom que les autres joueurs voient au classement.",
     playerName:"Nom de joueur", placeholder:"ex. : AsDesCartes", startPlaying:"Commencer", saveName:"Enregistrer", playNoName:"Jouer sans nom", cancel:"Annuler",
     nameErr:"Utilise 2 à 16 lettres ou chiffres.", player:"Joueur", userLabel:"Pseudo", userPh:"ex. : AsDesCartes", pinLabel:"Code", userErr:"Utilise 3 à 16 lettres ou chiffres (sans espace).", pinErr:"Choisis un code à 4 chiffres.", wrongPin:"Ce pseudo est déjà pris. Si c'est le tien, vérifie le code ; sinon, choisis-en un autre.", lockedErr:m => `Trop de codes erronés. Réessaie dans ${m} min.`, netErr:"Classement inaccessible. Vérifie ta connexion.", checking:"Vérification…", userHint:"Facultatif. Enregistre tes scores. Tu as déjà un pseudo ? Entre-le avec ton code.", userRenameTitle:"Ton pseudo", userRenameText:"Choisis un nouveau pseudo, ou connecte-toi à celui de ton autre appareil. Retiens ton code : il te le faudra sur tes autres appareils.", saveUser:"Enregistrer", changeUser:"Changer de pseudo", addUser:"Ajouter un pseudo", spNotYouU:"Ce n'est pas toi ? Utilise un autre pseudo",
@@ -1152,7 +1156,7 @@ const T = {
     you:n => `اخترت: ${n}`, spotOn:"تمامًا", kmOff:km => `بفارق ${km} كم`,
     bestNew:n => `رقم قياسي جديد على هذا الجهاز: ${n}`, bestDevice:n => `أفضل نتيجة لك على هذا الجهاز: ${n}`,
     playAgain:"العب مجددًا", playingAs:n => `تلعب باسم <b>${n}</b>`, changeName:"تغيير الاسم", addName:"أضف اسم لاعب",
-    appName:"العالم مع Abisto", spTag:"اكتشف العالم: الأعلام والدول والعواصم والمدن.", spGo:"العب", spExplore:"استكشف الخريطة أولًا", studyHint:"تريد المراجعة أولًا؟", studyBtn:"استكشف الخريطة", studyBtn2:"راجع على الخريطة أولًا", yourAnswers:n => `إجاباتك (${n})`, spHi:n => `أهلًا بعودتك يا ${n}!`, spNameHint:"اختياري. يظهر في لوحة الترتيب.", spNotYou:"لست أنت؟ غيّر الاسم", welcomeTitle:"مرحبًا بك في العالم مع Abisto", welcomeText:"اختر اسم لاعب. تظهر أفضل نتيجة لك في كل نمط في لوحة الترتيب، لترى مركزك بين اللاعبين.",
+    appName:"العالم مع Abisto", appShort:"العالم", spTag:"اكتشف العالم: الأعلام والدول والعواصم والمدن.", spGo:"العب", spExplore:"استكشف الخريطة أولًا", studyHint:"تريد المراجعة أولًا؟", studyBtn:"استكشف الخريطة", studyBtn2:"راجع على الخريطة أولًا", yourAnswers:n => `إجاباتك (${n})`, spHi:n => `أهلًا بعودتك يا ${n}!`, spNameHint:"اختياري. يظهر في لوحة الترتيب.", spNotYou:"لست أنت؟ غيّر الاسم", welcomeTitle:"مرحبًا بك في العالم مع Abisto", welcomeText:"اختر اسم لاعب. تظهر أفضل نتيجة لك في كل نمط في لوحة الترتيب، لترى مركزك بين اللاعبين.",
     renameTitle:"غيّر اسمك", renameText:"هذا هو الاسم الذي يراه اللاعبون الآخرون في لوحة الترتيب.",
     playerName:"اسم اللاعب", placeholder:"مثال: بطل الخرائط", startPlaying:"ابدأ اللعب", saveName:"حفظ الاسم", playNoName:"العب بدون اسم", cancel:"إلغاء",
     nameErr:"استخدم من 2 إلى 16 حرفًا أو رقمًا.", player:"لاعب", userLabel:"اسم المستخدم", userPh:"مثال: MapMaster", pinLabel:"الرمز", userErr:"استخدم من 3 إلى 16 حرفًا أو رقمًا (بدون مسافات).", pinErr:"اختر رمزًا من 4 أرقام.", wrongPin:"اسم المستخدم هذا محجوز. إن كان لك فتحقّق من الرمز، وإلا فاختر اسمًا آخر.", lockedErr:m => `محاولات خاطئة كثيرة. حاول مجددًا بعد ${m} دقيقة.`, netErr:"تعذّر الوصول إلى لوحة الترتيب. تحقّق من اتصالك.", checking:"جارٍ التحقق…", userHint:"اختياري. يحفظ نتائجك. لديك اسم مستخدم؟ أدخله مع رمزك.", userRenameTitle:"اسم المستخدم", userRenameText:"اختر اسم مستخدم جديدًا، أو سجّل الدخول بالاسم الذي تستخدمه على جهاز آخر. احفظ رمزك: ستحتاجه على أجهزتك الأخرى.", saveUser:"حفظ", changeUser:"تغيير اسم المستخدم", addUser:"أضف اسم مستخدم", spNotYouU:"لست أنت؟ استخدم اسم مستخدم آخر",
@@ -1192,7 +1196,7 @@ const T = {
     you:n => `вы: ${n}`, spotOn:"точно", kmOff:km => `мимо на ${km} км`,
     bestNew:n => `Новый личный рекорд на этом устройстве: ${n}`, bestDevice:n => `Ваш рекорд на этом устройстве: ${n}`,
     playAgain:"Играть снова", playingAs:n => `Вы играете как <b>${n}</b>`, changeName:"Сменить имя", addName:"Добавить имя игрока",
-    appName:"Globe by Abisto", spTag:"Изучайте мир: флаги, страны, столицы и города.", spGo:"Играть", spExplore:"Сначала изучить карту", studyHint:"Хотите сначала подучить?", studyBtn:"Изучить карту", studyBtn2:"Сначала изучить на карте", yourAnswers:n => `Ваши ответы (${n})`, spHi:n => `С возвращением, ${n}!`, spNameHint:"Необязательно. Видно в таблице лидеров.", spNotYou:"Не вы? Сменить имя", welcomeTitle:"Добро пожаловать в Globe by Abisto", welcomeText:"Выберите имя игрока. Ваш лучший результат в каждом режиме попадёт в таблицу лидеров.",
+    appName:"Globe by Abisto", appShort:"Globe", spTag:"Изучайте мир: флаги, страны, столицы и города.", spGo:"Играть", spExplore:"Сначала изучить карту", studyHint:"Хотите сначала подучить?", studyBtn:"Изучить карту", studyBtn2:"Сначала изучить на карте", yourAnswers:n => `Ваши ответы (${n})`, spHi:n => `С возвращением, ${n}!`, spNameHint:"Необязательно. Видно в таблице лидеров.", spNotYou:"Не вы? Сменить имя", welcomeTitle:"Добро пожаловать в Globe by Abisto", welcomeText:"Выберите имя игрока. Ваш лучший результат в каждом режиме попадёт в таблицу лидеров.",
     renameTitle:"Сменить имя", renameText:"Это имя видят другие игроки в таблице лидеров.",
     playerName:"Имя игрока", placeholder:"например, MapMaster", startPlaying:"Начать игру", saveName:"Сохранить имя", playNoName:"Играть без имени", cancel:"Отмена",
     nameErr:"От 2 до 16 букв или цифр.", player:"Игрок", userLabel:"Имя пользователя", userPh:"например, MapMaster", pinLabel:"PIN", userErr:"От 3 до 16 букв или цифр, без пробелов.", pinErr:"Придумайте PIN из 4 цифр.", wrongPin:"Это имя уже занято. Если оно ваше, проверьте PIN; если нет, выберите другое.", lockedErr:m => `Слишком много неверных PIN. Попробуйте через ${m} мин.`, netErr:"Нет связи с таблицей лидеров. Проверьте подключение.", checking:"Проверяем…", userHint:"Необязательно. Сохраняет ваши результаты. Уже есть имя? Введите его вместе с PIN.", userRenameTitle:"Ваше имя пользователя", userRenameText:"Выберите новое имя или войдите под тем, что используете на другом устройстве. Запомните PIN: он понадобится на других устройствах.", saveUser:"Сохранить", changeUser:"Сменить имя пользователя", addUser:"Добавить имя пользователя", spNotYouU:"Не вы? Войти под другим именем",
@@ -2668,12 +2672,21 @@ $("help").addEventListener("click", e => { if (e.target.id === "help") closeHelp
 document.addEventListener("keydown", e => { if (e.key === "Escape") { if (!$("help").hidden) closeHelp(); closeLangMenu(); } });
 
 /* ---------- language switch ---------- */
+function fitBrand(){
+  const b = document.querySelector(".brand"); if (!b) return;
+  b.classList.remove("tight");
+  const m = document.querySelector(".headrow .modes"), r = b.getBoundingClientRect(), mr = m.getBoundingClientRect();
+  const rtl = document.documentElement.dir === "rtl";
+  if (b.scrollWidth > b.clientWidth + 1 || m.scrollWidth > m.clientWidth + 1 || (rtl ? r.left < mr.right + 4 : r.right > mr.left - 4)) b.classList.add("tight");
+}
+addEventListener("resize", () => requestAnimationFrame(fitBrand));
 function applyStatic(){
   document.documentElement.lang = LANG;
   document.documentElement.dir = LANG === "ar" ? "rtl" : "ltr";
   document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
   document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
   $("langbtn").querySelector("span").textContent = LANG.toUpperCase();
+  requestAnimationFrame(fitBrand);
   $("langmenu").innerHTML = Object.entries(LANGS).map(([k, v]) => `<button type="button" role="menuitemradio" aria-checked="${k === LANG}" data-lang="${k}" lang="${k}">${v}</button>`).join("");
   wireLangPills($("langmenu"));
   paintThemeBtn?.();
