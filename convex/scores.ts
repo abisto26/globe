@@ -25,13 +25,13 @@ const FIRE = [25, 50]; // 🔥 On fire: silver at 25 in a row, gold at 50
 const fireOf = (streak?: number) => (streak ?? 0) >= FIRE[1] ? 2 : (streak ?? 0) >= FIRE[0] ? 1 : 0;
 const AVATAR = /^(ibnbattuta|marcopolo|columbus|zhenghe|earhart|tereshkova|nellybly|captain|fox|panda|lion|penguin|turtle|owl):[0-5]$/;
 // achievement progress sent by the game; each kept as the best value seen (languages: one bit per language, combined)
-const PROG_MAX: Record<string, number> = { bull: 1, light: 3000, explore: 200, untouch: 3000, days: 3660, langs: 15 };
+const PROG_MAX: Record<string, number> = { bull: 1, light: 3000, explore: 200, untouch: 3000, days: 3660, langs: 15, cont: 31 };
 function mergeProg(old: Record<string, number> | undefined, add: Record<string, number> | undefined) {
   const out: Record<string, number> = { ...(old ?? {}) };
   let changed = false;
   for (const [k, raw] of Object.entries(add ?? {})) {
     const max = PROG_MAX[k]; if (max === undefined || !Number.isInteger(raw) || raw < 0 || raw > max) continue;
-    const next = k === "langs" ? ((out[k] ?? 0) | raw) : Math.max(out[k] ?? 0, raw);
+    const next = k === "langs" || k === "cont" ? ((out[k] ?? 0) | raw) : Math.max(out[k] ?? 0, raw);
     if (next !== (out[k] ?? 0)) { out[k] = next; changed = true; }
   }
   return changed ? out : null;

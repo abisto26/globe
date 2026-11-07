@@ -39,7 +39,7 @@ Pick a game at the top, answer, and see how far you can go.
 
 **Explore** (🧭) is for learning: tap any country to see its flag, capital and biggest cities.
 
-**Regions** (🌐 next to Easy/Pro): play one continent at a time, Africa, Europe, Asia, the Americas or Oceania. Region games are for practice, so they don't count for the leaderboard or achievements.
+**Practice a continent** (in 🧭 Explore): play Africa, Europe, Asia, the Americas or Oceania on their own, with no timer and no leaderboard. Get 10 right on every continent to earn 🎓 Scholar.
 
 ## Features
 
@@ -52,7 +52,7 @@ Pick a game at the top, answer, and see how far you can go.
   - **Android:** in Chrome, open the ⋮ menu, then *Add to Home screen*.
 - **Leaderboard** for each game and level.
 - **Avatars:** pick a famous traveller (Ibn Battuta, Marco Polo, Amelia Earhart, Valentina Tereshkova…) or an animal, shown on the leaderboard.
-- **11 achievements** on your profile (tap your name in ⚙︎): 🌍 World tour, 🔥 On fire, 👑 Champion, 🎯 Bullseye, ⚡ Lightning, 🧭 Explorer, 🗺️ All-rounder, 🎖️ Pro, ❤️ Untouchable, 📅 Daily traveller and 🌐 Polyglot.
+- **12 achievements** on your profile (tap your name in ⚙︎): 🌍 World tour, 🔥 On fire, 👑 Champion, 🎯 Bullseye, ⚡ Lightning, 🧭 Explorer, 🗺️ All-rounder, 🎖️ Pro, ❤️ Untouchable, 📅 Daily traveller, 🌐 Polyglot and 🎓 Scholar.
 
 ## Leaderboard and your data
 
