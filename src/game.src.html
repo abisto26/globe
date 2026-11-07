@@ -341,7 +341,8 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .wt{position:relative;overflow:hidden;width:min(340px,92vw);border-radius:28px;padding:26px 22px 20px;text-align:center;background:var(--panel);box-shadow:0 30px 80px rgba(0,0,0,.35);animation:smpop .35s cubic-bezier(.2,1.3,.4,1)}
 .wt::before{content:"";position:absolute;inset:-40% -20% auto;height:220px;background:conic-gradient(from 0deg,#ffd76a33,#6cc3ff33,#2bb67333,#ffd76a33);filter:blur(30px);pointer-events:none}
 .wt .globe img{width:104px;height:auto;display:block}
-.pf .bd .ic.img{background:none!important;box-shadow:none!important}
+.pf .bd .ic.img{background:none!important;box-shadow:none!important;width:60px;height:60px}
+.pf .bd .bar.none{visibility:hidden}
 .pf .bd .bimg{width:60px;height:60px;object-fit:contain;display:block}
 .pf .bd.gold .ic.img .bimg,.pf .bd.silver .ic.img .bimg{filter:drop-shadow(0 6px 10px rgba(240,169,43,.35))}
 .wtimg{width:1.15em;height:1.15em;vertical-align:-.2em;object-fit:contain}
@@ -2311,7 +2312,7 @@ function renderProfile(pf, first){
     <div class="st"><div><b>${fmt(pf.best)}</b>${t("stBest")}</div><div><b>${fmt(pf.streak)}</b>${t("stStreak")}</div><div><b>${fmt(pf.tours)}</b>${t("stTours")}</div></div>
     ${isUser ? "" : `<p class="gnote"><span>${t("guestAch")}</span><button class="btn" id="pfadd">${t(USE_CONVEX ? "addUserShort" : "addNameShort")}</button></p>`}
     <h3>${t("achievements")} <span>${earned} / ${list.length}</span></h3>
-    <div class="grid">${list.map(a => `<div class="bd ${a.on ? a.tier : "locked"}"><div class="ic${a.img ? " img" : ""}"><span aria-hidden="true">${a.icon}</span>${a.on && a.x > 1 ? `<span class="x">×${a.x}</span>` : ""}</div>${!a.on && a.frac > 0 ? `<span class="bar" title="${a.count || ""}"><i style="width:${Math.round(Math.min(1, a.frac) * 100)}%"></i></span>` : ""}<b>${a.name}</b><small>${esc(a.sub)}</small></div>`).join("")}</div>
+    <div class="grid">${list.map(a => `<div class="bd ${a.on ? a.tier : "locked"}"><div class="ic${a.img ? " img" : ""}"><span aria-hidden="true">${a.icon}</span>${a.on && a.x > 1 ? `<span class="x">×${a.x}</span>` : ""}</div>${!a.on && a.frac > 0 ? `<span class="bar" title="${a.count || ""}"><i style="width:${Math.round(Math.min(1, a.frac) * 100)}%"></i></span>` : `<span class="bar none" aria-hidden="true"></span>`}<b>${a.name}</b><small>${esc(a.sub)}</small></div>`).join("")}</div>
     <button class="btn2 pfclose" id="pfclose">${t("lbClose")}</button>
   </div>`;
   if (first) el.hidden = false;
