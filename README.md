@@ -51,6 +51,7 @@ Pick a game at the top, answer, and see how far you can go.
   - **iPhone:** in Safari, tap Share, then *Add to Home Screen*.
   - **Android:** in Chrome, open the ⋮ menu, then *Add to Home screen*.
 - **Leaderboard** for each game and level.
+- **Share your score** as a picture for your story, or **challenge a friend**: they get a link and play the exact same questions to try to beat you.
 - **Avatars:** pick a famous traveller (Ibn Battuta, Marco Polo, Amelia Earhart, Valentina Tereshkova…) or an animal, shown on the leaderboard.
 - **12 achievements** on your profile (tap your name in ⚙︎): 🌍 World tour, 🔥 On fire, 👑 Champion, 🎯 Bullseye, ⚡ Lightning, 🧭 Explorer, 🗺️ All-rounder, 🎖️ Pro, ❤️ Untouchable, 📅 Daily traveller, 🌐 Polyglot and 🎓 Scholar.
 
