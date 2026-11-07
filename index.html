@@ -348,8 +348,15 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .board .wtag{font-size:.9em;margin-inline-start:6px;vertical-align:-.05em;cursor:default}
 .board .bdg{display:inline-flex;gap:1px;margin-inline-start:6px;font-size:.85em;vertical-align:-.05em;letter-spacing:0}
 /* profile: a bottom sheet with your best numbers and achievements */
-.pfscrim{position:fixed;inset:0;z-index:68;background:rgba(10,25,35,.35);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);display:flex;align-items:flex-end;justify-content:center;animation:fadein .2s ease}
-.pf{width:min(520px,100%);max-height:92%;overflow:auto;border-radius:28px 28px 0 0;background:var(--panel);box-shadow:0 -20px 60px rgba(0,0,0,.25);padding:10px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;text-align:start;animation:pfup .32s cubic-bezier(.2,1,.3,1)}
+.pfscrim{position:fixed;inset:0;z-index:68;background:rgba(10,25,35,.22);-webkit-backdrop-filter:blur(10px) saturate(120%);backdrop-filter:blur(10px) saturate(120%);display:flex;align-items:flex-end;justify-content:center;animation:fadein .2s ease;
+  /* same side and bottom spacing as the answer cards */
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+/* a floating glass card, the same width, corners and frosted look as the game's cards */
+.pf{width:100%;max-width:520px;max-height:100%;overflow:auto;border-radius:26px;padding:10px 16px 16px;display:flex;flex-direction:column;gap:14px;text-align:start;animation:pfup .32s cubic-bezier(.2,1,.3,1);
+  background:color-mix(in srgb,var(--panel) 72%,transparent);border:1px solid var(--glass-edge);box-shadow:var(--glass-shadow),0 24px 60px rgba(10,30,45,.22);
+  -webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%)}
+.pf .st div,.pf .bd .ic,.pf .gnote,.pick .opt{background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.pf .btn2{background:color-mix(in srgb,var(--panel) 60%,transparent)}
 @keyframes pfup{from{transform:translateY(40%);opacity:.4}}
 .pf .grab{width:40px;height:5px;border-radius:9px;background:var(--chip);align-self:center;border:0;padding:0;cursor:pointer}
 .pf .hd{display:flex;align-items:center;gap:14px}
