@@ -41,7 +41,7 @@ Pick a game at the top, answer, and see how far you can go.
 
 ## Features
 
-- **3 languages:** English, French and Arabic.
+- **4 languages:** English, French, Arabic and Russian.
 - **Light and dark mode.**
 - **Works offline.** Once you've opened it, the game plays without a connection, even in airplane mode. Scores you make offline go on the leaderboard when you're back online.
 - **Works on any phone.** Add it to your home screen and it opens like an app:
@@ -64,7 +64,7 @@ The leaderboard is optional. You can always play without a username.
 - [D3](https://d3js.org) and [topojson-client](https://github.com/topojson/topojson-client) for the map, with [world-atlas](https://github.com/topojson/world-atlas) country shapes (Natural Earth)
 - [flag-icons](https://github.com/lipis/flag-icons) for the flags
 - [Convex](https://convex.dev) for the leaderboard
-- Fonts: Bricolage Grotesque, IBM Plex Mono and IBM Plex Sans Arabic (SIL Open Font License)
+- Fonts: Bricolage Grotesque, IBM Plex Mono (with Cyrillic) and IBM Plex Sans Arabic (SIL Open Font License)
 
 Licence texts for these are in [`licenses/`](licenses).
 

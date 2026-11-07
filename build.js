@@ -33,12 +33,15 @@ img{max-width:100%}
 // fonts bundled with the site (no request to Google), so the game also looks right offline
 const LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
 const LATINEXT = 'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF';
+const CYRILLIC = 'U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116';
+const CYRILLICEXT = 'U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F';
 const ARABIC = 'U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC';
 const face = (fam, file, w, range, extra = '') => `@font-face{font-family:"${fam}";font-style:normal;font-display:swap;font-weight:${w};${extra}src:url(fonts/${file}) format("woff2");unicode-range:${range}}`;
 const fontCSS = [
   face('Bricolage Grotesque', 'bricolage-grotesque-latin-standard-normal.woff2', '200 800', LATIN, 'font-stretch:75% 100%;'),
   face('Bricolage Grotesque', 'bricolage-grotesque-latin-ext-standard-normal.woff2', '200 800', LATINEXT, 'font-stretch:75% 100%;'),
-  ...[500, 600].flatMap(w => [face('IBM Plex Mono', `ibm-plex-mono-latin-${w}-normal.woff2`, w, LATIN), face('IBM Plex Mono', `ibm-plex-mono-latin-ext-${w}-normal.woff2`, w, LATINEXT)]),
+  ...[500, 600].flatMap(w => [face('IBM Plex Mono', `ibm-plex-mono-latin-${w}-normal.woff2`, w, LATIN), face('IBM Plex Mono', `ibm-plex-mono-latin-ext-${w}-normal.woff2`, w, LATINEXT),
+    face('IBM Plex Mono', `ibm-plex-mono-cyrillic-${w}-normal.woff2`, w, CYRILLIC), face('IBM Plex Mono', `ibm-plex-mono-cyrillic-ext-${w}-normal.woff2`, w, CYRILLICEXT)]),
   ...[400, 500, 600, 700].map(w => face('IBM Plex Sans Arabic', `ibm-plex-sans-arabic-arabic-${w}-normal.woff2`, w, ARABIC)),
 ].join('\n');
 // sponsor: { name, url, logo } in site.config.json; the logo file is embedded so it also shows offline
