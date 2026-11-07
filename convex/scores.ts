@@ -147,8 +147,8 @@ export const me = query({
 
 /** Top 5 players on a board, plus this player's own rank. */
 export const board = query({
-  args: { board: v.string(), pid: v.optional(v.string()) },
-  handler: async (ctx, { board, pid }) => {
+  args: { board: v.string(), pid: v.optional(v.string()), limit: v.optional(v.number()) },
+  handler: async (ctx, { board, pid, limit }) => {
     if (!BOARD.test(board)) throw new Error("bad board");
     const top = await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board)).order("desc").take(50);
     top.sort((a, b) => b.best - a.best || a.at - b.at);
@@ -164,7 +164,8 @@ export const board = query({
       }
     }
     const count = (await ctx.db.query("bests").withIndex("by_board_best", q => q.eq("board", board)).collect()).length;
-    const shown = top.slice(0, 5);
+    // results screen asks for 5 (the default), the leaderboard sheet for 10
+    const shown = top.slice(0, Math.min(10, Math.max(1, Math.floor(limit ?? 5))));
     // badges next to names: 🌍 world tours on this board, 🔥 best streak, 👑 champion
     const userOf = async (p: string) => ctx.db.query("users").withIndex("by_pid", q => q.eq("pid", p)).unique();
     const badges = async (r: { pid: string; board: string; best: number; tours?: number }, isFirst: boolean) => {
