@@ -13,13 +13,13 @@ type DataModel = DataModelFromSchemaDefinition<typeof schema>;
 const query = queryGeneric as QueryBuilder<DataModel, "public">;
 const mutation = mutationGeneric as MutationBuilder<DataModel, "public">;
 
-const BOARD = /^(?:(?:flags|capitals|cities)_(?:easy|pro)|countries)$/;
+const BOARD = /^(?:(?:flags|capitals|cities)_(?:easy|pro)|countries|twist)$/;
 const PID = /^[a-z0-9]{20,40}$/;
 const PIN = /^\d{4}$/;
 const MAX_BEST = 3000;         // sanity cap: with 15 s per question this is over 12 hours of play without a miss
 const MIN_GAP_MS = 1500;       // at most one save every 1.5 seconds per player
 // how many places each game's list has: a best score this high means the whole list was played (🌍 World tour)
-const LIST_SIZE: Record<string, number> = { flags_easy: 171, flags_pro: 134, countries: 134, capitals_easy: 164, capitals_pro: 164, cities_easy: 72, cities_pro: 72 };
+const LIST_SIZE: Record<string, number> = { flags_easy: 171, flags_pro: 134, countries: 134, capitals_easy: 164, capitals_pro: 164, cities_easy: 72, cities_pro: 72, twist: 670 };
 const toursOf = (r: { board: string; best: number; tours?: number }) => Math.max(r.tours ?? 0, Math.floor(r.best / (LIST_SIZE[r.board] ?? 1e9)));
 const FIRE = [25, 50]; // 🔥 On fire: silver at 25 in a row, gold at 50
 const fireOf = (streak?: number) => (streak ?? 0) >= FIRE[1] ? 2 : (streak ?? 0) >= FIRE[0] ? 1 : 0;

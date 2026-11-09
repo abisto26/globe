@@ -37,6 +37,8 @@ Pick a game at the top, answer, and see how far you can go.
 | **Capitals** | Choose from 4 nearby capitals | Choose from 4 cities in the same country |
 | **Cities** | Find the city on a map zoomed to its country | Find it on the world map, within 1000 km |
 
+**Twist** mixes everything and asks it both ways: whose flag, find the flag, capital of, and capital of which country. It has its own leaderboard.
+
 **Explore** (🧭) is for learning: tap any country to see its flag, capital and biggest cities.
 
 **Practice a continent** (in 🧭 Explore): play Africa, Europe, Asia, the Americas or Oceania on their own, with no timer and no leaderboard. Get 10 right on every continent to earn 🎓 Scholar.
