@@ -1646,12 +1646,12 @@ function tone(f, at, dur, type = "sine", vol = .16, f2 = 0){
   o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0 + dur + .03);
 }
 const SFX = {
-  right(){ tone(880, 0, .14); tone(1318.5, .08, .3); },
-  wrong(){ tone(196, 0, .3, "square", .045, 130); tone(98, 0, .32, "sine", .14, 80); },
-  tick(){ tone(1500, 0, .045, "triangle", .07); },
-  life(){ [784, 988, 1175].forEach((f, i) => tone(f, .2 + i * .07, .2, "sine", .12)); },
+  right(){ tone(600, 0, .12, "sine", .18, 1200); },
+  wrong(){ tone(260, 0, .25, "sine", .2, 110); },
+  tick(){ tone(900, 0, .035, "square", .035); },
+  life(){ tone(523, .2, .32, "sine", .14, 1046); },
   fanfare(){ [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * .11, i === 3 ? .55 : .2, "triangle", .13)); },
-  badge(){ [1046.5, 1318.5, 1568].forEach((f, i) => tone(f, i * .08, .32, "sine", .11)); }
+  badge(){ [1568, 2093, 2637].forEach((f, i) => tone(f, i * .05, .2, "sine", .09)); }
 };
 function sfx(name, buzz){
   try { SFX[name](); } catch(e){}
