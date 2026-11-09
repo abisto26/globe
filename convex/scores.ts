@@ -23,7 +23,7 @@ const LIST_SIZE: Record<string, number> = { flags_easy: 171, flags_pro: 134, cou
 const toursOf = (r: { board: string; best: number; tours?: number }) => Math.max(r.tours ?? 0, Math.floor(r.best / (LIST_SIZE[r.board] ?? 1e9)));
 const FIRE = [25, 50]; // 🔥 On fire: silver at 25 in a row, gold at 50
 const fireOf = (streak?: number) => (streak ?? 0) >= FIRE[1] ? 2 : (streak ?? 0) >= FIRE[0] ? 1 : 0;
-const AVATAR = /^(ibnbattuta|marcopolo|columbus|zhenghe|earhart|tereshkova|nellybly|captain|fox|panda|lion|penguin|turtle|owl):[0-5]$/;
+const AVATAR = /^(abisto|ibnbattuta|marcopolo|columbus|zhenghe|earhart|tereshkova|nellybly|captain|fox|panda|lion|penguin|turtle|owl):[0-5]$/;
 // achievement progress sent by the game; each kept as the best value seen (languages: one bit per language, combined)
 const PROG_MAX: Record<string, number> = { bull: 1, light: 3000, explore: 200, untouch: 3000, days: 3660, langs: 15, cont: 31 };
 function mergeProg(old: Record<string, number> | undefined, add: Record<string, number> | undefined) {
