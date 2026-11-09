@@ -2934,6 +2934,8 @@ function fitBrand(){
   const fits = () => { const r = b.getBoundingClientRect(), mr = m.getBoundingClientRect();
     return m.scrollWidth <= m.clientWidth + 1 && (rtl ? r.left >= mr.right + 6 : r.right <= mr.left - 6); };
   const row = b.parentElement; row.classList.remove("stack");
+  // phones held upright: always logo on top, tabs on their own row (same look on every phone)
+  if (matchMedia("(max-width: 600px) and (orientation: portrait)").matches){ b.classList.remove("s2", "tight"); b.classList.add("s1"); row.classList.add("stack"); return; }
   for (const c of ["", "s1", "s2"]){
     b.classList.remove("s1", "s2", "tight"); if (c) b.classList.add(c);
     if (fits()) return;
