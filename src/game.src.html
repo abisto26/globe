@@ -1629,8 +1629,8 @@ async function drawShareCard(){
   g.fillStyle = ring; g.beginPath(); g.arc(ax, ay, ar + 12, 0, Math.PI * 2); g.fill();
   const [ak, acI] = (myAvatar || ":").split(":"), acol = AV_COLORS[+acI] || "#2bb673";
   g.save(); g.beginPath(); g.arc(ax, ay, ar, 0, Math.PI * 2); g.clip();
-  g.fillStyle = PORTRAITS[ak] || ANIMALS[ak] ? "#ffffff" : "#1f8a5b"; g.fillRect(ax - ar, ay - ar, ar * 2, ar * 2);
-  if (PORTRAITS[ak] || ANIMALS[ak]){ g.fillStyle = acol; g.globalAlpha = .3; g.fillRect(ax - ar, ay - ar, ar * 2, ar * 2); g.globalAlpha = 1; }
+  g.fillStyle = PORTRAITS[ak] || PHOTOS[ak] || ANIMALS[ak] ? "#ffffff" : "#1f8a5b"; g.fillRect(ax - ar, ay - ar, ar * 2, ar * 2);
+  if (PORTRAITS[ak] || PHOTOS[ak] || ANIMALS[ak]){ g.fillStyle = acol; g.globalAlpha = .3; g.fillRect(ax - ar, ay - ar, ar * 2, ar * 2); g.globalAlpha = 1; }
   if (PHOTOS[ak]){ try { const im = await loadImg(PHOTOS[ak]); g.drawImage(im, ax - ar, ay - ar, ar * 2, ar * 2); } catch(e){} }
   else if (PORTRAITS[ak]){ try { const im = await loadImg("data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="300" height="300">${PORTRAITS[ak]}</svg>`)); g.drawImage(im, ax - ar, ay - ar, ar * 2, ar * 2); } catch(e){} }
   else if (ANIMALS[ak]){ g.font = `${ar * 1.15}px system-ui,"Apple Color Emoji","Segoe UI Emoji",sans-serif`; g.textBaseline = "middle"; g.fillText(ANIMALS[ak], ax, ay + 8); g.textBaseline = "alphabetic"; }
@@ -2383,7 +2383,7 @@ function avatarHTML(av, size, name){
   const st = `width:${size}px;height:${size}px;--s:${size}px`;
   if (!avOk(av)) return `<span class="avpic" style="${st};background:linear-gradient(135deg,#2bb673,#1f8a5b);color:#fff;font:800 ${Math.round(size * .45)}px var(--display)">${esc([...(name || "?")][0].toUpperCase())}</span>`;
   const [k, c] = av.split(":"), bg = AV_COLORS[+c];
-  if (PHOTOS[k]) return `<span class="avpic ph" style="${st}"><img src="${PHOTOS[k]}" alt=""></span>`;
+  if (PHOTOS[k]) return `<span class="avpic ph" style="${st};background:color-mix(in srgb,${bg} 30%,#fff)"><img src="${PHOTOS[k]}" alt=""></span>`;
   if (PORTRAITS[k]) return `<span class="avpic" style="${st};background:color-mix(in srgb,${bg} 30%,#fff)"><svg viewBox="0 0 64 64" aria-hidden="true">${PORTRAITS[k]}</svg></span>`;
   return `<span class="avpic emo" style="${st};background:color-mix(in srgb,${bg} 30%,#fff)">${ANIMALS[k]}</span>`;
 }
