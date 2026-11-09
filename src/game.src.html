@@ -59,9 +59,13 @@ body{background:var(--ocean);color:var(--ink);font-family:var(--display);overflo
 .brand.s2 .bword{height:21px}
 .brand.tight .bword{display:none}
 /* phones too narrow for the logo beside the tabs: logo on top, tabs on their own row */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .headrow.stack{grid-template-columns:minmax(0,1fr);justify-items:center;gap:8px}
 .headrow.stack .brand{justify-self:center}
-.headrow.stack .modes{justify-self:center}
+.headrow.stack .modes{justify-self:stretch;justify-content:space-between}
+.headrow.stack .modes button{flex:1 1 auto;font-size:.84rem;padding:7px 6px}
+.headrow.stack .modes .m-explore{flex:0 0 auto;padding:7px 9px}
+@media (max-width:360px){.headrow.stack .modes button{font-size:.74rem;padding:6px 3px;letter-spacing:-.015em}.headrow.stack .modes .m-explore{padding:6px 5px}}
 /* loading splash: the logo, big and centred, pulsing softly until the game is ready, then fading out */
 .splash{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:radial-gradient(120% 90% at 50% 40%,color-mix(in srgb,var(--ocean) 70%,#fff) 0%,var(--ocean) 70%);transition:opacity .45s ease,visibility .45s}
 .splash .spin{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px;text-align:center}
@@ -1812,11 +1816,9 @@ function resultLine(r, last){
   if (!r.miss) return `<div class="verdictline ok">${t("right")} <span class="tag hit">+1</span></div>`;
   return `<div class="verdictline no">${r.timeout ? t("timesUp") : t("miss")} <span class="tag miss">${last ? t("outOfLives") : t("minusLife")}</span></div>`;
 }
-const choiceHint = () => Q() === "flags" ? t("hintFlags") : Q() === "rflag" ? t("hintRflag") : Q() === "rcap" ? t("hintRcap") : level === "pro" ? t("hintCapPro") : t("hintCap");
 function renderChoiceCard(c, focus){
   if (!revealed){
-    const hint = choiceHint();
-    c.innerHTML = choiceButtons() + `<div class="small">${hint}</div>`;
+    c.innerHTML = choiceButtons();
     c.querySelectorAll(".choice").forEach(b => onTap(b, () => pickCapital(choices[+b.dataset.i])));
     return;
   }
@@ -1827,10 +1829,9 @@ function renderChoiceCard(c, focus){
     : r.timeout ? (Q() === "flags" ? t("flagHit", countryName(r.key)) : t("capHit", placeName(r.key), countryName(current[1]))) : Q() === "flags"
     ? (r.miss ? t("flagMiss", countryName(r.key), countryName(r.picked)) : t("flagHit", countryName(r.key)))
     : (r.miss ? t("capMiss", placeName(r.key), countryName(current[1]), level === "pro" ? placeName(r.picked) : "") : t("capHit", placeName(r.key), countryName(current[1])));
-  const hint = choiceHint();
-  c.innerHTML = choiceButtons() + `<div class="small">${hint}</div>`;
+  c.innerHTML = choiceButtons();
   const rb = $("resultbar");
-  rb.innerHTML = `<div class="txt">${resultLine(r, last)}<div class="small">${esc(msg)}</div></div>${nextButtons(last)}`;
+  rb.innerHTML = `<div class="txt">${resultLine(r, last)}<span class="sr-only">${esc(msg)}</span></div>${nextButtons(last)}`;
   rb.hidden = false;
   wireNext(last, focus);
 }
