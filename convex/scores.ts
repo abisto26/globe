@@ -55,8 +55,10 @@ const newSalt = () => Array.from({ length: 16 }, () => Math.floor(Math.random() 
  * Returns the player id this device should use from now on.
  */
 export const claim = mutation({
-  args: { pid: v.string(), username: v.string(), pin: v.string() },
-  handler: async (ctx, { pid, username, pin }) => {
+  // mode: "rename" = only rename this device's own username (an existing name is refused),
+  // "signin" = only sign in to an existing username; left out = either (first-time setup)
+  args: { pid: v.string(), username: v.string(), pin: v.string(), mode: v.optional(v.union(v.literal("rename"), v.literal("signin"))) },
+  handler: async (ctx, { pid, username, pin, mode }) => {
     if (!PID.test(pid)) throw new Error("bad player id");
     const name = cleanName(username), key = name.toLowerCase();
     if (name.length < 3 || name !== username.normalize("NFKC")) return { ok: false as const, reason: "bad_name" };
@@ -64,6 +66,8 @@ export const claim = mutation({
     const now = Date.now();
 
     const owner = await ctx.db.query("users").withIndex("by_key", q => q.eq("key", key)).unique();
+    if (mode === "rename" && owner && owner.pid !== pid) return { ok: false as const, reason: "taken" };
+    if (mode === "signin" && !owner) return { ok: false as const, reason: "no_user" };
     if (owner && owner.pid !== pid) {
       // someone else's username: sign in with its PIN
       if (owner.lockedUntil > now) return { ok: false as const, reason: "locked", wait: Math.ceil((owner.lockedUntil - now) / 60000) };
