@@ -1374,9 +1374,26 @@ function exitPractice(){
 const pointsFor = km => Math.round(1000 * Math.exp(-km / 1800)) ;
 
 let laps = 0, lapShownAt = -1, gameStart = Date.now(), gameStreak = 0; // world tours: whole list played through in this game
+/* Questions you had in your last games come last, so a new game doesn't open with the same places.
+   Kept on this device only: the last RECENT_MAX places per game and level. */
+const RECENT_MAX = 60;
+const qKey = x => Array.isArray(x) ? x[0] + "|" + x[1] : x.properties.name;
+const recentKey = () => "globedrop-recent-" + mode + "-" + level;
+function readRecent(){ try { return JSON.parse(localStorage.getItem(recentKey()) || "[]"); } catch(e){ return []; } }
+function noteRecent(x){
+  if (mode === "explore" || !x) return;
+  const k = qKey(x), r = readRecent().filter(v => v !== k); r.push(k);
+  try { localStorage.setItem(recentKey(), JSON.stringify(r.slice(-RECENT_MAX))); } catch(e){}
+}
+function freshFirst(list){
+  const r = readRecent(); if (!r.length) return list;
+  const at = new Map(r.map((k, i) => [k, i]));
+  const fresh = list.filter(x => !at.has(qKey(x))), seen = list.filter(x => at.has(qKey(x))).sort((a, b) => at.get(qKey(a)) - at.get(qKey(b)));
+  return fresh.concat(seen);
+}
 function newGame(){
   paintPracBar();
-  queue = shuffle(pool());
+  queue = freshFirst(shuffle(pool()));
   if (activeChallenge && activeChallenge.m === mode && activeChallenge.l === level && !practice()){
     const base = basePool(), items = activeChallenge.q.map(i => base[i]).filter(Boolean);
     queue = items.concat(shuffle(pool()));
@@ -1394,21 +1411,24 @@ const FLAG_POOL = countries.filter(f => FLAGS[f.properties.name] && !/^(Falkland
 const FLAG_PRO_POOL = COUNTRY_POOL.filter(f => FLAGS[f.properties.name]);
 const pool = () => regionPool(basePool());
 const basePool = () => mode === "cities" ? CITIES : mode === "capitals" ? (level === "pro" ? CAPITALS_PRO_POOL : CAPITALS_POOL) : mode === "flags" ? (level === "pro" ? FLAG_PRO_POOL : FLAG_POOL) : COUNTRY_POOL;
-/* Flags · Easy: the 3 wrong answers are neighbours, which often have look-alike flags. Choices are map names; shown translated. */
+/* Flags · Easy: the 3 wrong answers are neighbours, which often have look-alike flags. They are picked at random among the
+   7 nearest, so the same question doesn't always come with the same choices. Choices are map names; shown translated. */
+const NEAR_POOL = 7;
+const pick3 = near => shuffle(near.slice(0, NEAR_POOL)).slice(0, 3);
 function flagChoices(f){
   const c = d3.geoCentroid(f);
-  const near = regionPool(FLAG_POOL).filter(x => x !== f).sort((a, b) => d3.geoDistance(d3.geoCentroid(a), c) - d3.geoDistance(d3.geoCentroid(b), c)).slice(0, 3);
+  const near = pick3(regionPool(FLAG_POOL).filter(x => x !== f).sort((a, b) => d3.geoDistance(d3.geoCentroid(a), c) - d3.geoDistance(d3.geoCentroid(b), c)));
   return shuffle([f, ...near]).map(x => x.properties.name);
 }
 const isChoiceRound = () => mode === "capitals" || (mode === "flags" && level === "easy");
 const tapsCountry = () => mode === "explore" || mode === "countries" || (mode === "flags" && level === "pro");
 const rightAnswer = () => mode === "capitals" ? current[0] : current.properties.name;
 const choiceLabel = k => mode === "capitals" ? placeName(k) : countryName(k);
-/* the 3 wrong answers are the capitals closest to the right one, so you can't guess by region */
+/* the 3 wrong answers are among the capitals closest to the right one, so you can't guess by region */
 function capitalChoices(c){
   if (level === "pro") return shuffle([c[0], ...OTHER_CITIES[c[1]]]);
   const ll = [c[3], c[2]];
-  const near = regionPool(CAPITALS_POOL).filter(x => x !== c).sort((a, b) => kmBetween([a[3],a[2]], ll) - kmBetween([b[3],b[2]], ll)).slice(0, 3);
+  const near = pick3(regionPool(CAPITALS_POOL).filter(x => x !== c).sort((a, b) => kmBetween([a[3],a[2]], ll) - kmBetween([b[3],b[2]], ll)));
   return shuffle([c, ...near]).map(x => x[0]);
 }
 
@@ -1440,7 +1460,7 @@ function startRound(){
     let more = shuffle(pool()); if (more[0] === queue[queue.length-1]) more.push(more.shift());
     queue = queue.concat(more);
   }
-  current = queue[round]; guess = null; revealed = false; answerLL = null;
+  current = queue[round]; guess = null; revealed = false; answerLL = null; noteRecent(current);
   const easy = mode === "cities" && level === "easy";
   const lit = easy || mode === "capitals";
   area = lit ? cityArea(current) : null; pickedF = null; chosen = null;
