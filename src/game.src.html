@@ -555,16 +555,18 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .lbsheet .board li.me{position:sticky;top:-12px;bottom:-12px;z-index:1;background:color-mix(in srgb,var(--gold) 22%,var(--chip))}
 .lbsheet .board li{grid-template-columns:3.4ch 1fr auto}
 .lbsheet .board > .note{text-align:center}
-.stnote{margin:0;font-size:.8rem;color:var(--ink-soft)}
-.sttiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sttile{display:grid;gap:2px;padding:10px;border-radius:14px;background:color-mix(in srgb,var(--panel) 55%,transparent)}
-.sttile b{font-size:1.6rem;font-variant-numeric:tabular-nums}.sttile span{font-size:.78rem;color:var(--ink-soft)}
-.stby{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.stby li{display:flex;gap:6px;padding:4px 10px;border-radius:999px;background:var(--chip);font-size:.82rem}
-.lbsheet .board.sttable{min-height:0}
-.sttable table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.88rem}
-.sttable th,.sttable td{padding:6px 4px;text-align:end}.sttable th:first-child,.sttable td:first-child{text-align:start}
-.sttable th{font-size:.72rem;color:var(--ink-soft);font-weight:600}
+.stsheet{text-align:start}
+.sthd{display:flex;justify-content:space-between;align-items:baseline}.sthd b{font-size:1.15rem}.sthd span{font-size:.82rem;color:var(--ink-soft)}
+.stkpi{display:grid;grid-template-columns:repeat(3,1fr);text-align:center}.stkpi div{display:grid;gap:2px}.stkpi div+div{border-inline-start:1px solid color-mix(in srgb,var(--ink) 12%,transparent)}
+.stkpi b{font-size:1.9rem;font-weight:800;font-variant-numeric:tabular-nums}.stkpi span{font-size:.75rem;color:var(--ink-soft)}
+.stchart{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:150px;padding-top:14px}
+.stchart div{display:grid;justify-items:center;align-content:end;gap:6px;height:100%}
+.stchart i{width:100%;max-width:26px;border-radius:7px 7px 3px 3px;background:color-mix(in srgb,var(--ink) 18%,transparent)}
+.stchart .now i{background:#3ecf8e}.stchart .later i{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.stchart span{font-size:.68rem;color:var(--ink-soft)}.stchart .now span{color:var(--ink);font-weight:700}.stchart .later span{opacity:.5}
+.stchart em{font-style:normal;font-size:.75rem;font-weight:700;font-variant-numeric:tabular-nums}
+.stcap{margin:0;text-align:center;font-size:.78rem;color:var(--ink-soft)}
+.stchips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.stchips span{font-size:.8rem;padding:5px 11px;border-radius:999px;background:color-mix(in srgb,var(--ink) 8%,transparent)}.stchips b{margin-inline-start:6px}
 .splb{display:inline-flex;align-items:center;gap:6px}
 /* "Powered by" sponsor: a small pill under the answers and at the foot of the start screen */
 .sponsor.nolink{cursor:default}
@@ -2279,14 +2281,20 @@ async function openStats(){
   let d = null; try { d = await cx("query", "stats:daily", { pid: lb.uid }); } catch(e){}
   if (el.hidden) return;
   if (!d){ shell(`<div class="board"><div class="note">${t("lbDown2")}</div></div>`); return; }
-  const today = d.days.find(x => x.day === d.today) || { players: 0, named: 0, games: 0, newUsers: 0, byGame: {} };
-  const tile = (n, l) => `<div class="sttile"><b>${n}</b><span>${l}</span></div>`;
-  const by = Object.entries(today.byGame || {}).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<li><span>${esc(boardLabel(k))}</span><b>${n}</b></li>`).join("");
-  const rows = d.days.slice(0, 14).map(x => `<tr><td>${x.day.slice(5).replace("-", "/")}</td><td>${x.players}</td><td>${x.games}</td><td>${x.newUsers}</td></tr>`).join("");
-  shell(`<p class="stnote">Today (Morocco time). Each phone counts once a day. Nothing about players is stored.</p>
-    <div class="sttiles">${tile(today.players, "players today")}${tile(today.games, "games today")}${tile(today.newUsers, "new usernames")}${tile(d.users, "usernames in total")}</div>
-    ${by ? `<ul class="stby">${by}</ul>` : ""}
-    <div class="board sttable"><table><thead><tr><th>Day</th><th>Players</th><th>Games</th><th>New names</th></tr></thead><tbody>${rows || `<tr><td colspan="4">No data yet</td></tr>`}</tbody></table></div>`);
+  const byDay = Object.fromEntries(d.days.map(x => [x.day, x]));
+  const today = byDay[d.today] || { players: 0, games: 0, newUsers: 0, byGame: {} };
+  // this week, Monday to Sunday (Morocco days)
+  const base = new Date(d.today + "T12:00:00Z"), mon = new Date(base); mon.setUTCDate(base.getUTCDate() - ((base.getUTCDay() + 6) % 7));
+  const week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((w, i) => { const x = new Date(mon); x.setUTCDate(mon.getUTCDate() + i); const k = x.toISOString().slice(0, 10);
+    return { w, k, n: byDay[k]?.players || 0, now: k === d.today, later: k > d.today }; });
+  const top = Math.max(1, ...week.map(x => x.n));
+  const nice = base.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+  const by = Object.entries(today.byGame || {}).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<span>${esc(boardLabel(k))}<b>${n}</b></span>`).join("");
+  shell(`<div class="sthd"><b>Today</b><span>${nice}</span></div>
+    <div class="stkpi"><div><b>${today.players}</b><span>players</span></div><div><b>${today.games}</b><span>games</span></div><div><b>${today.newUsers}</b><span>new names</span></div></div>
+    <div class="stchart">${week.map(x => `<div class="${x.now ? "now" : x.later ? "later" : ""}">${x.n ? `<em>${x.n}</em>` : ""}<i style="height:${Math.max(4, Math.round(x.n / top * 92))}px"></i><span>${x.w}</span></div>`).join("")}</div>
+    <p class="stcap">Players per day this week · ${d.users} usernames in total</p>
+    ${by ? `<div class="stchips">${by}</div>` : ""}`);
 }
 function closeBoardSheet(){ $("lbsheet").hidden = true; lbSeq++; }
 function renderBoardSheet(){
