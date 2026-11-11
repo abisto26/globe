@@ -8,6 +8,17 @@
 <meta name="theme-color" content="#0c3a5e">
 <link rel="icon" type="image/png" href="../icons/favicon.png">
 <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<!-- If someone does the steps on this page, the home-screen icon is still "Globe" and opens the game -->
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Globe">
+<script>
+(function(){
+  var standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+  if (standalone) location.replace("../");
+})();
+</script>
 <style>
 @font-face{font-family:"Bricolage Grotesque";font-weight:200 800;font-display:swap;src:url(../fonts/bricolage-grotesque-latin-standard-normal.woff2) format("woff2")}
 @font-face{font-family:"Bricolage Grotesque";font-weight:200 800;font-display:swap;src:url(../fonts/bricolage-grotesque-latin-ext-standard-normal.woff2) format("woff2");unicode-range:U+0100-02AF,U+1E00-1EFF}
