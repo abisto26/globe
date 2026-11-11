@@ -4,6 +4,7 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 import schema from "./schema";
+import { bump } from "./stats";
 
 // Leaderboard for Globe by Abisto.
 // Players pick a unique username and a 4-digit PIN. Each device keeps a private player id;
@@ -89,6 +90,7 @@ export const claim = mutation({
       for (const r of rows) if (r.name !== name) await ctx.db.patch(r._id, { name });
     } else {
       await ctx.db.insert("users", { pid, name, key, salt, pinHash, fails: 0, lockedUntil: 0, lastSubmit: 0 });
+      await bump(ctx, { newUsers: 1 });
     }
     return { ok: true as const, pid, name, signedIn: false };
   },

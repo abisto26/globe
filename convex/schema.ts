@@ -33,6 +33,17 @@ export default defineSchema({
     .index("by_board_best", ["board", "best"])
     .index("by_pid_board", ["pid", "board"]),
 
+  // Anonymous daily numbers, one row per day (Morocco time). No names, no ids: each phone adds 1 to
+  // "players" the first time it opens the game that day; every finished game adds 1 to "games".
+  daily: defineTable({
+    day: v.string(),                    // "2026-11-11"
+    players: v.number(),                // phones that opened the game that day
+    named: v.number(),                  // ... of which had a username
+    games: v.number(),                  // finished games
+    newUsers: v.number(),               // usernames created
+    byGame: v.record(v.string(), v.number()), // finished games per board
+  }).index("by_day", ["day"]),
+
   // First version (name only, no usernames). Kept so old rows don't block deploys; no longer used.
   players: defineTable(v.any()),
   scores: defineTable(v.any()),

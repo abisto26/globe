@@ -555,6 +555,16 @@ svg#map{width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
 .lbsheet .board li.me{position:sticky;top:-12px;bottom:-12px;z-index:1;background:color-mix(in srgb,var(--gold) 22%,var(--chip))}
 .lbsheet .board li{grid-template-columns:3.4ch 1fr auto}
 .lbsheet .board > .note{text-align:center}
+.stnote{margin:0;font-size:.8rem;color:var(--ink-soft)}
+.sttiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sttile{display:grid;gap:2px;padding:10px;border-radius:14px;background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.sttile b{font-size:1.6rem;font-variant-numeric:tabular-nums}.sttile span{font-size:.78rem;color:var(--ink-soft)}
+.stby{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.stby li{display:flex;gap:6px;padding:4px 10px;border-radius:999px;background:var(--chip);font-size:.82rem}
+.lbsheet .board.sttable{min-height:0}
+.sttable table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.88rem}
+.sttable th,.sttable td{padding:6px 4px;text-align:end}.sttable th:first-child,.sttable td:first-child{text-align:start}
+.sttable th{font-size:.72rem;color:var(--ink-soft);font-weight:600}
 .splb{display:inline-flex;align-items:center;gap:6px}
 /* "Powered by" sponsor: a small pill under the answers and at the foot of the start screen */
 .sponsor.nolink{cursor:default}
@@ -1978,6 +1988,17 @@ const PID_KEY = "globedrop-pid";
 const USE_CONVEX = !window.claude?.use && /^https:\/\//.test(CONVEX_URL);
 const cleanUser = s => String(s || "").normalize("NFKC").replace(/[^\p{L}\p{N}_.\-]/gu, "").slice(0, 16);
 const BOARDS = ["flags_easy", "flags_pro", "countries", "capitals_easy", "capitals_pro", "cities_easy", "cities_pro", "twist"];
+/* Anonymous daily numbers: this phone says "opened today" once a day and "finished a game" after each game.
+   Nothing identifies the phone or the player (no id, no name). Only the owner's account can read the totals. */
+const STAT_DAY_KEY = "globedrop-stat-day";
+const localDay = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+function statOpen(){
+  let last = ""; try { last = localStorage.getItem(STAT_DAY_KEY) || ""; } catch(e){}
+  const day = localDay(); if (last === day || lb.kind !== "convex") return;
+  cx("mutation", "stats:ping", { kind: "open", named: !!playerName }).then(() => { try { localStorage.setItem(STAT_DAY_KEY, day); } catch(e){} }).catch(() => {});
+}
+function statGame(board){ if (lb.kind === "convex" && lb.ready) cx("mutation", "stats:ping", { kind: "game", board }).catch(() => {}); }
+const isOwner = () => ["abisto26", "abisto"].includes(String(playerName || "").toLowerCase());
 // the best kept on this device for each board (saved by showResults even without a username)
 function localBests(){
   const out = [];
@@ -2059,6 +2080,7 @@ const cleanName = s => String(s || "").replace(/[^\p{L}\p{N} _.\-]/gu, "").repla
           if (avOk(p.avatar)) setMyAvatar(p.avatar, false); else if (myAvatar) setMyAvatar(myAvatar); }).catch(() => {}); }
         else if (playerName){ playerName = ""; if (splashOpen){ splashAsk = true; renderSplash(); } }
       } catch(e){}
+      statOpen();
       return;
     }
     lb.kind = "claude";
@@ -2246,6 +2268,26 @@ function openBoardSheet(){
   $("lbsheet").hidden = false; $("lbsheet").classList.add("opening"); setTimeout(() => $("lbsheet").classList.remove("opening"), 400); renderBoardSheet();
   setTimeout(() => $("lbsheet").querySelector("[aria-pressed=true]")?.focus({preventScroll:true}), 50);
 }
+/* Owner-only numbers: players per day (phones that opened the game), games, new usernames. */
+async function openStats(){
+  const el = $("lbsheet");
+  el.hidden = false; el.classList.add("opening"); setTimeout(() => el.classList.remove("opening"), 400);
+  const shell = body => { el.innerHTML = `<div class="sheet lbsheet stsheet" role="dialog" aria-labelledby="st-t"><button class="grab" aria-label="${esc(t("lbClose"))}"></button>
+    <h3 id="st-t">📊 Stats</h3>${body}<button class="btn2 pfclose" id="stclose" type="button">${t("lbClose")}</button></div>`;
+    onTap($("stclose"), closeBoardSheet); el.querySelector(".grab").onclick = closeBoardSheet; };
+  shell(`<div class="board"><div class="note">${t("loading")}</div></div>`);
+  let d = null; try { d = await cx("query", "stats:daily", { pid: lb.uid }); } catch(e){}
+  if (el.hidden) return;
+  if (!d){ shell(`<div class="board"><div class="note">${t("lbDown2")}</div></div>`); return; }
+  const today = d.days.find(x => x.day === d.today) || { players: 0, named: 0, games: 0, newUsers: 0, byGame: {} };
+  const tile = (n, l) => `<div class="sttile"><b>${n}</b><span>${l}</span></div>`;
+  const by = Object.entries(today.byGame || {}).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<li><span>${esc(boardLabel(k))}</span><b>${n}</b></li>`).join("");
+  const rows = d.days.slice(0, 14).map(x => `<tr><td>${x.day.slice(5).replace("-", "/")}</td><td>${x.players}</td><td>${x.games}</td><td>${x.newUsers}</td></tr>`).join("");
+  shell(`<p class="stnote">Today (Morocco time). Each phone counts once a day. Nothing about players is stored.</p>
+    <div class="sttiles">${tile(today.players, "players today")}${tile(today.games, "games today")}${tile(today.newUsers, "new usernames")}${tile(d.users, "usernames in total")}</div>
+    ${by ? `<ul class="stby">${by}</ul>` : ""}
+    <div class="board sttable"><table><thead><tr><th>Day</th><th>Players</th><th>Games</th><th>New names</th></tr></thead><tbody>${rows || `<tr><td colspan="4">No data yet</td></tr>`}</tbody></table></div>`);
+}
 function closeBoardSheet(){ $("lbsheet").hidden = true; lbSeq++; }
 function renderBoardSheet(){
   const v = lbView;
@@ -2326,6 +2368,7 @@ function renderSettings(){
       <button class="item" id="sm-ach"><span class="ic green" aria-hidden="true">🏅</span>${t("achievements")}<span class="chev" aria-hidden="true">›</span></button>
       <button class="item" id="sm-lb"${live ? " disabled" : ""}><span class="ic gold" aria-hidden="true">🏆</span>${t("leaderboard")}${live ? `<span class="lockhint">${t("afterQ")}</span>` : `<span class="chev" aria-hidden="true">›</span>`}</button>
       <button class="item" id="sm-how"><span class="ic blue" aria-hidden="true">?</span>${t("howToPlay")}<span class="chev" aria-hidden="true">›</span></button>
+      ${isOwner() && lb.kind === "convex" ? `<button class="item" id="sm-stats"><span class="ic gold" aria-hidden="true">📊</span>Stats<span class="chev" aria-hidden="true">›</span></button>` : ""}
     </div>
     ${live ? `<div class="foot"><span class="tick">⏱ ${t("timerRuns")}</span></div>` : ""}`;
   m.querySelectorAll("[data-lang]").forEach(b => onTap(b, () => { if (LANG !== b.dataset.lang) setLang(b.dataset.lang); renderSettings(); }));
@@ -2346,6 +2389,7 @@ function renderSettings(){
   onTap($("sm-ach"), () => { closeSettings(); openProfile(); });
   onTap($("sm-lb"), () => { if (questionLive()) return; closeSettings(); openBoardSheet(); });
   onTap($("sm-how"), () => { closeSettings(); showHelp(); });
+  if ($("sm-stats")) onTap($("sm-stats"), () => { closeSettings(); openStats(); });
   placeSettings();
 }
 function placeSettings(){
@@ -2685,7 +2729,7 @@ function showResults(outOfLives){
   try { best = +localStorage.getItem(key) || 0; if (total > best && !practice()) localStorage.setItem(key, total); } catch(e){}
   if (practice()) best = Infinity; // practice never counts as a new best
   if (practice() && total >= 10 && REGION_BIT[curRegion()]) bumpProg("cont", REGION_BIT[curRegion()]);
-  if (results.length) { noteGamePlayed(); noteBests(bpBefore); }
+  if (results.length) { noteGamePlayed(); noteBests(bpBefore); if (!practice()) statGame(boardKey()); }
   lastOutcome = { outOfLives, total, best, newBest: total > best, laps, ch: activeChallenge, q: queue.slice(0, Math.min(queue.length, results.length + 40, 250)), streak: gameStreak };
   activeChallenge = null;
   a2hsShown = shouldOfferA2hs();
