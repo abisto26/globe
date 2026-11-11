@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Add Globe to your home screen</title>
+<meta name="description" content="Put Globe by Abisto on your phone's home screen, like an app. iPhone and Android, step by step.">
+<meta name="theme-color" content="#0c3a5e">
+<link rel="icon" type="image/png" href="../icons/favicon.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<style>
+@font-face{font-family:"Bricolage Grotesque";font-weight:200 800;font-display:swap;src:url(../fonts/bricolage-grotesque-latin-standard-normal.woff2) format("woff2")}
+@font-face{font-family:"Bricolage Grotesque";font-weight:200 800;font-display:swap;src:url(../fonts/bricolage-grotesque-latin-ext-standard-normal.woff2) format("woff2");unicode-range:U+0100-02AF,U+1E00-1EFF}
+@font-face{font-family:"IBM Plex Sans Arabic";font-weight:500;font-display:swap;src:url(../fonts/ibm-plex-sans-arabic-arabic-500-normal.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+FB50-FDFF,U+FE70-FEFF}
+@font-face{font-family:"IBM Plex Sans Arabic";font-weight:700;font-display:swap;src:url(../fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+FB50-FDFF,U+FE70-FEFF}
+/* one column of numbered steps; each step = a small drawn phone + what to tap. Same ocean colours as the game. */
+:root{
+  --ocean:#8fc6ea; --ink:#16323b; --soft:#4d6873; --panel:#ffffff; --line:rgba(22,50,59,.12); --accent:#2bb673; --ring:#ff7a3d;
+  --scr:#f4f8fa; --bar:#e3ecf0; --chip:#cfdde3;
+  --font:"Bricolage Grotesque","IBM Plex Sans Arabic","Avenir Next","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ocean:#0c3a5e;--ink:#e8f2f3;--soft:#a8c0c8;--panel:#12232a;--line:rgba(232,242,243,.12);--scr:#1b2f37;--bar:#24414c;--chip:#33535f;color-scheme:dark}}
+:root[data-theme="dark"]{--ocean:#0c3a5e;--ink:#e8f2f3;--soft:#a8c0c8;--panel:#12232a;--line:rgba(232,242,243,.12);--scr:#1b2f37;--bar:#24414c;--chip:#33535f;color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--ocean)}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(120% 70% at 50% 0%,color-mix(in srgb,var(--ocean) 70%,#fff) 0%,var(--ocean) 70%) fixed;
+  padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:520px;margin:0 auto;display:grid;gap:16px}
+.top{display:grid;justify-items:center;gap:10px;text-align:center}
+.top img{width:84px;height:84px;border-radius:22px;box-shadow:0 10px 24px rgba(10,30,40,.25)}
+h1{margin:0;font-size:1.55rem;line-height:1.2;font-weight:800;letter-spacing:-.01em;text-wrap:balance}
+.lead{margin:0;color:var(--soft);line-height:1.45;max-width:36ch}
+.pills{display:flex;gap:2px;padding:3px;border-radius:999px;background:color-mix(in srgb,var(--panel) 45%,transparent);justify-self:center;max-width:100%}
+.pills button{font:600 .88rem var(--font);color:var(--ink);background:none;border:0;padding:7px 13px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.pills button[aria-pressed="true"]{background:var(--panel);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.pills.os button{font-size:1rem;padding:9px 22px}
+.pills button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:color-mix(in srgb,var(--panel) 72%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:22px;padding:14px}
+ol{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.step{display:grid;grid-template-columns:118px minmax(0,1fr);gap:14px;align-items:center}
+.num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:.9rem;margin-bottom:6px}
+.step h2{margin:0 0 4px;font-size:1.05rem;line-height:1.3}
+.step p{margin:0;color:var(--soft);font-size:.92rem;line-height:1.45}
+.step b{color:var(--ink)}
+svg.ph{width:118px;height:auto;display:block}
+.note{margin:0;font-size:.88rem;line-height:1.45;color:var(--soft);text-align:center}
+.play{justify-self:center;display:inline-block;text-decoration:none;font:800 1.05rem var(--font);color:#16323b;background:#eef6f8;padding:13px 30px;border-radius:999px;box-shadow:0 10px 24px rgba(10,30,40,.25)}
+[dir="rtl"] .step{direction:rtl}
+@media (prefers-reduced-motion:no-preference){.pulse{animation:pulse 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}}
+@keyframes pulse{50%{opacity:.35}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <img src="../icons/icon-192.png" alt="">
+    <h1 id="t-title">Add Globe to your home screen</h1>
+    <p class="lead" id="t-lead">Open it in one tap, like an app. It even works without internet.</p>
+  </div>
+  <div class="pills" id="langs" role="group" aria-label="Language">
+    <button type="button" data-l="en">English</button><button type="button" data-l="fr">Français</button><button type="button" data-l="ru">Русский</button><button type="button" data-l="ar">العربية</button>
+  </div>
+  <div class="pills os" id="oss" role="group" aria-label="Phone">
+    <button type="button" data-o="ios">iPhone</button><button type="button" data-o="android">Android</button>
+  </div>
+  <div class="card"><ol id="steps"></ol></div>
+  <p class="note" id="t-note"></p>
+  <a class="play" id="t-play" href="../">Play Globe</a>
+</main>
+<script>
+/* Texts. Instagram's own browser can't add to the home screen, so step 1 is always "open it in Safari / Chrome". */
+const T = {
+  en: { title:"Add Globe to your home screen", lead:"Open it in one tap, like an app. It even works without internet.", play:"Play Globe",
+    ios:[["Open it in Safari","Opened the link from Instagram? Tap <b>⋯</b> at the top, then <b>Open in external browser</b>."],
+         ["Tap Share","At the bottom of Safari, tap the <b>Share</b> button (a square with an arrow). If you only see <b>⋯</b>, tap it first."],
+         ["Add to Home Screen","Scroll down the list and tap <b>Add to Home Screen</b>."],
+         ["Tap Add","Keep the name <b>Globe</b> and tap <b>Add</b> at the top."],
+         ["Done!","Globe is on your home screen. Tap it to play."]],
+    android:[["Open it in Chrome","Opened the link from Instagram? Tap <b>⋮</b> at the top, then <b>Open in Chrome</b>."],
+         ["Open the menu","In Chrome, tap <b>⋮</b> at the top right."],
+         ["Add to Home screen","Tap <b>Add to Home screen</b> (it can also say <b>Install app</b>)."],
+         ["Tap Install","Tap <b>Install</b> (or <b>Add</b>)."],
+         ["Done!","Globe is on your home screen. Tap it to play."]],
+    note:"Menus can look a little different depending on your phone." },
+  fr: { title:"Ajoute Globe à ton écran d’accueil", lead:"Ouvre-le en un geste, comme une appli. Il marche même sans internet.", play:"Jouer à Globe",
+    ios:[["Ouvre-le dans Safari","Tu as ouvert le lien depuis Instagram ? Touche <b>⋯</b> en haut, puis <b>Ouvrir dans le navigateur</b>."],
+         ["Touche Partager","En bas de Safari, touche <b>Partager</b> (un carré avec une flèche). Si tu vois seulement <b>⋯</b>, touche-le d’abord."],
+         ["Sur l’écran d’accueil","Descends dans la liste et touche <b>Sur l’écran d’accueil</b>."],
+         ["Touche Ajouter","Garde le nom <b>Globe</b> et touche <b>Ajouter</b> en haut."],
+         ["C’est fait !","Globe est sur ton écran d’accueil. Touche-le pour jouer."]],
+    android:[["Ouvre-le dans Chrome","Tu as ouvert le lien depuis Instagram ? Touche <b>⋮</b> en haut, puis <b>Ouvrir dans Chrome</b>."],
+         ["Ouvre le menu","Dans Chrome, touche <b>⋮</b> en haut à droite."],
+         ["Ajouter à l’écran d’accueil","Touche <b>Ajouter à l’écran d’accueil</b> (ou <b>Installer l’appli</b>)."],
+         ["Touche Installer","Touche <b>Installer</b> (ou <b>Ajouter</b>)."],
+         ["C’est fait !","Globe est sur ton écran d’accueil. Touche-le pour jouer."]],
+    note:"Les menus peuvent changer un peu selon ton téléphone." },
+  ru: { title:"Добавьте Globe на экран «Домой»", lead:"Открывайте одним касанием, как приложение. Работает даже без интернета.", play:"Играть в Globe",
+    ios:[["Откройте в Safari","Открыли ссылку из Instagram? Нажмите <b>⋯</b> вверху, затем <b>Открыть во внешнем браузере</b>."],
+         ["Нажмите «Поделиться»","Внизу Safari нажмите <b>Поделиться</b> (квадрат со стрелкой). Если видите только <b>⋯</b>, сначала нажмите на него."],
+         ["На экран «Домой»","Прокрутите список и нажмите <b>На экран «Домой»</b>."],
+         ["Нажмите «Добавить»","Оставьте имя <b>Globe</b> и нажмите <b>Добавить</b> вверху."],
+         ["Готово!","Globe на экране «Домой». Нажмите, чтобы играть."]],
+    android:[["Откройте в Chrome","Открыли ссылку из Instagram? Нажмите <b>⋮</b> вверху, затем <b>Открыть в Chrome</b>."],
+         ["Откройте меню","В Chrome нажмите <b>⋮</b> вверху справа."],
+         ["Добавить на главный экран","Нажмите <b>Добавить на главный экран</b> (или <b>Установить приложение</b>)."],
+         ["Нажмите «Установить»","Нажмите <b>Установить</b> (или <b>Добавить</b>)."],
+         ["Готово!","Globe на главном экране. Нажмите, чтобы играть."]],
+    note:"Меню могут немного отличаться на разных телефонах." },
+  ar: { title:"أضف Globe إلى الشاشة الرئيسية", lead:"افتحه بلمسة واحدة مثل التطبيق. ويعمل حتى بدون إنترنت.", play:"العب Globe",
+    ios:[["افتحه في Safari","فتحت الرابط من إنستغرام؟ اضغط <b>⋯</b> في الأعلى، ثم <b>فتح في متصفح خارجي</b>."],
+         ["اضغط مشاركة","في أسفل Safari اضغط زر <b>المشاركة</b> (مربع فيه سهم). إذا رأيت <b>⋯</b> فقط، اضغطه أولًا."],
+         ["إضافة إلى الشاشة الرئيسية","انزل في القائمة واضغط <b>إضافة إلى الشاشة الرئيسية</b>."],
+         ["اضغط إضافة","اترك الاسم <b>Globe</b> واضغط <b>إضافة</b> في الأعلى."],
+         ["تمّ!","أصبح Globe على شاشتك الرئيسية. اضغطه لتلعب."]],
+    android:[["افتحه في Chrome","فتحت الرابط من إنستغرام؟ اضغط <b>⋮</b> في الأعلى، ثم <b>فتح في Chrome</b>."],
+         ["افتح القائمة","في Chrome اضغط <b>⋮</b> أعلى الشاشة."],
+         ["إضافة إلى الشاشة الرئيسية","اضغط <b>إضافة إلى الشاشة الرئيسية</b> (أو <b>تثبيت التطبيق</b>)."],
+         ["اضغط تثبيت","اضغط <b>تثبيت</b> (أو <b>إضافة</b>)."],
+         ["تمّ!","أصبح Globe على شاشتك الرئيسية. اضغطه لتلعب."]],
+    note:"قد تختلف القوائم قليلًا حسب هاتفك." }
+};
+/* Small drawn phones. 120×210 screen; ring = what to tap. */
+const ICON = "../icons/icon-192.png";
+function phone(inner){
+  return `<svg class="ph" viewBox="0 0 120 210" aria-hidden="true">
+    <rect x="2" y="2" width="116" height="206" rx="18" fill="var(--panel)" stroke="var(--line)" stroke-width="2"/>
+    <rect x="8" y="8" width="104" height="194" rx="13" fill="var(--scr)"/>${inner}</svg>`;
+}
+const ring = (cx, cy, r = 11) => `<circle class="pulse" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--ring)" stroke-width="3"/>`;
+const lines = (x, y, n, w = 70) => Array.from({length:n}, (_, i) => `<rect x="${x}" y="${y + i * 14}" width="${w - (i % 2) * 18}" height="6" rx="3" fill="var(--chip)"/>`).join("");
+const dots3 = (x, y, vert) => [0,1,2].map(i => vert ? `<circle cx="${x}" cy="${y - 5 + i * 5}" r="1.8" fill="var(--ink)"/>` : `<circle cx="${x - 5 + i * 5}" cy="${y}" r="1.8" fill="var(--ink)"/>`).join("");
+const menu = (x, y, w, items, hi) => `<rect x="${x}" y="${y}" width="${w}" height="${items * 16 + 8}" rx="8" fill="var(--panel)" stroke="var(--line)"/>` +
+  Array.from({length:items}, (_, i) => i === hi ? `<rect x="${x + 4}" y="${y + 4 + i * 16}" width="${w - 8}" height="14" rx="5" fill="color-mix(in srgb,var(--ring) 22%,transparent)" stroke="var(--ring)" stroke-width="1.5"/><rect x="${x + 10}" y="${y + 9 + i * 16}" width="${w - 30}" height="5" rx="2.5" fill="var(--ink)"/>` : `<rect x="${x + 10}" y="${y + 9 + i * 16}" width="${w - 34 - (i % 2) * 8}" height="5" rx="2.5" fill="var(--chip)"/>`).join("");
+const shareIcon = (x, y) => `<rect x="${x - 6}" y="${y - 3}" width="12" height="11" rx="2" fill="none" stroke="var(--ink)" stroke-width="1.6"/><path d="M${x} ${y + 3}V${y - 9}M${x - 4} ${y - 5}l4-4 4 4" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+const home = () => {
+  let g = ""; for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++){ const x = 16 + c * 24, y = 30 + r * 30;
+    g += (r === 2 && c === 1) ? `<image href="${ICON}" x="${x}" y="${y}" width="18" height="18" clip-path="inset(0 round 5px)"/>` : `<rect x="${x}" y="${y}" width="18" height="18" rx="5" fill="var(--chip)"/>`; }
+  return g + ring(49, 99, 14);
+};
+const ART = {
+  ios: [
+    () => phone(`<rect x="8" y="8" width="104" height="26" rx="13" fill="var(--bar)"/>${dots3(98, 22)}${ring(98, 22)}${menu(30, 38, 78, 3, 1)}${lines(18, 110, 5)}`),
+    () => phone(`${lines(18, 30, 9)}<rect x="8" y="172" width="104" height="30" rx="13" fill="var(--bar)"/>${shareIcon(60, 188)}${ring(60, 186, 12)}<path d="M28 186l-5 0m5 0" stroke="var(--ink)" stroke-width="1.6"/><path d="M24 183l-4 3 4 3M96 183l4 3-4 3" fill="none" stroke="var(--ink)" stroke-width="1.6"/>`),
+    () => phone(`${lines(18, 20, 3)}<rect x="8" y="80" width="104" height="122" rx="13" fill="var(--panel)" stroke="var(--line)"/>${menu(14, 96, 92, 5, 3)}`),
+    () => phone(`<rect x="8" y="8" width="104" height="26" rx="13" fill="var(--bar)"/><rect x="84" y="16" width="20" height="10" rx="4" fill="var(--accent)"/>${ring(94, 21, 13)}<image href="${ICON}" x="44" y="60" width="32" height="32" clip-path="inset(0 round 8px)"/><rect x="34" y="102" width="52" height="7" rx="3.5" fill="var(--ink)"/>${lines(24, 124, 3)}`),
+    () => phone(home())
+  ],
+  android: [
+    () => phone(`<rect x="8" y="8" width="104" height="26" rx="13" fill="var(--bar)"/>${dots3(98, 22, true)}${ring(98, 22)}${menu(30, 38, 78, 3, 1)}${lines(18, 110, 5)}`),
+    () => phone(`<rect x="8" y="8" width="104" height="26" rx="13" fill="var(--bar)"/><rect x="16" y="15" width="68" height="12" rx="6" fill="var(--chip)"/>${dots3(98, 21, true)}${ring(98, 21)}${lines(18, 48, 9)}`),
+    () => phone(`<rect x="8" y="8" width="104" height="26" rx="13" fill="var(--bar)"/>${dots3(98, 21, true)}${menu(40, 30, 70, 7, 4)}${lines(18, 60, 7, 40)}`),
+    () => phone(`${lines(18, 24, 4)}<rect x="16" y="80" width="88" height="70" rx="12" fill="var(--panel)" stroke="var(--line)"/><image href="${ICON}" x="26" y="90" width="20" height="20" clip-path="inset(0 round 5px)"/><rect x="52" y="96" width="40" height="6" rx="3" fill="var(--ink)"/><rect x="72" y="128" width="26" height="12" rx="6" fill="var(--accent)"/>${ring(85, 134, 13)}`),
+    () => phone(home())
+  ]
+};
+let lang, os;
+try { lang = localStorage.getItem("globedrop-lang"); } catch(e){}
+if (!T[lang]) lang = ((navigator.language || "en").slice(0, 2)); if (!T[lang]) lang = "en";
+os = /android/i.test(navigator.userAgent) ? "android" : "ios";
+const q = new URLSearchParams(location.search); if (q.get("os") === "android" || q.get("os") === "ios") os = q.get("os"); if (T[q.get("lang")]) lang = q.get("lang");
+function render(){
+  const L = T[lang];
+  document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.title = L.title;
+  for (const k of ["title", "lead", "note", "play"]) document.getElementById("t-" + k).textContent = L[k];
+  document.getElementById("steps").innerHTML = L[os].map((s, i) => `<li class="step">${ART[os][i]()}<div><span class="num">${i + 1}</span><h2>${s[0]}</h2><p>${s[1]}</p></div></li>`).join("");
+  document.querySelectorAll("#langs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.l === lang));
+  document.querySelectorAll("#oss button").forEach(b => b.setAttribute("aria-pressed", b.dataset.o === os));
+}
+document.getElementById("langs").onclick = e => { const b = e.target.closest("button"); if (!b) return; lang = b.dataset.l; try { localStorage.setItem("globedrop-lang", lang); } catch(e){} render(); };
+document.getElementById("oss").onclick = e => { const b = e.target.closest("button"); if (!b) return; os = b.dataset.o; render(); };
+render();
+</script>
+</body>
+</html>
