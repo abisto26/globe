@@ -2281,7 +2281,12 @@ async function fillBoardSheet(){
   let list = st.top.map((r, i) => line(r.name, r.me, i + 1, r.best, r)).join("");
   if (st.me && st.me.rank > st.top.length) list += (st.me.rank > st.top.length + 1 ? `<li class="gap">⋯</li>` : "") + line(st.me.name, true, st.me.rank, st.me.best, st.me);
   const where = st.me ? t("rank", false, st.me.rank, st.count) : !playerName ? t(USE_CONVEX ? "joinUser" : "joinName") : "";
+  el.style.maxHeight = "";
   el.innerHTML = `${where ? `<div class="note">${where}</div>` : ""}${st.top.length ? `<ol>${list}</ol>` : `<div class="note">${t("noScores")}</div>`}`;
+  // 10 rows tall, the rest scrolls (your own row stays pinned when you're further down)
+  const rows = el.querySelectorAll("ol > li");
+  if (rows.length > 10){ const top = el.getBoundingClientRect().top, tenth = rows[9].getBoundingClientRect().bottom;
+    el.style.maxHeight = Math.ceil(tenth - top + el.scrollTop + parseFloat(getComputedStyle(el).paddingBottom || 0)) + "px"; }
 }
 onTap($("lbbtn"), openBoardSheet);
 
