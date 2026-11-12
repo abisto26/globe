@@ -74,7 +74,7 @@ svg.ph{width:118px;height:auto;display:block}
     <button type="button" data-l="en">English</button><button type="button" data-l="fr">Français</button><button type="button" data-l="ru">Русский</button><button type="button" data-l="ar">العربية</button>
   </div>
   <div class="pills os" id="oss" role="group" aria-label="Phone">
-    <button type="button" data-o="ios">iPhone</button><button type="button" data-o="android">Android</button>
+    <button type="button" data-o="ios">iPhone</button><button type="button" data-o="android">Android</button><button type="button" data-o="pc" id="t-pc">Computer</button>
   </div>
   <div class="card"><ol id="steps"></ol></div>
   <p class="note" id="t-note"></p>
@@ -83,7 +83,7 @@ svg.ph{width:118px;height:auto;display:block}
 <script>
 /* Texts. Instagram's own browser can't add to the home screen, so step 1 is always "open it in Safari / Chrome". */
 const T = {
-  en: { title:"Add Globe to your home screen", lead:"Open it in one tap, like an app. It even works without internet.", play:"Play Globe",
+  en: { pcTab:"Computer", title:"Add Globe to your home screen", lead:"Open it in one tap, like an app. It even works without internet.", play:"Play Globe",
     ios:[["Open it in Safari","Opened the link from Instagram? Tap <b>⋯</b> at the top, then <b>Open in external browser</b>."],
          ["Tap Share","At the bottom of Safari, tap the <b>Share</b> button (a square with an arrow). If you only see <b>⋯</b>, tap it first."],
          ["Add to Home Screen","Scroll down the list and tap <b>Add to Home Screen</b>."],
@@ -94,8 +94,13 @@ const T = {
          ["Add to Home screen","Tap <b>Add to Home screen</b> (it can also say <b>Install app</b>)."],
          ["Tap Install","Tap <b>Install</b> (or <b>Add</b>)."],
          ["Done!","Globe is on your home screen. Tap it to play."]],
+    pc:[["Open it in Chrome or Edge","Go to <b>abisto26.com/globe</b> in Chrome or Microsoft Edge."],
+         ["Click Install","In the address bar, click the <b>Install</b> icon (a screen with an arrow). No icon? Open the <b>⋮</b> menu → <b>Cast, save and share</b> → <b>Install page as app</b>."],
+         ["Confirm","Click <b>Install</b> in the small window."],
+         ["Done!","Globe opens in its own window. Find it in your apps, or pin it to the taskbar or Dock."]],
+    pcMac:"On a Mac with Safari: <b>File</b> → <b>Add to Dock</b>.",
     note:"Menus can look a little different depending on your phone." },
-  fr: { title:"Ajoute Globe à ton écran d’accueil", lead:"Ouvre-le en un geste, comme une appli. Il marche même sans internet.", play:"Jouer à Globe",
+  fr: { pcTab:"Ordinateur", title:"Ajoute Globe à ton écran d’accueil", lead:"Ouvre-le en un geste, comme une appli. Il marche même sans internet.", play:"Jouer à Globe",
     ios:[["Ouvre-le dans Safari","Tu as ouvert le lien depuis Instagram ? Touche <b>⋯</b> en haut, puis <b>Ouvrir dans le navigateur</b>."],
          ["Touche Partager","En bas de Safari, touche <b>Partager</b> (un carré avec une flèche). Si tu vois seulement <b>⋯</b>, touche-le d’abord."],
          ["Sur l’écran d’accueil","Descends dans la liste et touche <b>Sur l’écran d’accueil</b>."],
@@ -106,8 +111,13 @@ const T = {
          ["Ajouter à l’écran d’accueil","Touche <b>Ajouter à l’écran d’accueil</b> (ou <b>Installer l’appli</b>)."],
          ["Touche Installer","Touche <b>Installer</b> (ou <b>Ajouter</b>)."],
          ["C’est fait !","Globe est sur ton écran d’accueil. Touche-le pour jouer."]],
+    pc:[["Ouvre-le dans Chrome ou Edge","Va sur <b>abisto26.com/globe</b> dans Chrome ou Microsoft Edge."],
+         ["Clique sur Installer","Dans la barre d’adresse, clique sur l’icône <b>Installer</b> (un écran avec une flèche). Pas d’icône ? Menu <b>⋮</b> → <b>Caster, enregistrer et partager</b> → <b>Installer la page en tant qu’appli</b>."],
+         ["Confirme","Clique sur <b>Installer</b> dans la petite fenêtre."],
+         ["C’est fait !","Globe s’ouvre dans sa propre fenêtre. Retrouve-le dans tes applis, ou épingle-le à la barre des tâches ou au Dock."]],
+    pcMac:"Sur Mac avec Safari : <b>Fichier</b> → <b>Ajouter au Dock</b>.",
     note:"Les menus peuvent changer un peu selon ton téléphone." },
-  ru: { title:"Добавьте Globe на экран «Домой»", lead:"Открывайте одним касанием, как приложение. Работает даже без интернета.", play:"Играть в Globe",
+  ru: { pcTab:"Компьютер", title:"Добавьте Globe на экран «Домой»", lead:"Открывайте одним касанием, как приложение. Работает даже без интернета.", play:"Играть в Globe",
     ios:[["Откройте в Safari","Открыли ссылку из Instagram? Нажмите <b>⋯</b> вверху, затем <b>Открыть во внешнем браузере</b>."],
          ["Нажмите «Поделиться»","Внизу Safari нажмите <b>Поделиться</b> (квадрат со стрелкой). Если видите только <b>⋯</b>, сначала нажмите на него."],
          ["На экран «Домой»","Прокрутите список и нажмите <b>На экран «Домой»</b>."],
@@ -118,8 +128,13 @@ const T = {
          ["Добавить на главный экран","Нажмите <b>Добавить на главный экран</b> (или <b>Установить приложение</b>)."],
          ["Нажмите «Установить»","Нажмите <b>Установить</b> (или <b>Добавить</b>)."],
          ["Готово!","Globe на главном экране. Нажмите, чтобы играть."]],
+    pc:[["Откройте в Chrome или Edge","Перейдите на <b>abisto26.com/globe</b> в Chrome или Microsoft Edge."],
+         ["Нажмите «Установить»","В адресной строке нажмите значок <b>Установить</b> (экран со стрелкой). Нет значка? Меню <b>⋮</b> → <b>Трансляция, сохранение и отправка</b> → <b>Установить страницу как приложение</b>."],
+         ["Подтвердите","Нажмите <b>Установить</b> в маленьком окне."],
+         ["Готово!","Globe открывается в отдельном окне. Найдите его среди приложений или закрепите на панели задач или в Dock."]],
+    pcMac:"На Mac в Safari: <b>Файл</b> → <b>Добавить в Dock</b>.",
     note:"Меню могут немного отличаться на разных телефонах." },
-  ar: { title:"أضف Globe إلى الشاشة الرئيسية", lead:"افتحه بلمسة واحدة مثل التطبيق. ويعمل حتى بدون إنترنت.", play:"العب Globe",
+  ar: { pcTab:"الحاسوب", title:"أضف Globe إلى الشاشة الرئيسية", lead:"افتحه بلمسة واحدة مثل التطبيق. ويعمل حتى بدون إنترنت.", play:"العب Globe",
     ios:[["افتحه في Safari","فتحت الرابط من إنستغرام؟ اضغط <b>⋯</b> في الأعلى، ثم <b>فتح في متصفح خارجي</b>."],
          ["اضغط مشاركة","في أسفل Safari اضغط زر <b>المشاركة</b> (مربع فيه سهم). إذا رأيت <b>⋯</b> فقط، اضغطه أولًا."],
          ["إضافة إلى الشاشة الرئيسية","انزل في القائمة واضغط <b>إضافة إلى الشاشة الرئيسية</b>."],
@@ -130,6 +145,11 @@ const T = {
          ["إضافة إلى الشاشة الرئيسية","اضغط <b>إضافة إلى الشاشة الرئيسية</b> (أو <b>تثبيت التطبيق</b>)."],
          ["اضغط تثبيت","اضغط <b>تثبيت</b> (أو <b>إضافة</b>)."],
          ["تمّ!","أصبح Globe على شاشتك الرئيسية. اضغطه لتلعب."]],
+    pc:[["افتحه في Chrome أو Edge","اذهب إلى <b>abisto26.com/globe</b> في Chrome أو Microsoft Edge."],
+         ["اضغط تثبيت","في شريط العنوان اضغط أيقونة <b>التثبيت</b> (شاشة فيها سهم). لا توجد أيقونة؟ افتح القائمة <b>⋮</b> ← <b>البث والحفظ والمشاركة</b> ← <b>تثبيت الصفحة كتطبيق</b>."],
+         ["أكّد","اضغط <b>تثبيت</b> في النافذة الصغيرة."],
+         ["تمّ!","يفتح Globe في نافذته الخاصة. ستجده بين تطبيقاتك، ويمكنك تثبيته في شريط المهام أو الـDock."]],
+    pcMac:"على Mac مع Safari: <b>ملف</b> ← <b>إضافة إلى Dock</b>.",
     note:"قد تختلف القوائم قليلًا حسب هاتفك." }
 };
 /* Small drawn phones. 120×210 screen; ring = what to tap. */
@@ -150,6 +170,14 @@ const home = () => {
     g += (r === 2 && c === 1) ? `<image href="${ICON}" x="${x}" y="${y}" width="18" height="18" clip-path="inset(0 round 5px)"/>` : `<rect x="${x}" y="${y}" width="18" height="18" rx="5" fill="var(--chip)"/>`; }
   return g + ring(49, 99, 14);
 };
+function laptop(inner){
+  return `<svg class="ph" viewBox="0 0 120 210" aria-hidden="true"><g transform="translate(0 45)">
+    <rect x="6" y="4" width="108" height="74" rx="7" fill="var(--panel)" stroke="var(--line)" stroke-width="2"/>
+    <rect x="11" y="9" width="98" height="64" rx="3" fill="var(--scr)"/>${inner}
+    <path d="M0 82h120l-6 8H6z" fill="var(--panel)" stroke="var(--line)" stroke-width="2"/></g></svg>`;
+}
+const addr = `<rect x="11" y="9" width="98" height="12" rx="3" fill="var(--bar)"/><rect x="16" y="12" width="66" height="6" rx="3" fill="var(--chip)"/>`;
+const instIcon = (x, y) => `<rect x="${x - 4}" y="${y - 3}" width="8" height="6" rx="1" fill="none" stroke="var(--ink)" stroke-width="1.2"/><path d="M${x} ${y - 2}v3m-1.6-1.4 1.6 1.6 1.6-1.6" fill="none" stroke="var(--ink)" stroke-width="1"/>`;
 const ART = {
   ios: [
     () => phone(`<rect x="8" y="8" width="104" height="26" rx="13" fill="var(--bar)"/>${dots3(98, 22)}${ring(98, 22)}${menu(30, 38, 78, 3, 1)}${lines(18, 110, 5)}`),
@@ -164,18 +192,26 @@ const ART = {
     () => phone(`<rect x="8" y="8" width="104" height="26" rx="13" fill="var(--bar)"/>${dots3(98, 21, true)}${menu(40, 30, 70, 7, 4)}${lines(18, 60, 7, 40)}`),
     () => phone(`${lines(18, 24, 4)}<rect x="16" y="80" width="88" height="70" rx="12" fill="var(--panel)" stroke="var(--line)"/><image href="${ICON}" x="26" y="90" width="20" height="20" clip-path="inset(0 round 5px)"/><rect x="52" y="96" width="40" height="6" rx="3" fill="var(--ink)"/><rect x="72" y="128" width="26" height="12" rx="6" fill="var(--accent)"/>${ring(85, 134, 13)}`),
     () => phone(home())
+  ],
+  pc: [
+    () => laptop(`${addr}<rect x="18" y="13" width="50" height="4" rx="2" fill="var(--ink)"/>${ring(50, 15, 22)}${lines(18, 30, 3, 70)}`),
+    () => laptop(`${addr}${instIcon(90, 15)}${ring(90, 15, 8)}${lines(18, 30, 3, 70)}`),
+    () => laptop(`${addr}${lines(18, 30, 3, 70)}<rect x="48" y="22" width="58" height="34" rx="5" fill="var(--panel)" stroke="var(--line)"/><image href="${ICON}" x="53" y="27" width="10" height="10"/><rect x="66" y="30" width="30" height="4" rx="2" fill="var(--ink)"/><rect x="82" y="44" width="20" height="8" rx="4" fill="var(--accent)"/>${ring(92, 48, 9)}`),
+    () => laptop(`<rect x="11" y="9" width="98" height="64" rx="3" fill="var(--ocean)"/><rect x="30" y="20" width="60" height="38" rx="4" fill="var(--panel)" stroke="var(--line)"/><image href="${ICON}" x="52" y="28" width="16" height="16"/><rect x="40" y="64" width="40" height="7" rx="3" fill="var(--panel)"/><image href="${ICON}" x="56" y="64.5" width="6" height="6"/>${ring(59, 67, 7)}`)
   ]
 };
 let lang, os;
 try { lang = localStorage.getItem("globedrop-lang"); } catch(e){}
 if (!T[lang]) lang = ((navigator.language || "en").slice(0, 2)); if (!T[lang]) lang = "en";
-os = /android/i.test(navigator.userAgent) ? "android" : "ios";
-const q = new URLSearchParams(location.search); if (q.get("os") === "android" || q.get("os") === "ios") os = q.get("os"); if (T[q.get("lang")]) lang = q.get("lang");
+os = /android/i.test(navigator.userAgent) ? "android" : /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /mac/i.test(navigator.platform)) ? "ios" : "pc";
+const q = new URLSearchParams(location.search); if (["android", "ios", "pc"].includes(q.get("os"))) os = q.get("os"); if (T[q.get("lang")]) lang = q.get("lang");
 function render(){
   const L = T[lang];
   document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   document.title = L.title;
   for (const k of ["title", "lead", "note", "play"]) document.getElementById("t-" + k).textContent = L[k];
+  document.getElementById("t-pc").textContent = L.pcTab;
+  if (os === "pc") document.getElementById("t-note").innerHTML = L.pcMac + "<br>" + L.note;
   document.getElementById("steps").innerHTML = L[os].map((s, i) => `<li class="step">${ART[os][i]()}<div><span class="num">${i + 1}</span><h2>${s[0]}</h2><p>${s[1]}</p></div></li>`).join("");
   document.querySelectorAll("#langs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.l === lang));
   document.querySelectorAll("#oss button").forEach(b => b.setAttribute("aria-pressed", b.dataset.o === os));
