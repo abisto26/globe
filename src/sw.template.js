@@ -23,6 +23,9 @@ self.addEventListener("fetch", e => {
   if (url.origin !== location.origin || url.searchParams.has("ping")) return; // connection checks go straight to the network
   if (req.method !== "GET") return;
   if (req.mode === "navigate") {
+    // only the game page itself comes from the saved copy; other pages (like install/) load normally
+    const root = new URL("./", self.registration.scope).pathname;
+    if (url.pathname !== root && url.pathname !== root + "index.html") return;
     e.respondWith(caches.match("./", { cacheName: CACHE }).then(r => r || fetch(req)).catch(() => caches.match("index.html")));
     return;
   }
