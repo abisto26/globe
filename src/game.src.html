@@ -2569,6 +2569,12 @@ function noteGamePlayed(){
     bumpProg("days", p.run);
   }
   bumpProg("langs", LANG_BIT[LANG] || 0);
+  // with a username the server keeps the run for all the player's devices; this device follows it
+  if (lb.kind === "convex" && lb.ready && playerName) cx("mutation", "scores:played", { pid: lb.uid, day }).then(r => {
+    if (!r || !r.run) return;
+    const q = getProg(); q.run = r.run; q.lastDay = day; try { localStorage.setItem(PROG_KEY, JSON.stringify(q)); } catch(e){}
+    bumpProg("days", r.run);
+  }).catch(() => {});
 }
 const progToSend = () => { const p = getProg(), o = {}; for (const k of ["bull", "light", "explore", "untouch", "days", "langs", "cont"]) if (p[k]) o[k] = p[k]; return o; };
 let fastRun = 0, untouchedRun = 0, lostAny = false;

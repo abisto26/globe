@@ -97,6 +97,32 @@ export const claim = mutation({
 });
 
 /** Save results (one finished game, or the bests a device kept while offline). Keeps the best per board. */
+/* 📅 Daily traveller follows the username, not the device: each finished game reports the player's
+   local date, and the server keeps the run of days in a row (phone, computer and installed app together). */
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+const prevDay = (d: string) => new Date(Date.parse(d + "T12:00:00Z") - 864e5).toISOString().slice(0, 10);
+// streaks given back by hand (days already played before the server kept them); used once, the first time
+const RUN_GRANTS: Record<string, { run: number; lastDay: string }> = { abisto26: { run: 6, lastDay: "2026-11-12" } };
+export const played = mutation({
+  args: { pid: v.string(), day: v.string() },
+  handler: async (ctx, { pid, day }) => {
+    if (!PID.test(pid) || !DAY.test(day)) return null;
+    // the local date can only be a day away from the server's (time zones)
+    const off = Math.abs(Date.parse(day + "T12:00:00Z") - Date.now());
+    if (!(off < 2 * 864e5)) return null;
+    const user = await ctx.db.query("users").withIndex("by_pid", q => q.eq("pid", pid)).unique();
+    if (!user) return null;
+    let run = user.run, last = user.lastDay;
+    if (run === undefined && RUN_GRANTS[user.key]) ({ run, lastDay: last } = RUN_GRANTS[user.key]);
+    if (last === day) { /* already counted today */ }
+    else if (last && last > day) return { run: run ?? 1 }; // a date earlier than one we have: ignore
+    else { run = last === prevDay(day) ? (run ?? 0) + 1 : 1; last = day; }
+    const prog = mergeProg(user.prog, { days: Math.min(run ?? 1, PROG_MAX.days) });
+    await ctx.db.patch(user._id, prog ? { run, lastDay: last, prog } : { run, lastDay: last });
+    return { run: run ?? 1 };
+  },
+});
+
 export const submit = mutation({
   args: { pid: v.string(), scores: v.array(v.object({ board: v.string(), best: v.number(), tours: v.optional(v.number()) })), streak: v.optional(v.number()),
           prog: v.optional(v.record(v.string(), v.number())) },

@@ -17,6 +17,8 @@ export default defineSchema({
     champion: v.optional(v.boolean()),  // has been #1 on a leaderboard (👑 Champion)
     avatar: v.optional(v.string()),     // chosen picture, "ibnbattuta:1" (picture:colour)
     prog: v.optional(v.record(v.string(), v.number())), // achievement progress: bull, light, explore, untouch, days, langs
+    run: v.optional(v.number()),        // 📅 days in a row with a finished game, on any device (follows the username)
+    lastDay: v.optional(v.string()),    // the player's local date of the last finished game, "2026-11-12"
   })
     .index("by_pid", ["pid"])
     .index("by_key", ["key"]),
