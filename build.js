@@ -23,6 +23,8 @@ const head = `<!doctype html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Globe">
+<link rel="canonical" href="https://abisto26.com/globe/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Abisto26","item":"https://abisto26.com/"},{"@type":"ListItem","position":2,"name":"Games","item":"https://abisto26.com/#games"},{"@type":"ListItem","position":3,"name":"Globe","item":"https://abisto26.com/globe/"}]}</script>
 <style>
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;font:14px system-ui,sans-serif}
