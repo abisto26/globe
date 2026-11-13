@@ -123,7 +123,7 @@ body{background:var(--ocean);color:var(--ink);font-family:var(--display);overflo
 .splash .namefield{text-align:start}
 .splash .namefield input{background:var(--panel)}
 .idrow input.pin::placeholder{letter-spacing:0;font-size:.82rem}
-.splash .idrow label{white-space:nowrap}
+.idrow label{white-space:nowrap}
 .splash .namefield .hint{font-size:.8rem;color:var(--ink-soft)}
 .splash .err{color:var(--pin);font-size:.85rem;min-height:0}
 .splash .err:empty{display:none}
@@ -2888,7 +2888,7 @@ function renderResults(){
     </div>
     ${USE_CONVEX && !playerName && total > 0 && !practice() ? `<form class="savebox" id="saveform" autocomplete="off" novalidate>
       <b>🏆 ${t("saveTitle", total)}</b><span class="small">${t("saveText")}</span>
-      ${idFields("rs", "", true)}<div class="err" id="rserr"></div>
+      <div class="namefield">${idFields("rs", "", true)}</div><div class="err" id="rserr"></div>
       <button class="btn" id="rssave" type="submit">${t("saveBtn")}</button></form>` : ""}
     ${practice() ? `<div class="board"><div class="note">${total >= 10 && REGION_BIT[curRegion()] ? t("scholarCount", t("rg_" + curRegion()), progVal(getProg(), "cont")) + "<br>" : ""}${t("practiceNote")}</div></div>` : `<div class="board" id="board"></div>`}
     ${played ? `<details class="answers"><summary>${t("yourAnswers", played)}</summary>
@@ -3319,7 +3319,7 @@ function renderSplash(){
   if (splashAsk) $("spform").onsubmit = e => { e.preventDefault(); enterGame(); };
   else { $("spgo").onclick = enterGame; $("spnotyou").onclick = () => { splashAsk = true; splashForm = true; renderSplash(); $("spname")?.focus(); }; }
 }
-let splashForm = false;
+let splashForm = true; // new players see the optional username + PIN on the start screen too
 let entering = false;
 async function enterGame(toExplore){
   if (entering) return;
